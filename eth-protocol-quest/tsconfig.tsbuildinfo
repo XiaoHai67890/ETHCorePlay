@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/worldmap.tsx","./src/data/levels.ts","./src/game/daily.ts","./src/game/knowledgemap.ts","./src/game/store.ts","./src/game/types.ts","./src/pages/homepage.tsx","./src/pages/levelpage.tsx","./src/pages/mappage.tsx","./src/pages/progresspage.tsx"],"version":"5.9.3"}
