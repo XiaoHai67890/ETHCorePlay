@@ -23,6 +23,7 @@ type ProgressState = {
   studyHistory: Record<string, Array<{ ts: number; action: string; detail?: string }>>;
   badges: string[];
   lastVisitedChapter?: string;
+  lastVisitedSection?: string;
   completeLevel: (id: number, gainedXp: number) => void;
   addWrongQuestion: (q: WrongQuestion) => void;
   clearWrongBook: () => void;
@@ -32,6 +33,7 @@ type ProgressState = {
   addStudyEvent: (chapterId: string, action: string, detail?: string) => void;
   awardBadge: (badge: string) => void;
   setLastVisitedChapter: (chapterId: string) => void;
+  setLastVisitedSection: (sectionId: string) => void;
 };
 
 export const useProgressStore = create<ProgressState>((set) => ({
@@ -46,6 +48,7 @@ export const useProgressStore = create<ProgressState>((set) => ({
   studyHistory: {},
   badges: [],
   lastVisitedChapter: undefined,
+  lastVisitedSection: undefined,
   completeLevel: (id, gainedXp) =>
     set((s) => ({
       xp: s.xp + gainedXp,
@@ -105,5 +108,6 @@ export const useProgressStore = create<ProgressState>((set) => ({
     })),
   awardBadge: (badge) =>
     set((s) => ({ badges: s.badges.includes(badge) ? s.badges : [...s.badges, badge] })),
-  setLastVisitedChapter: (chapterId) => set({ lastVisitedChapter: chapterId })
+  setLastVisitedChapter: (chapterId) => set({ lastVisitedChapter: chapterId }),
+  setLastVisitedSection: (sectionId) => set({ lastVisitedSection: sectionId })
 }));

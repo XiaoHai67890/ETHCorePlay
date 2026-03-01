@@ -6,10 +6,11 @@ import { getDailyQuests } from '../game/daily';
 const ONBOARDING_KEY = 'epq_onboarding_v1';
 
 export function HomePage() {
-  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge, lastVisitedChapter } = useProgressStore();
+  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge, lastVisitedChapter, lastVisitedSection } = useProgressStore();
   const daily = getDailyQuests();
   const passCount = Object.values(chapterResults).filter((r) => r.passed).length;
   const [tasks, setTasks] = useState<Record<string, boolean>>({ read: false, quiz: false, replay: false, report: false });
+  const [badgeToast, setBadgeToast] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -21,8 +22,13 @@ export function HomePage() {
   useEffect(() => {
     localStorage.setItem(ONBOARDING_KEY, JSON.stringify(tasks));
     const allDone = Object.values(tasks).every(Boolean);
-    if (allDone) awardBadge('Starter Badge');
-  }, [tasks, awardBadge]);
+    const hadBadge = badges.includes('Starter Badge');
+    if (allDone && !hadBadge) {
+      awardBadge('Starter Badge');
+      setBadgeToast('🏅 恭喜解锁 Starter Badge');
+      setTimeout(() => setBadgeToast(null), 2500);
+    }
+  }, [tasks, awardBadge, badges]);
 
   const toggleTask = (k: string) => setTasks((s) => ({ ...s, [k]: !s[k] }));
 
@@ -59,11 +65,13 @@ export function HomePage() {
         </div>
       </section>
 
+      {badgeToast && <div className="toast">{badgeToast}</div>}
+
       <div className="card">
         <h3>最近学习继续</h3>
-        <p>{lastVisitedChapter ? `你上次停在：${lastVisitedChapter}` : '还没有最近学习记录，建议从 EL 核心开始。'}</p>
+        <p>{lastVisitedSection ? `你上次停在小节：${lastVisitedSection}` : (lastVisitedChapter ? `你上次停在章节：${lastVisitedChapter}` : '还没有最近学习记录，建议从 EL 核心开始。')}</p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Link to={lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core'} className="btn">继续学习</Link>
+          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn">继续学习</Link>
           <Link to="/curriculum" className="btn btn-ghost">打开课程总览</Link>
         </div>
       </div>

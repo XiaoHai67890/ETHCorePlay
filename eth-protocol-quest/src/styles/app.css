@@ -16,7 +16,7 @@ body[data-theme='dark'] {
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: var(--bg-main); color: var(--text-main); transition: background .2s ease,color .2s ease; }
+body { margin: 0; min-height: 100vh; background: var(--bg-main); color: var(--text-main); transition: background .3s ease,color .3s ease; }
 
 a { color: #4d9f74; }
 
@@ -215,4 +215,26 @@ body[data-theme='dark'] .brand {
   align-items: center;
   gap: 8px;
   margin: 6px 0;
+}
+
+
+.card, .btn, .topbar { transition: background .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease; }
+
+.toast {
+  position: sticky;
+  top: 68px;
+  z-index: 40;
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #79a2ff;
+  background: #eaf1ff;
+  color: #22407a;
+  font-weight: 600;
+}
+
+body[data-theme='dark'] .toast {
+  background: #1a2742;
+  color: #dbe8ff;
+  border-color: #4f76cf;
 }

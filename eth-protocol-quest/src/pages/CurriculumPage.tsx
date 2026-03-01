@@ -48,7 +48,8 @@ export function CurriculumPage() {
     setKnowledgeStatus,
     badges,
     awardBadge,
-    setLastVisitedChapter
+    setLastVisitedChapter,
+    setLastVisitedSection
   } = useProgressStore();
 
   useEffect(() => {
@@ -439,9 +440,9 @@ export function CurriculumPage() {
           </button>
           <Link to="/progress" className="btn">去错题本复习</Link>
           <Link to="/glossary" className="btn">去术语页复习</Link>
-          <a className="btn" href="#el-core">跳 EL 核心</a>
-          <a className="btn" href="#cl-core">跳 CL 核心</a>
-          <a className="btn" href="#engine-api-core">跳 Engine API</a>
+          <a className="btn" href="#el-core" onClick={() => setLastVisitedSection('el-core-sec-0')}>跳 EL 核心</a>
+          <a className="btn" href="#cl-core" onClick={() => setLastVisitedSection('cl-core-sec-0')}>跳 CL 核心</a>
+          <a className="btn" href="#engine-api-core" onClick={() => setLastVisitedSection('engine-api-core-sec-0')}>跳 Engine API</a>
         </div>
       </section>
 
@@ -522,9 +523,10 @@ export function CurriculumPage() {
               </ul>
             </div>
 
-            {chapter.sections.map((sec) => (
-              <div key={sec.heading} style={{ marginTop: 10 }}>
+            {chapter.sections.map((sec, si) => (
+              <div key={sec.heading} id={`${chapter.id}-sec-${si}`} style={{ marginTop: 10 }}>
                 <strong>{sec.heading}</strong>
+                <button className="btn btn-ghost" style={{ marginLeft: 8, padding: '4px 8px' }} onClick={() => setLastVisitedSection(`${chapter.id}-sec-${si}`)}>记录到此小节</button>
                 <ul>
                   {sec.points.map((p) => <li key={p}>{p}</li>)}
                 </ul>
