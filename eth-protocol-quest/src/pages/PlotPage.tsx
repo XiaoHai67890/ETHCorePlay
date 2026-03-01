@@ -1,7 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
+import { GardenLinksPanel } from '../components/ui/GardenLinksPanel';
+import { useState } from 'react';
 
 export function PlotPage() {
   const { id } = useParams();
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const quiz = [
+    { q: '该知识点最核心的工程收益是？', opts: ['更可观测', '更花哨', '更复杂'], ans: 0 },
+    { q: '异常处理中最关键的是？', opts: ['回滚与复盘', '隐藏错误', '忽略告警'], ans: 0 },
+    { q: '上线前应优先完成？', opts: ['文案润色', '基准+回归+监控', '减少测试'], ans: 1 }
+  ];
+
+  const score = quiz.reduce((a, x, i) => a + (answers[i] === x.ans ? 1 : 0), 0);
+
   return (
     <main className="container">
       <Link to="/curriculum">← 返回课程</Link>
@@ -10,16 +21,65 @@ export function PlotPage() {
           <h2 style={{ margin: 0 }}>Plot: {id}</h2>
           <span className="meta-pill">Spec / EIP / Client</span>
         </div>
-        <p className="subtle">Plot Page 模板：Intuition → Definition → Mechanism → Failure Modes → MiniLab → QuickQuiz</p>
+        <p className="subtle">固定模板：Intuition → Definition → Mechanism → Failure Modes → MiniLab → QuickQuiz</p>
       </section>
 
-      <section className="card">
-        <h3>MiniLab</h3>
-        <ol>
-          <li>执行最小可跑步骤</li>
-          <li>记录预期输出</li>
-          <li>对照异常路径并复盘</li>
-        </ol>
+      <section className="grid" style={{ gridTemplateColumns: '220px 1fr 300px', alignItems: 'start' }}>
+        <aside className="card card-hover" style={{ position: 'sticky', top: 76 }}>
+          <h3>TOC</h3>
+          <ul>
+            <li><a href="#intuition">Intuition</a></li>
+            <li><a href="#definition">Definition</a></li>
+            <li><a href="#mechanism">Mechanism</a></li>
+            <li><a href="#failure">Failure Modes</a></li>
+            <li><a href="#lab">MiniLab</a></li>
+            <li><a href="#quiz">QuickQuiz</a></li>
+          </ul>
+        </aside>
+
+        <article>
+          <section id="intuition" className="card"><h3>Intuition Story</h3><p className="subtle">用直觉类比解释该机制为什么存在。</p></section>
+          <section id="definition" className="card"><h3>Precise Definition</h3><p className="subtle">给出规范化定义与边界。</p></section>
+          <section id="mechanism" className="card"><h3>Mechanism Breakdown</h3><p className="subtle">列状态机/流程图和关键输入输出。</p></section>
+          <section id="failure" className="card"><h3>Failure Modes & Security</h3><p className="subtle">列常见故障/攻击面与缓解策略。</p></section>
+
+          <section id="lab" className="card">
+            <h3>MiniLab</h3>
+            <ol>
+              <li>Step 1：执行最小可跑命令</li>
+              <li>Step 2：记录预期输出与实际输出</li>
+              <li>Step 3：异常分支复盘并形成 runbook</li>
+            </ol>
+            <button className="btn">Copy Lab Steps</button>
+          </section>
+
+          <section id="quiz" className="card">
+            <h3>QuickQuiz</h3>
+            {quiz.map((it, i) => (
+              <div key={i} style={{ marginBottom: 10 }}>
+                <strong>{i + 1}. {it.q}</strong>
+                {it.opts.map((o, oi) => (
+                  <label key={o} style={{ display: 'block' }}>
+                    <input type="radio" name={`q-${i}`} checked={answers[i] === oi} onChange={() => setAnswers((s) => ({ ...s, [i]: oi }))} /> {o}
+                  </label>
+                ))}
+              </div>
+            ))}
+            <p>得分：{score}/{quiz.length}</p>
+          </section>
+        </article>
+
+        <aside style={{ position: 'sticky', top: 76, display: 'grid', gap: 10 }}>
+          <section className="card card-hover">
+            <h3>Prereqs</h3>
+            <ul><li>EL Core</li><li>CL Core</li></ul>
+          </section>
+          <GardenLinksPanel />
+          <section className="card card-hover">
+            <h3>Notes</h3>
+            <p className="subtle">记录你自己的实现坑点与例子。</p>
+          </section>
+        </aside>
       </section>
     </main>
   );

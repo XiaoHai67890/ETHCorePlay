@@ -4,6 +4,7 @@ import { useProgressStore } from '../game/store';
 import { getDailyQuests } from '../game/daily';
 import { chapterDependencies } from '../data/dependencies';
 import { MapRenderer } from '../components/map/MapRenderer';
+import { PlotCard } from '../components/ui/PlotCard';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
 
@@ -32,6 +33,12 @@ export function HomePage() {
     badges: badges.length,
     minutes: totalMinutes
   };
+
+  const featuredPlots = [
+    { id: 'verkle-stateless-deep', title: 'Verkle / Stateless Ethereum', summary: '状态承诺升级与 witness 路径', zone: 'Execution' as const, difficulty: 4 as const, timeMins: 45, tags: ['Verkle','Witness'], progress: 0 },
+    { id: 'eip4844-da-economics-deep', title: 'EIP-4844 Blob 经济学', summary: 'DA 成本模型与批处理策略', zone: 'Scaling' as const, difficulty: 4 as const, timeMins: 40, tags: ['Blob','DA'], progress: 0 },
+    { id: 'pbs-inclusion-censorship-deep', title: 'PBS / Inclusion List', summary: '抗审查机制与演练案例', zone: 'Security' as const, difficulty: 5 as const, timeMins: 50, tags: ['PBS','Censorship'], progress: 0 }
+  ];
 
   const heatmap = Array.from({ length: 14 }).map((_, i) => {
     const seed = (passCount * 13 + wrongBook.length * 7 + i * 11 + totalMinutes) % 100;
@@ -158,23 +165,12 @@ export function HomePage() {
         </ul>
       </div>
 
-      <div className="card">
-        <h3>🔥 新增专题导览</h3>
+      <section className="card card-hover">
+        <h3>🔥 新增专题导览（PlotCard 统一体系）</h3>
         <div className="grid">
-          <div className="level">
-            <strong>Verkle / Stateless Ethereum</strong>
-            <small>状态承诺升级与 witness 路径</small>
-          </div>
-          <div className="level">
-            <strong>EIP-4844 Blob 经济学</strong>
-            <small>DA 成本模型与批处理策略</small>
-          </div>
-          <div className="level">
-            <strong>PBS / Inclusion List</strong>
-            <small>抗审查机制与演练案例</small>
-          </div>
+          {featuredPlots.map((p) => <PlotCard key={p.id} {...p} status="new" />)}
         </div>
-      </div>
+      </section>
 
       <div className="card">
         <h3>新手首日引导任务流</h3>
