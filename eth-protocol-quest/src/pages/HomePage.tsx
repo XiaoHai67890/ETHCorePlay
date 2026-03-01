@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useProgressStore } from '../game/store';
 import { getDailyQuests } from '../game/daily';
 import { chapterDependencies } from '../data/dependencies';
+import { GardenMap } from '../components/GardenMap';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
 
@@ -227,6 +228,8 @@ export function HomePage() {
           <Link to="/curriculum#mempool-private-orderflow-deep" className="btn">Mempool/私有路由</Link>
         </div>
       </div>
+
+      <GardenMap />
 
       <div className="card card-hover">
         <h3 className="section-title">协议雷达（本周）</h3>

@@ -6,6 +6,8 @@ import { MapPage } from './pages/MapPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { GlossaryPage } from './pages/GlossaryPage';
 import { CurriculumPage } from './pages/CurriculumPage';
+import { ZonePage } from './pages/ZonePage';
+import { PlotPage } from './pages/PlotPage';
 
 export function App() {
   const [themeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
@@ -21,7 +23,9 @@ export function App() {
 
   useEffect(() => {
     const effectiveDark = themeMode === 'system' ? systemDark : themeMode === 'dark';
-    document.body.dataset.theme = effectiveDark ? 'dark' : 'light';
+    const mode = effectiveDark ? 'dark' : 'light';
+    document.body.dataset.theme = mode;
+    document.documentElement.dataset.theme = mode;
     localStorage.setItem('epq_theme_mode', themeMode);
   }, [themeMode, systemDark]);
 
@@ -46,6 +50,8 @@ export function App() {
         <Route path="/progress" element={<ProgressPage />} />
         <Route path="/curriculum" element={<CurriculumPage />} />
         <Route path="/glossary" element={<GlossaryPage />} />
+        <Route path="/zone/:zoneKey" element={<ZonePage />} />
+        <Route path="/plot/:id" element={<PlotPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
