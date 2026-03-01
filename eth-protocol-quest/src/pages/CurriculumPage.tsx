@@ -5,6 +5,7 @@ import { chapterAssessments } from '../data/chapterAssessments';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
 import { chapterDependencies } from '../data/dependencies';
 import { chapterChecklists } from '../data/checklists';
+import { practiceTemplates } from '../data/practiceTemplates';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
@@ -109,13 +110,33 @@ export function CurriculumPage() {
 
     setChapterResult(chapterId, { score, total, passed, threshold, wrongIds } as any);
 
+    // Checklist 联动：提交测评后自动勾选“完成章节测评”项（索引1）
+    setChecklistState((s) => ({
+      ...s,
+      [chapterId]: { ...(s[chapterId] || {}), 1: true, 0: true }
+    }));
+
     if (passed) {
+      // 通过后自动提示可勾选“完成实战任务”（索引2由用户确认）
       const domain = chapterDomain(chapterId);
       const target = knowledgeMap.find((n) => n.domain === domain && n.status !== 'done');
       if (target) setKnowledgeStatus(target.id, 'done');
       setRetryMode((s) => ({ ...s, [chapterId]: false }));
     }
   };
+
+
+  const dependencyAlerts = useMemo(() => {
+    return allChapters
+      .filter((c) => !done[c.id])
+      .map((c) => {
+        const deps = chapterDependencies[c.id] || [];
+        const missing = deps.filter((d) => !done[d]);
+        return { id: c.id, title: c.title, missing };
+      })
+      .filter((x) => x.missing.length > 0)
+      .slice(0, 3);
+  }, [allChapters, done]);
 
   const recommendation = useMemo(() => {
     const failed = Object.entries(chapterResults).filter(([, r]) => !r.passed);
@@ -202,6 +223,16 @@ export function CurriculumPage() {
       <section className="card">
         <h3>学习推荐引擎</h3>
         <p>{recommendation}</p>
+        {dependencyAlerts.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>前置依赖缺失告警</strong>
+            <ul>
+              {dependencyAlerts.map((a) => (
+                <li key={a.id}>{a.title} 缺少前置：{a.missing.map((m) => allChapters.find((c) => c.id === m)?.title || m).join(' / ')}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       <section className="card">
@@ -241,6 +272,17 @@ export function CurriculumPage() {
             <strong>{n.chapterTitle}</strong>
             <div><em>术语：</em>{n.keyTerms.join(' · ')}</div>
             <div><em>练习：</em>{n.practiceTitles.join(' / ')}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="card">
+        <h3>客户端与测试实践模板库</h3>
+        {practiceTemplates.map((t) => (
+          <div key={t.id} style={{ marginBottom: 10 }}>
+            <strong>[{t.category}] {t.title}</strong>
+            <div><em>适用场景：</em>{t.whenToUse}</div>
+            <ol>{t.template.map((line) => <li key={line}>{line}</li>)}</ol>
           </div>
         ))}
       </section>
@@ -326,6 +368,7 @@ export function CurriculumPage() {
 
             <div style={{ marginTop: 10 }}>
               <strong>学习完成清单（Checklist）</strong>
+              <small style={{ display: 'block', margin: '4px 0 8px' }}>提示：提交测评后会自动勾选“完成章节测评”。若仍有缺项，请按缺项完成对应动作。</small>
               <ul>
                 {(chapterChecklists.find((x) => x.chapterId === chapter.id)?.items || ['阅读本章','完成测评','完成1个练习']).map((item, i) => (
                   <li key={item}>
