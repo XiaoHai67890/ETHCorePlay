@@ -8,7 +8,7 @@ import { GlossaryPage } from './pages/GlossaryPage';
 import { CurriculumPage } from './pages/CurriculumPage';
 
 export function App() {
-  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
+  const [themeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
   const [systemDark, setSystemDark] = useState(() => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
@@ -35,9 +35,6 @@ export function App() {
             <Link to="/progress">总览</Link>
             <Link to="/curriculum">课程</Link>
             <Link to="/glossary">术语</Link>
-            <button className="btn btn-ghost" onClick={() => setThemeMode('light')}>浅色</button>
-            <button className="btn btn-ghost" onClick={() => setThemeMode('dark')}>暗色</button>
-            <button className="btn btn-ghost" onClick={() => setThemeMode('system')}>跟随系统</button>
           </nav>
         </div>
       </header>

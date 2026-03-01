@@ -127,6 +127,24 @@ export function HomePage() {
       </div>
 
       <div className="card">
+        <h3>🔥 新增专题导览</h3>
+        <div className="grid">
+          <div className="level">
+            <strong>Verkle / Stateless Ethereum</strong>
+            <small>状态承诺升级与 witness 路径</small>
+          </div>
+          <div className="level">
+            <strong>EIP-4844 Blob 经济学</strong>
+            <small>DA 成本模型与批处理策略</small>
+          </div>
+          <div className="level">
+            <strong>PBS / Inclusion List</strong>
+            <small>抗审查机制与演练案例</small>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
         <h3>新手首日引导任务流</h3>
         <div className="task-item"><input type="checkbox" checked={!!tasks.read} onChange={() => toggleTask('read')} /><span>完成「EL 核心」章节阅读（15-20 分钟）</span></div>
         <div className="task-item"><input type="checkbox" checked={!!tasks.quiz} onChange={() => toggleTask('quiz')} /><span>提交第一次章节测评，建立基线分数</span></div>
@@ -146,6 +164,7 @@ export function HomePage() {
           <li><strong>第 2 周：</strong>交易生命周期 + Engine API + EIP 流程</li>
           <li><strong>第 3 周：</strong>客户端测试与安全专题 + 错题压缩复盘</li>
           <li><strong>第 4 周：</strong>跨客户端调试 + 首个贡献实战任务</li>
+          <li><strong>第 5 周（进阶）：</strong>Verkle/Stateless + EIP-4844 + PBS 抗审查专题</li>
         </ul>
       </div>
 
