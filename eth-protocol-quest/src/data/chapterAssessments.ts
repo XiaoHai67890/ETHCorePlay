@@ -103,4 +103,22 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'l2-a3', prompt: '跨域消息通常具备？', options: ['同步即时', '异步与延迟', '免费无限', '无需验证'], answerIndex: 1, explanation: '跨域多数是异步流程。' }
     ]
   }
+  ,{
+    chapterId: 'p2p-gossip-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'p2p-a1', prompt: 'Gossip 传播延迟主要与什么相关？', options: ['节点拓扑与链路质量', '钱包 UI 配色', '私钥长度', 'Logo 设计'], answerIndex: 0, explanation: '传播是网络拓扑与节点性能问题。' },
+      { id: 'p2p-a2', prompt: 'Peer Score 的核心目标是？', options: ['增加 gas', '识别并抑制低质量 peer 行为', '替代共识', '减少区块时间'], answerIndex: 1, explanation: 'Peer Score 用于抗垃圾与连接质量治理。' },
+      { id: 'p2p-a3', prompt: '消息风暴治理更合理的做法是？', options: ['完全放开限流', '分层限流+背压+监控告警', '关闭日志', '禁用 gossip'], answerIndex: 1, explanation: '工程上需要限流和可观测性配套。' }
+    ]
+  },
+  {
+    chapterId: 'mev-builder-relay-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'mev-a1', prompt: 'Builder/Relay/Proposer 分工中，Relay 常见职责是？', options: ['持久化私钥', '作为中介传递候选并做链路协调', '生成最终性证明', '替代 EL 执行'], answerIndex: 1, explanation: 'Relay 承担候选传递与链路协调角色。' },
+      { id: 'mev-a2', prompt: '单 relay 依赖的主要风险是？', options: ['手续费降低', '系统性可用性风险', '自动提升最终性', '减少监控需求'], answerIndex: 1, explanation: '单点依赖会放大中断风险。' },
+      { id: 'mev-a3', prompt: '构建链路工程治理应优先关注？', options: ['主题颜色统一', '提案成功率/超时率/回退命中率', 'Markdown 风格', '页面加载动画'], answerIndex: 1, explanation: '这些指标直接反映链路健康度。' }
+    ]
+  }
 ];

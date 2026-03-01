@@ -209,4 +209,100 @@ export const deepDiveChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'p2p-gossip-deep',
+    title: '网络深潜：Gossip 传播、Peer Score 与消息风暴抑制',
+    level: 'advanced',
+    objective: '理解以太坊节点网络层如何在真实性能与抗攻击之间平衡。',
+    sections: [
+      {
+        heading: '细粒度小节：Gossip 传播路径与延迟来源',
+        points: [
+          '消息通常通过多跳传播，不是单次广播即全网可见。',
+          '拓扑结构、节点质量与带宽会直接影响传播延迟。',
+          '同一消息在不同节点到达时间差可能触发短时分歧。'
+        ]
+      },
+      {
+        heading: '细粒度小节：Peer Score 与抗垃圾策略',
+        points: [
+          '节点会基于行为质量给 peer 打分并动态调整连接权重。',
+          '持续发送低质量/重复消息的 peer 会被降权或断连。',
+          '评分策略需要平衡误伤率与抗攻击强度。'
+        ]
+      },
+      {
+        heading: '细粒度小节：消息风暴与限流治理',
+        points: [
+          '突发热点事件会导致消息放大，触发带宽与 CPU 压力。',
+          '合理的 topic 限流、缓存与背压可降低雪崩风险。',
+          '观测指标应覆盖入站速率、丢包率、重传比、处理时延。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '误把传播延迟当作共识故障。',
+      '盲目提高限流阈值导致节点过载。',
+      '忽视 peer score 规则与业务流量特征不匹配。'
+    ],
+    glossary: ['GossipSub', 'Peer Score', 'Backpressure', 'Message Storm', 'Propagation Delay'],
+    practice: [
+      {
+        title: '实战：网络传播观测面板设计',
+        steps: [
+          '定义核心指标：传播时延、重传率、失效率、活跃 peer 数。',
+          '构建阈值告警与分级响应策略。',
+          '通过一次压力演练验证告警与限流策略。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mev-builder-relay-deep',
+    title: 'MEV 与区块构建链路：Builder / Relay / Proposer 协作实务',
+    level: 'advanced',
+    objective: '理解现代区块构建链路中的角色边界、信任假设与风险控制。',
+    sections: [
+      {
+        heading: '细粒度小节：角色分工与价值流',
+        points: [
+          'Builder 负责构建收益优化区块候选。',
+          'Relay 在信息隔离与传递中承担中介角色。',
+          'Proposer 在时限内选择候选并出块。'
+        ]
+      },
+      {
+        heading: '细粒度小节：可信执行与信息泄露风险',
+        points: [
+          '链路中的可见性差异会影响公平性与审查风险。',
+          '错误的 relay 信任假设可能放大单点故障。',
+          '需要从可用性、透明度、故障转移角度设计 fallback。'
+        ]
+      },
+      {
+        heading: '细粒度小节：工程治理与监控指标',
+        points: [
+          '关注提案成功率、超时率、候选多样性与回退路径命中率。',
+          '建立 relay 异常时的自动降级策略。',
+          '对高价值业务增加更保守确认策略与审计日志。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只追求收益最大化，忽略可用性和安全性。',
+      '单 relay 依赖导致系统性中断风险。',
+      '无 fallback 方案导致提议时隙浪费。'
+    ],
+    glossary: ['MEV', 'Builder', 'Relay', 'Proposer', 'PBS', 'Fallback Path'],
+    practice: [
+      {
+        title: '实战：构建链路故障演练手册',
+        steps: [
+          '定义 relay 异常场景与分级故障类型。',
+          '设计自动降级策略与手动应急流程。',
+          '输出“故障→恢复→复盘”的闭环模板。'
+        ]
+      }
+    ]
+  }
 ];
