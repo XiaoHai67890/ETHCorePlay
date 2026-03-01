@@ -593,4 +593,148 @@ export const deepDiveChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'client-labs-minimal-runs',
+    title: '客户端实操实验课：Geth/Nethermind/Lighthouse/Prysm 最小可跑实验',
+    level: 'advanced',
+    objective: '用最小环境跑通 EL/CL 客户端组合，建立“可观测 + 可复现 + 可恢复”的工程实践。',
+    sections: [
+      {
+        heading: '实验一：最小单机 EL/CL 组合启动',
+        points: [
+          '准备两组组合：Geth+Lighthouse、Nethermind+Prysm。',
+          '验证基本同步、RPC 可用、日志健康。',
+          '记录启动参数与版本矩阵。'
+        ]
+      },
+      {
+        heading: '实验二：链路可观测性基线',
+        points: [
+          '采集关键指标：同步高度、peer 数、最终性状态。',
+          '建立最小告警阈值：同步停滞、peer 急降、最终性延迟。',
+          '对比两组客户端组合的稳定性表现。'
+        ]
+      },
+      {
+        heading: '实验三：故障恢复演练',
+        points: [
+          '模拟异常重启与配置错误。',
+          '验证 runbook：定位→修复→校验。',
+          '形成可复用故障清单与恢复手册。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只会“启动成功”，不会验证运行健康。',
+      '不记录参数导致实验无法复现。',
+      '无恢复手册导致故障处理依赖记忆。'
+    ],
+    glossary: ['Geth', 'Nethermind', 'Lighthouse', 'Prysm', 'Client Matrix', 'Runbook'],
+    practice: [
+      {
+        title: '实战：最小可跑实验报告模板',
+        steps: [
+          '记录环境、命令、关键日志片段。',
+          '列出健康指标与告警结果。',
+          '输出“问题-修复-验证”闭环。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'chaos-lite-ops-lab',
+    title: 'Chaos-lite 运维实验：最终性延迟、Peer 抖动、Relay 不可用',
+    level: 'advanced',
+    objective: '通过轻量故障注入培养协议运维思维：先观测、再定位、后恢复。',
+    sections: [
+      {
+        heading: '场景一：最终性延迟模拟',
+        points: [
+          '观测 checkpoint 与最终性推进节奏变化。',
+          '识别“短时波动”与“持续异常”边界。',
+          '制定分级响应策略。'
+        ]
+      },
+      {
+        heading: '场景二：Peer 抖动与网络不稳定',
+        points: [
+          '观察 peer 数、传播延迟、重连频率。',
+          '评估对同步和链头判断的影响。',
+          '验证限流与重连参数是否合理。'
+        ]
+      },
+      {
+        heading: '场景三：Relay 不可用与降级路径',
+        points: [
+          '模拟 relay 中断并触发 fallback。',
+          '验证自动降级是否生效。',
+          '复盘提议成功率与恢复时长。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '故障注入后不做指标对照，无法形成结论。',
+      '把演练环境异常直接外推到生产。',
+      '无回滚开关导致演练扩大影响。'
+    ],
+    glossary: ['Chaos Engineering', 'Finality Delay', 'Peer Flap', 'Relay Outage', 'Fallback'],
+    practice: [
+      {
+        title: '实战：Chaos-lite 演练记录卡',
+        steps: [
+          '定义注入动作、观测指标、退出条件。',
+          '记录告警触发与处理时间线。',
+          '输出改进项并回写 runbook。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'eip-reading-workbench',
+    title: 'EIP 阅读工作台：动机/规范/兼容/安全/实现影响结构化拆解',
+    level: 'advanced',
+    objective: '把 EIP 阅读从“看懂”升级为“可复用分析方法”，支持评审与实现。',
+    sections: [
+      {
+        heading: '阅读框架一：问题动机与边界',
+        points: [
+          '明确要解决的问题、受影响对象和边界条件。',
+          '识别与现有机制的冲突与重叠。',
+          '拆解关键假设是否成立。'
+        ]
+      },
+      {
+        heading: '阅读框架二：规范与兼容性',
+        points: [
+          '提取 MUST/SHOULD 条款形成检查清单。',
+          '分析向后兼容与迁移成本。',
+          '标注客户端实现中的高风险区域。'
+        ]
+      },
+      {
+        heading: '阅读框架三：安全与实现影响',
+        points: [
+          '梳理新增攻击面与缓解机制。',
+          '映射到测试向量与回归策略。',
+          '沉淀为 PR/评审可复用模板。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只看摘要，不拆解规范细节。',
+      '忽略兼容性导致落地成本失真。',
+      '无测试映射导致实现偏差难发现。'
+    ],
+    glossary: ['MUST/SHOULD', 'Backward Compatibility', 'Security Considerations', 'Reference Tests'],
+    practice: [
+      {
+        title: '实战：一页式 EIP 分析卡',
+        steps: [
+          '按五栏输出：动机/规范/兼容/安全/实现影响。',
+          '列出 3 个测试向量与 1 个回归策略。',
+          '形成可直接用于评审的摘要。'
+        ]
+      }
+    ]
+  }
 ];

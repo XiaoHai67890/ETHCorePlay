@@ -1,6 +1,6 @@
 export type PracticeTemplate = {
   id: string;
-  category: 'client' | 'testing';
+  category: 'client' | 'testing' | 'ops' | 'research';
   title: string;
   whenToUse: string;
   template: string[];
@@ -57,6 +57,45 @@ export const practiceTemplates: PracticeTemplate[] = [
       '客户端B输出',
       '差异分析',
       '结论与后续动作'
+    ]
+  }
+  ,{
+    id: 'client-min-lab-template',
+    category: 'client',
+    title: '客户端最小可跑实验模板（EL/CL）',
+    whenToUse: '搭建 geth/nethermind + lighthouse/prysm 最小实验时',
+    template: [
+      '客户端组合与版本矩阵',
+      '启动命令与关键参数',
+      '健康检查指标（同步/peer/最终性）',
+      '异常场景与恢复步骤',
+      '实验结论与后续优化项'
+    ]
+  },
+  {
+    id: 'chaos-lite-template',
+    category: 'ops',
+    title: 'Chaos-lite 故障注入模板',
+    whenToUse: '做最终性延迟/peer 抖动/relay 中断演练时',
+    template: [
+      '演练目标与影响范围',
+      '注入动作与持续时长',
+      '观测指标与告警阈值',
+      '恢复动作与回滚开关',
+      '复盘结论与改进 backlog'
+    ]
+  },
+  {
+    id: 'eip-workbench-template',
+    category: 'research',
+    title: 'EIP 阅读工作台模板（五栏）',
+    whenToUse: '阅读/评审 EIP 并准备实现方案时',
+    template: [
+      '动机：问题定义与边界',
+      '规范：MUST/SHOULD 条款清单',
+      '兼容：向后兼容与迁移成本',
+      '安全：新增攻击面与缓解机制',
+      '实现影响：客户端改动点与测试向量'
     ]
   }
 ];

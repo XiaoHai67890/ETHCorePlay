@@ -175,4 +175,31 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'lst-a3', prompt: '产品风控较优实践是？', options: ['无上限敞口', '敞口限额+熔断+风险披露', '隐藏风险信息', '固定策略不调整'], answerIndex: 1, explanation: '可运营风险管理需要限额与披露。' }
     ]
   }
+  ,{
+    chapterId: 'client-labs-minimal-runs',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'lab-a1', prompt: '最小可跑实验的关键目标是？', options: ['仅启动成功', '可复现+可观测+可恢复', '只看前端页面', '只看 TPS'], answerIndex: 1, explanation: '工程实验应形成闭环能力。' },
+      { id: 'lab-a2', prompt: '客户端矩阵记录主要用于？', options: ['社媒展示', '复现问题与兼容排查', '替代测试', '减少日志'], answerIndex: 1, explanation: '版本矩阵是排错关键。' },
+      { id: 'lab-a3', prompt: 'runbook 价值在于？', options: ['替代监控', '标准化故障恢复流程', '增加复杂度', '减少测试'], answerIndex: 1, explanation: 'runbook 提升故障处理一致性。' }
+    ]
+  },
+  {
+    chapterId: 'chaos-lite-ops-lab',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'chaos-a1', prompt: 'Chaos-lite 演练先做什么？', options: ['先注入再说', '定义观测指标与退出条件', '关闭告警', '直接上线生产'], answerIndex: 1, explanation: '演练必须先定义边界和观测。' },
+      { id: 'chaos-a2', prompt: 'relay 不可用时关键能力是？', options: ['忽略故障', 'fallback 降级路径', '重启所有机器', '停止所有服务'], answerIndex: 1, explanation: '降级路径决定可用性。' },
+      { id: 'chaos-a3', prompt: '演练复盘应包含？', options: ['仅截图', '时间线+处理动作+改进项', '只写结论', '不记录'], answerIndex: 1, explanation: '复盘要形成可执行改进。' }
+    ]
+  },
+  {
+    chapterId: 'eip-reading-workbench',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'eipw-a1', prompt: 'EIP 阅读工作台核心价值是？', options: ['读得更快', '结构化输出可复用分析', '减少文档', '替代实现'], answerIndex: 1, explanation: '目标是方法论可复用。' },
+      { id: 'eipw-a2', prompt: '规范拆解应优先提取？', options: ['修辞', 'MUST/SHOULD 条款', '作者故事', '社媒讨论'], answerIndex: 1, explanation: '实现要基于规范条款。' },
+      { id: 'eipw-a3', prompt: '安全维度输出应连接到？', options: ['美术设计', '测试向量与回归策略', '产品文案', '活动海报'], answerIndex: 1, explanation: '安全分析必须落地测试。' }
+    ]
+  }
 ];

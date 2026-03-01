@@ -10,5 +10,8 @@ export const chapterTemplateMapping: Record<string, string[]> = {
   'security-core': ['issue-repro-template'],
   'l2-da-core': ['consistency-vector-template'],
   'el-deep-state-trie': ['regression-test-template'],
-  'cl-deep-forkchoice-finality': ['issue-repro-template']
+  'cl-deep-forkchoice-finality': ['issue-repro-template'],
+  'client-labs-minimal-runs': ['client-min-lab-template', 'issue-repro-template'],
+  'chaos-lite-ops-lab': ['chaos-lite-template', 'consistency-vector-template'],
+  'eip-reading-workbench': ['eip-workbench-template', 'pr-delivery-template']
 };
