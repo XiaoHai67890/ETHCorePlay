@@ -13,9 +13,11 @@ export function HomePage() {
       <div className="card">
         <p>当前 XP：<strong>{xp}</strong></p>
         <p>已解锁关卡：<strong>Lv{unlockedLevel}</strong></p>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to="/map" className="btn">开始闯关</Link>
           <Link to="/progress" className="btn">学习总览</Link>
+          <Link to="/curriculum" className="btn">系统课程</Link>
+          <a className="btn" href="https://github.com/XiaoHai67890/ETHCorePlay/issues/new" target="_blank" rel="noreferrer">提交反馈</a>
         </div>
       </div>
 
