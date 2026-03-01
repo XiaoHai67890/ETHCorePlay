@@ -121,4 +121,31 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'mev-a3', prompt: '构建链路工程治理应优先关注？', options: ['主题颜色统一', '提案成功率/超时率/回退命中率', 'Markdown 风格', '页面加载动画'], answerIndex: 1, explanation: '这些指标直接反映链路健康度。' }
     ]
   }
+  ,{
+    chapterId: 'verkle-stateless-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'verkle-a1', prompt: 'Verkle/Stateless 的核心目标之一是？', options: ['增大发行量', '降低状态证明与验证负担', '替代签名机制', '移除共识层'], answerIndex: 1, explanation: '核心是优化状态承诺与验证路径。' },
+      { id: 'verkle-a2', prompt: 'Stateless Ethereum 强调什么？', options: ['节点必须保存完整状态', '执行所需 witness 可随交易/区块提供', '完全不需要网络传播', '只优化前端'], answerIndex: 1, explanation: 'witness 是无状态执行关键。' },
+      { id: 'verkle-a3', prompt: '迁移风险管理更合理的是？', options: ['一次性切换无回退', '设置过渡窗口与回退策略', '忽略测试向量', '只看理论分析'], answerIndex: 1, explanation: '工程迁移必须有回退与验证。' }
+    ]
+  },
+  {
+    chapterId: 'eip4844-da-economics-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: '4844-a1', prompt: 'EIP-4844 引入 Blob 的关键价值是？', options: ['提高头像清晰度', '为 DA 提供更高性价比数据承载', '替代所有 calldata', '替代共识投票'], answerIndex: 1, explanation: 'Blob 主要服务 DA 成本优化。' },
+      { id: '4844-a2', prompt: 'Blob 成本治理应关注？', options: ['仅单次费用', '双费用市场波动与批次策略', '只看 UI 速度', '忽略失败重试'], answerIndex: 1, explanation: '要结合波动与批处理策略。' },
+      { id: '4844-a3', prompt: '运营最佳实践之一是？', options: ['固定批次参数永不调整', '建立高波动时自适应降频/扩批策略', '关闭监控', '取消回测'], answerIndex: 1, explanation: '需要策略弹性应对费用变化。' }
+    ]
+  },
+  {
+    chapterId: 'pbs-inclusion-censorship-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'pbs-a1', prompt: 'PBS 的一个核心意图是？', options: ['增加中心化依赖', '优化提议-构建分工并改善系统效率', '替代 EVM', '取消中继'], answerIndex: 1, explanation: 'PBS 核心是角色分离与效率/安全平衡。' },
+      { id: 'pbs-a2', prompt: 'Inclusion list 的治理价值更接近？', options: ['保证最低可包含性', '完全消除网络延迟', '降低存储成本', '替代审计'], answerIndex: 0, explanation: '其目标是提升交易可包含保障。' },
+      { id: 'pbs-a3', prompt: '抗审查工程实践应优先具备？', options: ['单 relay 固定路径', '多路径 fallback 与事件复盘闭环', '无监控运行', '仅靠人工经验'], answerIndex: 1, explanation: '抗审查能力需要可用性与治理闭环。' }
+    ]
+  }
 ];

@@ -305,4 +305,148 @@ export const deepDiveChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'verkle-stateless-deep',
+    title: 'Verkle / Stateless Ethereum：状态承诺升级与无状态执行路径',
+    level: 'advanced',
+    objective: '理解 Verkle 树与 Stateless Ethereum 的设计动机、工程收益与落地挑战。',
+    sections: [
+      {
+        heading: '细粒度小节：为什么需要从 MPT 走向 Verkle',
+        points: [
+          '状态规模增长导致证明体积与验证开销持续上升。',
+          'Verkle 通过向量承诺压缩证明大小并提升验证效率。',
+          '目标是降低节点同步与状态访问负担。'
+        ]
+      },
+      {
+        heading: '细粒度小节：Stateless Ethereum 核心思路',
+        points: [
+          '把执行所需 witness 随区块/交易携带，减少节点对完整状态的依赖。',
+          '节点可在更低存储负担下验证执行正确性。',
+          '关键挑战在 witness 生成、传播与验证成本平衡。'
+        ]
+      },
+      {
+        heading: '细粒度小节：落地风险与迁移策略',
+        points: [
+          '状态承诺切换需要兼容过渡窗口与双轨验证策略。',
+          '客户端实现需处理 witness 缺失/异常路径。',
+          '需要测试向量覆盖“证明正确但性能退化”场景。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '把 Verkle 当作纯性能优化，忽略协议与运维复杂度。',
+      '低估 witness 传播对网络层的压力。',
+      '只关注理论证明，不做客户端工程验证。'
+    ],
+    glossary: ['Verkle Tree', 'Vector Commitment', 'Stateless Ethereum', 'Witness', 'State Access'],
+    practice: [
+      {
+        title: '实战：Stateless 迁移评估清单',
+        steps: [
+          '列出当前依赖完整状态的关键流程。',
+          '为每条流程定义 witness 需求与失败回退。',
+          '输出迁移优先级与测试覆盖计划。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'eip4844-da-economics-deep',
+    title: 'EIP-4844（Blob）与 DA 成本模型：吞吐、费用与可用性平衡',
+    level: 'advanced',
+    objective: '掌握 Blob 引入后的数据可用性成本结构及其对 L2 经济性的影响。',
+    sections: [
+      {
+        heading: '细粒度小节：Blob 与 Calldata 的角色差异',
+        points: [
+          'Blob 为 DA 场景提供更高性价比的数据承载路径。',
+          'Calldata 与 Blob 在可访问性、保留周期、费用模型上不同。',
+          '工程上需要明确“长期可读数据”与“短期 DA 数据”边界。'
+        ]
+      },
+      {
+        heading: '细粒度小节：双费用市场与成本波动',
+        points: [
+          'Blob gas 与 execution gas 分离，形成双市场动态。',
+          'L2 批次策略需对 blob 费用波动有弹性。',
+          '成本控制需结合批量大小、延迟容忍与确认策略。'
+        ]
+      },
+      {
+        heading: '细粒度小节：运营层指标与策略',
+        points: [
+          '监控每批次 DA 成本、失败重试率与确认延迟。',
+          '建立“高波动时降频/扩批”的自适应策略。',
+          '通过历史窗口回测优化批处理参数。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '把 blob 成本当作恒定值，不做波动建模。',
+      '忽略批次失败重试对总成本的放大。',
+      '没有成本上限策略导致高峰期失控。'
+    ],
+    glossary: ['EIP-4844', 'Blob', 'Blob Gas', 'Data Availability', 'Batching Economics'],
+    practice: [
+      {
+        title: '实战：L2 批处理成本模拟',
+        steps: [
+          '设定 3 种负载场景（低/中/高）。',
+          '模拟不同批次大小下的 blob 成本与延迟。',
+          '输出成本-时延帕累托最优策略。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'pbs-inclusion-censorship-deep',
+    title: 'PBS / Inclusion List / Censorship Resistance：抗审查实战案例包',
+    level: 'advanced',
+    objective: '系统理解提议-构建分离与 inclusion list 机制在抗审查中的作用与局限。',
+    sections: [
+      {
+        heading: '细粒度小节：PBS 的目标与现实约束',
+        points: [
+          'PBS 通过角色分离提升构建效率并降低部分中心化压力。',
+          '现实中仍需关注 relay 集中与信息不对称风险。',
+          '需要把可用性与公平性一起纳入评估。'
+        ]
+      },
+      {
+        heading: '细粒度小节：Inclusion List 的治理价值',
+        points: [
+          'Inclusion list 提升“最低交易可包含性”保障。',
+          '机制设计需平衡强制性、复杂度与滥用防护。',
+          '与 mempool 策略、提议时隙约束存在耦合。'
+        ]
+      },
+      {
+        heading: '细粒度小节：抗审查演练框架',
+        points: [
+          '定义审查事件等级与观测指标（遗漏率、延迟、恢复时长）。',
+          '建立多 relay + fallback + 审计日志闭环。',
+          '复盘应覆盖协议层、客户端层、运营层改进项。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只讨论理论公平性，不做运行时指标治理。',
+      '单一路径依赖导致抗审查能力脆弱。',
+      '缺少演练，导致策略在真实事件中失效。'
+    ],
+    glossary: ['PBS', 'Inclusion List', 'Censorship Resistance', 'Relay Diversity', 'Fallback'],
+    practice: [
+      {
+        title: '实战：抗审查事件复盘模板',
+        steps: [
+          '记录事件窗口内交易包含率与延迟分布。',
+          '定位失败路径（构建/中继/提议/网络）。',
+          '输出下一轮治理与工程改进 backlog。'
+        ]
+      }
+    ]
+  }
 ];
