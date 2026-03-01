@@ -94,6 +94,8 @@ export function CurriculumPage() {
     const chapter = allChapters.find((c) => c.id === chapterId);
     if (!chapter) return;
     const result = chapterResults[chapterId] as any;
+    const prevRate = result?.history && result.history.length >= 2 ? result.history[result.history.length - 2] : null;
+    const currRate = result ? result.score / Math.max(1, result.total) : null;
     const checklist = chapterChecklists.find((x) => x.chapterId === chapterId)?.items || [];
     const state = checklistState[chapterId] || {};
     const missing = checklist.filter((_, i) => !state[i]);
@@ -108,6 +110,11 @@ export function CurriculumPage() {
       mastery: chapterMastery[chapterId] || '初学',
       studyMinutes: studyMinutes[chapterId] || 0,
       assessment: result || null,
+      compare: {
+        prevRate,
+        currRate,
+        delta: prevRate != null && currRate != null ? currRate - prevRate : null
+      },
       missingChecklist: missing,
       missingDependencies: missingDeps,
       history,
@@ -129,7 +136,7 @@ export function CurriculumPage() {
 <style>body{font-family:Inter,Arial,sans-serif;padding:24px;color:#1a2b20}.card{border:1px solid #cfe5d5;border-radius:10px;padding:12px;margin:10px 0}h1,h2{color:#22543a}li{margin:4px 0}</style></head><body>
 <h1>${chapter.title} 学习报告</h1>
 <div class='card'><p><b>目标：</b>${chapter.objective}</p><p><b>状态：</b>${report.status}</p><p><b>掌握度：</b>${report.mastery}</p><p><b>学习时长：</b>${report.studyMinutes} 分钟</p></div>
-<div class='card'><h2>测评</h2><p>${result ? `得分 ${result.score}/${result.total}，${result.passed ? '通过' : '未通过'}` : '暂无测评'}</p></div>
+<div class='card'><h2>测评</h2><p>${result ? `得分 ${result.score}/${result.total}，${result.passed ? '通过' : '未通过'}` : '暂无测评'}</p><p>${prevRate != null && currRate != null ? `对比上次：${(prevRate*100).toFixed(0)}% → ${(currRate*100).toFixed(0)}%（变化 ${(currRate-prevRate>=0?'+':'') + ((currRate-prevRate)*100).toFixed(0)}%）` : '对比上次：暂无历史数据'}</p></div>
 <div class='card'><h2>缺项</h2><ul>${missing.map((m) => `<li>${m}</li>`).join('') || '<li>无</li>'}</ul><p><b>缺失前置：</b>${missingDeps.join(' / ') || '无'}</p></div>
 <div class='card'><h2>学习历史时间线</h2><ul>${history.map((h: any) => `<li>${new Date(h.ts).toLocaleString()} - ${h.action} ${h.detail || ''}</li>`).join('') || '<li>暂无</li>'}</ul></div>
 </body></html>`;
@@ -140,6 +147,30 @@ export function CurriculumPage() {
     a.download = `${chapterId}-learning-report.html`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+
+  const adaptiveHint = (chapterId: string) => {
+    const r = chapterResults[chapterId] as any;
+    const m = chapterMastery[chapterId] || '初学';
+    const mins = studyMinutes[chapterId] || 0;
+    if (!r) return '建议先完成首次测评，建立基线分数。';
+    const rate = r.score / Math.max(1, r.total);
+    if (rate < 0.6) return '当前建议降难：先复习重点卡片+错题回放，再二测。';
+    if (rate < 0.8) return '当前建议中难度：巩固术语与实战步骤后复测。';
+    if (m === '巩固' && mins >= 30) return '当前建议升难：进入深层章节或贡献实操模板。';
+    return '当前节奏合适：完成一次实战任务后进入下一章。';
+  };
+
+  const generateWeeklyPlan = () => {
+    const pending = allChapters.filter((c) => !done[c.id]).slice(0, 7);
+    const fallback = allChapters.slice(0, 7);
+    const target = pending.length ? pending : fallback;
+    const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    return days.map((d, i) => {
+      const c = target[i % target.length];
+      return `${d}：学习《${c.title}》30-45分钟 + 章节测评1次 + 错题回放10分钟`;
+    });
   };
 
   const setAnswer = (chapterId: string, qid: string, v: number) => {
@@ -293,6 +324,13 @@ export function CurriculumPage() {
       </section>
 
       <section className="card">
+        <h3>学习目标自动生成（周计划）</h3>
+        <ol>
+          {generateWeeklyPlan().map((line) => <li key={line}>{line}</li>)}
+        </ol>
+      </section>
+
+      <section className="card">
         <h3>内容内链接跳转</h3>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="btn" onClick={() => setOnlyPending((v) => !v)}>
@@ -356,6 +394,7 @@ export function CurriculumPage() {
             <p><strong>学习目标：</strong>{chapter.objective}</p>
             <p><strong>难度：</strong>{chapter.level}</p>
             <p><strong>掌握度：</strong>{chapterMastery[chapter.id] || '初学'} · <strong>学习时长：</strong>{studyMinutes[chapter.id] || 0} 分钟</p>
+            <p><strong>难度自适应提示：</strong>{adaptiveHint(chapter.id)}</p>
             <button className="btn" onClick={() => addStudyMinutes(chapter.id, 15)}>+15 分钟学习记录</button>
 
             <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
