@@ -228,4 +228,173 @@ export const foundationChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'engine-api-core',
+    title: 'Engine API 协同：EL/CL 的协议桥梁',
+    level: 'intermediate',
+    objective: '掌握 Engine API 在 Merge 后的职责、常见调用与排错思路。',
+    sections: [
+      {
+        heading: '概念讲解：为什么需要 Engine API',
+        points: [
+          'Merge 后共识与执行分层，二者需要标准接口协作。',
+          'CL 负责共识流程，EL 负责交易执行与状态结果。',
+          'Engine API 提供 payload 提议、验证、回执等关键交互。'
+        ]
+      },
+      {
+        heading: '概念讲解：核心交互路径',
+        points: [
+          'CL 请求候选 payload，EL 返回可执行候选。',
+          'CL 推进链头时调用 EL 验证执行结果。',
+          'EL 返回状态与错误，帮助 CL 做后续决策。'
+        ]
+      },
+      {
+        heading: '概念讲解：兼容性与升级风险',
+        points: [
+          '客户端版本不匹配会导致提议/同步异常。',
+          '升级窗口需要 EL/CL 组合兼容验证。',
+          '日志与健康检查是排障关键证据。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '误区1：只升级 EL 或只升级 CL。',
+      '误区2：把接口异常误判为网络抖动。',
+      '误区3：忽略执行端返回的错误码含义。'
+    ],
+    glossary: ['Engine API', 'Payload', 'Forkchoice Updated', 'Execution Payload', 'Client Compatibility'],
+    practice: [
+      {
+        title: '实战1：版本兼容检查',
+        steps: [
+          '列出你当前 EL/CL 客户端版本组合。',
+          '查阅对应版本兼容说明。',
+          '输出升级前的风险清单与回滚方案。'
+        ]
+      },
+      {
+        title: '实战2：接口故障排障演练',
+        steps: [
+          '模拟一次 EL/CL 连接异常场景。',
+          '收集双方日志并定位交互失败节点。',
+          '写出最小修复步骤与验证方法。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'eip-workflow-core',
+    title: 'EIP 流程实践：从提案到规范落地',
+    level: 'advanced',
+    objective: '理解 EIP 文档结构、审阅流程与落地实现关系。',
+    sections: [
+      {
+        heading: '概念讲解：EIP 的结构化要求',
+        points: [
+          '高质量提案需要动机、规范、向后兼容、安全考虑。',
+          '文档可读性决定评审效率。',
+          '提案不是观点帖，而是可执行规范草案。'
+        ]
+      },
+      {
+        heading: '概念讲解：讨论与迭代机制',
+        points: [
+          '公开讨论中，反对意见是提案质量提升来源。',
+          '状态流转（Draft/Review/Final）体现成熟度。',
+          '参考实现与测试会显著提升可信度。'
+        ]
+      },
+      {
+        heading: '概念讲解：提案与客户端实现',
+        points: [
+          'EIP 通过不等于自动上线。',
+          '需要客户端实现、测试向量与主网协调。',
+          '实现差异需要通过测试统一行为。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '误区1：只写愿景，不写可验证规范。',
+      '误区2：忽视 backward compatibility。',
+      '误区3：无测试与实现支持就推动上线。'
+    ],
+    glossary: ['EIP Lifecycle', 'Draft', 'Review', 'Final', 'Backwards Compatibility', 'Reference Implementation'],
+    practice: [
+      {
+        title: '实战1：拆解一个经典 EIP',
+        steps: [
+          '选择一篇已 Final 的 EIP。',
+          '按“问题-方案-影响-风险”写结构化总结。',
+          '指出其实现依赖与测试要点。'
+        ]
+      },
+      {
+        title: '实战2：写一个微型提案草稿',
+        steps: [
+          '定义一个真实痛点。',
+          '写出最小规范（字段/行为/边界）。',
+          '补充兼容性与安全考虑。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'client-testing-core',
+    title: '客户端实现与测试：从代码到可合并贡献',
+    level: 'advanced',
+    objective: '建立客户端贡献路径：阅读、修改、测试、PR 协作。',
+    sections: [
+      {
+        heading: '概念讲解：贡献类型与优先级',
+        points: [
+          '新手最稳路径：文档修复 → 测试补充 → 小 bug 修复。',
+          '可复现问题比“感觉有问题”更有价值。',
+          '小步提交比大而全改动更易合并。'
+        ]
+      },
+      {
+        heading: '概念讲解：测试体系与质量门槛',
+        points: [
+          '单元测试验证局部逻辑。',
+          '集成测试验证模块协同。',
+          '跨客户端测试用于一致性保障。'
+        ]
+      },
+      {
+        heading: '概念讲解：PR 沟通与迭代',
+        points: [
+          'PR 描述应包括动机、改动、验证方式。',
+          'review 反馈要快速响应并补证据。',
+          '合并后应留复盘，沉淀知识。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '误区1：跳过测试直接提 PR。',
+      '误区2：改动范围过大导致 review 困难。',
+      '误区3：没有复现步骤与验证截图。'
+    ],
+    glossary: ['Unit Test', 'Integration Test', 'Client Diversity', 'PR Review', 'Regression', 'Reproducibility'],
+    practice: [
+      {
+        title: '实战1：最小贡献任务设计',
+        steps: [
+          '选择一个 good first issue。',
+          '拆分为 3 个可验证子任务。',
+          '定义完成标准与测试方法。'
+        ]
+      },
+      {
+        title: '实战2：PR 交付包',
+        steps: [
+          '准备复现步骤、变更说明、测试结果。',
+          '提交 PR 并回答首轮 review。',
+          '根据反馈完成二次迭代并复盘。'
+        ]
+      }
+    ]
+  }
+
 ];
