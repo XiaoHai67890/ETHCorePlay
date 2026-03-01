@@ -4,6 +4,7 @@ import { LevelPage } from './pages/LevelPage';
 import { MapPage } from './pages/MapPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { GlossaryPage } from './pages/GlossaryPage';
+import { CurriculumPage } from './pages/CurriculumPage';
 
 export function App() {
   return (
@@ -14,6 +15,7 @@ export function App() {
           <nav>
             <Link to="/map">地图</Link>
             <Link to="/progress">总览</Link>
+            <Link to="/curriculum">课程</Link>
             <Link to="/glossary">术语</Link>
           </nav>
         </div>
@@ -23,6 +25,7 @@ export function App() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/level/:id" element={<LevelPage />} />
         <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/curriculum" element={<CurriculumPage />} />
         <Route path="/glossary" element={<GlossaryPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
