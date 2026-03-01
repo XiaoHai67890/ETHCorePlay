@@ -358,3 +358,29 @@ body[data-theme='dark'] .badge-on {
 body[data-theme='dark'] .hero .card:first-child {
   box-shadow: 0 12px 28px rgba(18, 33, 70, 0.35);
 }
+
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+
+.heatmap span {
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+}
+
+.heat-0 { background: #edf2ef; }
+.heat-1 { background: #c9e8d3; }
+.heat-2 { background: #8ed5a3; }
+.heat-3 { background: #4cbf7b; }
+.heat-4 { background: #1f8e52; }
+
+body[data-theme='dark'] .heat-0 { background: #2a3430; }
+body[data-theme='dark'] .heat-1 { background: #2b5a3e; }
+body[data-theme='dark'] .heat-2 { background: #2f7d52; }
+body[data-theme='dark'] .heat-3 { background: #2d9a5d; }
+body[data-theme='dark'] .heat-4 { background: #3ccf7c; }

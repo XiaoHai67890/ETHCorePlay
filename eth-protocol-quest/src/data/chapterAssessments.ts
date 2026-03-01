@@ -157,4 +157,22 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'aa-a3', prompt: 'AA 工程实践中推荐保留？', options: ['紧急回退方案', '禁用监控', '无 nonce 策略', '无失败告警'], answerIndex: 0, explanation: '回退与监控是可运营前提。' }
     ]
   }
+  ,{
+    chapterId: 'eof-pectra-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'eof-a1', prompt: 'EOF 的核心价值更接近？', options: ['提高字节码结构化与可验证性', '替代共识层', '移除 gas', '降低签名需求'], answerIndex: 0, explanation: 'EOF 的重点是执行格式演进与可分析性。' },
+      { id: 'eof-a2', prompt: 'Pectra 升级准备应优先包含？', options: ['只更新前端', '版本矩阵+回归测试+回滚方案', '禁用监控', '忽略测试网'], answerIndex: 1, explanation: '协议升级必须有全链路准备。' },
+      { id: 'eof-a3', prompt: '应用侧最容易忽略的是？', options: ['工具链兼容性检查', 'Logo 设计', '社区名字', '页面配色'], answerIndex: 0, explanation: '工具链不兼容是常见故障源。' }
+    ]
+  },
+  {
+    chapterId: 'lst-lrt-risk-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'lst-a1', prompt: 'LST/LRT 风险评估应先做什么？', options: ['只看 APY', '拆解收益来源与风险来源', '只看 TVL', '只看 UI'], answerIndex: 1, explanation: '收益与风险必须同时分层。' },
+      { id: 'lst-a2', prompt: '再质押常见系统性风险是？', options: ['相关性风险放大', '自动降低波动', '完全无流动性问题', '无需风控'], answerIndex: 0, explanation: '相关性会放大连锁风险。' },
+      { id: 'lst-a3', prompt: '产品风控较优实践是？', options: ['无上限敞口', '敞口限额+熔断+风险披露', '隐藏风险信息', '固定策略不调整'], answerIndex: 1, explanation: '可运营风险管理需要限额与披露。' }
+    ]
+  }
 ];

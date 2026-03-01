@@ -17,6 +17,11 @@ export function HomePage() {
     minutes: totalMinutes
   };
 
+  const heatmap = Array.from({ length: 14 }).map((_, i) => {
+    const seed = (passCount * 13 + wrongBook.length * 7 + i * 11 + totalMinutes) % 100;
+    return Math.min(4, Math.floor(seed / 20));
+  });
+
   const nextBadgeHint = (() => {
     if (!badges.includes('First Pass')) return '再通过 1 个章节测评可解锁 First Pass';
     if (!badges.includes('Protocol Explorer')) return `再通过 ${Math.max(0, 5 - passCount)} 个章节测评可解锁 Protocol Explorer`;
@@ -166,6 +171,14 @@ export function HomePage() {
           <li><strong>第 4 周：</strong>跨客户端调试 + 首个贡献实战任务</li>
           <li><strong>第 5 周（进阶）：</strong>Verkle/Stateless + EIP-4844 + PBS 抗审查专题</li>
         </ul>
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">学习热力图（近14天）</h3>
+        <div className="heatmap">
+          {heatmap.map((v, idx) => <span key={idx} className={`heat-${v}`} title={`Day-${idx + 1} 强度 ${v}`} />)}
+        </div>
+        <small>强度说明：0=休息，4=高强度学习。</small>
       </div>
 
       <div className="card">
