@@ -304,3 +304,57 @@ body[data-theme='dark'] .badge-on {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
 }
+
+
+.container {
+  max-width: 1040px;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,.16), transparent 35%);
+  pointer-events: none;
+}
+
+.hero .card:first-child {
+  border: 1px solid color-mix(in srgb, var(--card-border) 80%, #7ea7ff);
+  box-shadow: 0 12px 28px rgba(69, 116, 188, 0.14);
+}
+
+.section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.section-title::before {
+  content: '✦';
+  color: #5a76dc;
+}
+
+.level {
+  min-height: 98px;
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-links .btn {
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+body[data-theme='dark'] .hero .card:first-child {
+  box-shadow: 0 12px 28px rgba(18, 33, 70, 0.35);
+}

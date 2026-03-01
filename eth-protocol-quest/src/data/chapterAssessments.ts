@@ -148,4 +148,13 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'pbs-a3', prompt: '抗审查工程实践应优先具备？', options: ['单 relay 固定路径', '多路径 fallback 与事件复盘闭环', '无监控运行', '仅靠人工经验'], answerIndex: 1, explanation: '抗审查能力需要可用性与治理闭环。' }
     ]
   }
+  ,{
+    chapterId: 'account-abstraction-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'aa-a1', prompt: 'ERC-4337 典型交易入口是？', options: ['UserOperation + Bundler', 'EOA 直发必须', '只靠 RPC 转发', '只在 L2 可用'], answerIndex: 0, explanation: 'AA 典型链路是 UserOperation 经 Bundler 聚合。' },
+      { id: 'aa-a2', prompt: 'Paymaster 的核心风险是？', options: ['提升 UX', '被滥用导致代付成本失控', '减少签名复杂度', '加快同步'], answerIndex: 1, explanation: '代付必须配套风控策略。' },
+      { id: 'aa-a3', prompt: 'AA 工程实践中推荐保留？', options: ['紧急回退方案', '禁用监控', '无 nonce 策略', '无失败告警'], answerIndex: 0, explanation: '回退与监控是可运营前提。' }
+    ]
+  }
 ];

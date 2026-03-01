@@ -99,13 +99,13 @@ export function HomePage() {
       </div>
 
       <div className="card">
-        <h3>今日智能建议</h3>
+        <h3 className="section-title">今日智能建议</h3>
         <div className="notice">{smartRecommendation}</div>
         <p style={{ marginTop: 10 }}><strong>下一个徽章目标：</strong>{nextBadgeHint}</p>
       </div>
 
       <div className="card">
-        <h3>Badge 墙</h3>
+        <h3 className="section-title">Badge 墙</h3>
         <div className="badge-wall">
           {['Starter Badge', 'First Pass', 'Protocol Explorer', 'Wrongbook Warrior'].map((b) => (
             <div key={b} className={`badge-item ${badges.includes(b) ? 'badge-on' : 'badge-off'}`}>
@@ -117,7 +117,7 @@ export function HomePage() {
       </div>
 
       <div className="card">
-        <h3>内容覆盖（持续扩展）</h3>
+        <h3 className="section-title">内容覆盖（持续扩展）</h3>
         <ul>
           <li>执行层：状态树、Gas、交易执行语义、mempool 行为</li>
           <li>共识层：fork choice、finality、时钟与同步机制</li>
@@ -169,7 +169,7 @@ export function HomePage() {
       </div>
 
       <div className="card">
-        <h3>个人学习周报卡（自动摘要）</h3>
+        <h3 className="section-title">个人学习周报卡（自动摘要）</h3>
         <div className="weekly-card-grid">
           <div className="kpi"><small>本周通过测评</small><br/><b>{weeklySummary.passed}</b></div>
           <div className="kpi"><small>当前错题池</small><br/><b>{weeklySummary.wrongs}</b></div>
@@ -177,6 +177,21 @@ export function HomePage() {
           <div className="kpi"><small>已获徽章数</small><br/><b>{weeklySummary.badges}</b></div>
         </div>
         <p style={{ marginTop: 10 }}>自动结论：{weeklySummary.passed >= 3 ? '节奏良好，可提升到中高难实战。' : '建议先稳住基础章节测评通过率，再扩展深度内容。'}</p>
+      </div>
+
+
+      <div className="card">
+        <h3 className="section-title">协议雷达（本周）</h3>
+        <div className="grid">
+          <div className="level"><strong>执行层热点</strong><small>EIP-1559 费用波动与替换交易策略</small></div>
+          <div className="level"><strong>共识层热点</strong><small>最终性延迟信号与验证者在线率</small></div>
+          <div className="level"><strong>扩容热点</strong><small>EIP-4844 blob 成本窗口与批次调优</small></div>
+        </div>
+        <div className="quick-links" style={{ marginTop: 10 }}>
+          <Link to="/curriculum#eip4844-da-economics-deep" className="btn">去学 4844</Link>
+          <Link to="/curriculum#pbs-inclusion-censorship-deep" className="btn">去学 PBS</Link>
+          <Link to="/curriculum#verkle-stateless-deep" className="btn">去学 Verkle</Link>
+        </div>
       </div>
 
       <div className="card">

@@ -449,4 +449,52 @@ export const deepDiveChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'account-abstraction-deep',
+    title: '账户抽象（AA）深度：ERC-4337、Bundler 与 Paymaster 机制',
+    level: 'advanced',
+    objective: '掌握账户抽象交易链路与安全边界，能够设计可落地的 AA 钱包策略。',
+    sections: [
+      {
+        heading: '细粒度小节：UserOperation 与 Bundler 流程',
+        points: [
+          'AA 通过 UserOperation 替代传统交易入口。',
+          'Bundler 聚合并提交到链上入口合约。',
+          '模拟执行失败会直接影响打包可用性。'
+        ]
+      },
+      {
+        heading: '细粒度小节：Paymaster 赞助与风控',
+        points: [
+          'Paymaster 可为用户代付 gas，但需防止滥用。',
+          '常见策略：额度、白名单、行为评分。',
+          '需要对失败率与恶意调用建立监控。'
+        ]
+      },
+      {
+        heading: '细粒度小节：安全边界与回退方案',
+        points: [
+          '签名验证、nonce 管理与重放防护是核心。',
+          '聚合签名与批处理需防批量失败放大。',
+          '业务必须准备 EOA 回退与紧急开关。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只看 UX 提升，忽略攻击面扩大。',
+      'Paymaster 无风控导致成本失控。',
+      '缺少回退方案导致服务中断。'
+    ],
+    glossary: ['Account Abstraction', 'ERC-4337', 'UserOperation', 'Bundler', 'Paymaster'],
+    practice: [
+      {
+        title: '实战：AA 钱包风控策略设计',
+        steps: [
+          '定义 3 类用户（新手/活跃/高风险）与额度策略。',
+          '设计 paymaster 拒绝规则与告警阈值。',
+          '输出异常时 EOA 回退流程。'
+        ]
+      }
+    ]
+  }
 ];
