@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run tokens:build && tsc -b && vite build",
+    "tokens:build": "node scripts/generate-css-vars.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
