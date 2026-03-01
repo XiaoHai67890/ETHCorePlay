@@ -180,3 +180,39 @@ ul { padding-left: 18px; }
   gap: 8px;
   margin-bottom: 8px;
 }
+
+
+/* Accessibility contrast tuning */
+.btn {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
+
+body[data-theme='dark'] .btn {
+  background: linear-gradient(90deg, #2f8f63 0%, #4666d6 100%);
+  color: #f7fffb;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 0 2px 10px rgba(0,0,0,.3);
+}
+
+body[data-theme='dark'] .kpi,
+body[data-theme='dark'] .level,
+body[data-theme='dark'] .notice {
+  border-color: #395448;
+}
+
+body[data-theme='dark'] .notice {
+  background: #182236;
+  color: #d8e9ff;
+  border-left-color: #79a2ff;
+}
+
+body[data-theme='dark'] .topbar nav a,
+body[data-theme='dark'] .brand {
+  color: #cfe8da;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}

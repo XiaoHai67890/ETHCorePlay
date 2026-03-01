@@ -13,6 +13,7 @@ import { useProgressStore } from '../game/store';
 
 type DoneMap = Record<string, boolean>;
 const STORAGE_KEY = 'epq_curriculum_done_v1';
+const EXPANDED_KEY = 'epq_curriculum_expanded_v1';
 
 function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 'Economics' | 'EIP' | 'Client' | 'Testing' | 'Security' | 'L2' {
   if (chapterId.startsWith('el-') || chapterId.includes('tx-')) return 'EL';
@@ -51,6 +52,8 @@ export function CurriculumPage() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setDone(JSON.parse(raw));
+      const exp = localStorage.getItem(EXPANDED_KEY);
+      if (exp) setExpandedChapters(JSON.parse(exp));
     } catch {
       // ignore
     }
@@ -59,6 +62,10 @@ export function CurriculumPage() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
   }, [done]);
+
+  useEffect(() => {
+    localStorage.setItem(EXPANDED_KEY, JSON.stringify(expandedChapters));
+  }, [expandedChapters]);
 
   const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
 

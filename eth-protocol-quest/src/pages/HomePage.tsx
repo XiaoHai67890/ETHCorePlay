@@ -1,11 +1,30 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useProgressStore } from '../game/store';
 import { getDailyQuests } from '../game/daily';
 
+const ONBOARDING_KEY = 'epq_onboarding_v1';
+
 export function HomePage() {
-  const { xp, unlockedLevel, chapterResults, wrongBook } = useProgressStore();
+  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge } = useProgressStore();
   const daily = getDailyQuests();
   const passCount = Object.values(chapterResults).filter((r) => r.passed).length;
+  const [tasks, setTasks] = useState<Record<string, boolean>>({ read: false, quiz: false, replay: false, report: false });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(ONBOARDING_KEY);
+      if (raw) setTasks(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(ONBOARDING_KEY, JSON.stringify(tasks));
+    const allDone = Object.values(tasks).every(Boolean);
+    if (allDone) awardBadge('Starter Badge');
+  }, [tasks, awardBadge]);
+
+  const toggleTask = (k: string) => setTasks((s) => ({ ...s, [k]: !s[k] }));
 
   return (
     <main className="container">
@@ -50,12 +69,11 @@ export function HomePage() {
 
       <div className="card">
         <h3>新手首日引导任务流</h3>
-        <ol>
-          <li>先完成「EL 核心」章节阅读（15-20 分钟）</li>
-          <li>提交第一次章节测评，建立基线分数</li>
-          <li>执行一次错题回放，记录改进点</li>
-          <li>导出首份学习报告（HTML）作为学习档案</li>
-        </ol>
+        <div className="task-item"><input type="checkbox" checked={!!tasks.read} onChange={() => toggleTask('read')} /><span>完成「EL 核心」章节阅读（15-20 分钟）</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!tasks.quiz} onChange={() => toggleTask('quiz')} /><span>提交第一次章节测评，建立基线分数</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!tasks.replay} onChange={() => toggleTask('replay')} /><span>执行一次错题回放，记录改进点</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!tasks.report} onChange={() => toggleTask('report')} /><span>导出首份学习报告（HTML）作为学习档案</span></div>
+        {badges.includes('Starter Badge') && <p style={{ marginTop: 8 }}>🏅 已获得：<strong>Starter Badge</strong></p>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to="/curriculum#el-core" className="btn">开始首日任务</Link>
           <Link to="/progress" className="btn">查看错题与进度</Link>
