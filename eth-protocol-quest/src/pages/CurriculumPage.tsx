@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { chapterMap } from '../data/chapterMap';
 import { chapterAssessments } from '../data/chapterAssessments';
-import { foundationChapters } from '../data/curriculum/foundations';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
+import { foundationChapters } from '../data/curriculum/foundations';
 import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
 
@@ -27,6 +27,7 @@ export function CurriculumPage() {
   const [onlyPending, setOnlyPending] = useState(false);
   const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
   const [retryMode, setRetryMode] = useState<Record<string, boolean>>({});
+  const [query, setQuery] = useState('');
   const {
     wrongBook,
     chapterResults,
@@ -50,10 +51,21 @@ export function CurriculumPage() {
 
   const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
 
-  const chapters = useMemo(
-    () => (onlyPending ? allChapters.filter((c) => !done[c.id]) : allChapters),
-    [onlyPending, done, allChapters]
-  );
+  const chapters = useMemo(() => {
+    const base = onlyPending ? allChapters.filter((c) => !done[c.id]) : allChapters;
+    const q = query.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter((c) => {
+      const blob = [
+        c.title,
+        c.objective,
+        ...c.glossary,
+        ...c.sections.flatMap((s) => [s.heading, ...s.points]),
+        ...c.practice.flatMap((p) => [p.title, ...p.steps])
+      ].join(' ').toLowerCase();
+      return blob.includes(q);
+    });
+  }, [onlyPending, done, allChapters, query]);
 
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = Math.round((completedCount / allChapters.length) * 100);
@@ -67,10 +79,10 @@ export function CurriculumPage() {
   const submitAssessment = (chapterId: string, onlyWrong = false) => {
     const assessment = chapterAssessments.find((a) => a.chapterId === chapterId);
     if (!assessment) return;
-    const prev = chapterResults[chapterId];
+    const prev = chapterResults[chapterId] as any;
     const user = answers[chapterId] || {};
 
-    const previousWrongIds = (prev && (prev as any).wrongIds) ? (prev as any).wrongIds as string[] : [];
+    const previousWrongIds = prev?.wrongIds || [];
     const baseQs = assessment.questions;
     const scopedQs = onlyWrong && previousWrongIds.length
       ? baseQs.filter((q) => previousWrongIds.includes(q.id))
@@ -96,7 +108,7 @@ export function CurriculumPage() {
     const failed = Object.entries(chapterResults).filter(([, r]) => !r.passed);
     if (failed.length) {
       const ranked = failed
-        .map(([cid, r]) => ({ cid, score: r.score / Math.max(1, r.total), wrong: (r.wrongIds || []).length }))
+        .map(([cid, r]) => ({ cid, score: r.score / Math.max(1, r.total), wrong: (r as any).wrongIds?.length || 0 }))
         .sort((a, b) => a.score - b.score || b.wrong - a.wrong);
       const top = ranked[0];
       const c = allChapters.find((x) => x.id === top.cid);
@@ -112,11 +124,29 @@ export function CurriculumPage() {
     return '你已完成全部章节，建议进入核心贡献者路径并提交第一份可验证贡献。';
   }, [chapterResults, wrongBook.length, done, allChapters]);
 
+  const pathBoard = useMemo(() => {
+    const basicDone = ['el-core', 'cl-core', 'evm-core', 'tx-lifecycle-core'].filter((id) => done[id]).length;
+    const builderDone = ['engine-api-core', 'eip-workflow-core', 'client-testing-core'].filter((id) => done[id]).length;
+    const coreDone = ['testing-systems-core', 'security-core', 'l2-da-core', 'el-deep-state-trie', 'cl-deep-forkchoice-finality'].filter((id) => done[id]).length;
+    return { basicDone, builderDone, coreDone };
+  }, [done]);
+
   return (
     <main className="container">
       <Link to="/">← 首页</Link>
       <h2>系统化学习课程（基础→进阶）</h2>
       <p>学习优先：先完整掌握章节，再用闯关做检验。</p>
+
+      <section className="card">
+        <h3>章节知识点检索</h3>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="输入关键词：如 Engine API / Finality / Gas / Rollup"
+          style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #cde3d2' }}
+        />
+        <small>当前命中章节：{chapters.length}</small>
+      </section>
 
       <section className="card">
         <h3>学习路径推荐</h3>
@@ -134,17 +164,31 @@ export function CurriculumPage() {
       </section>
 
       <section className="card">
+        <h3>路径目标达成看板</h3>
+        <ul>
+          <li>基础路径：{pathBoard.basicDone}/4 章节完成</li>
+          <li>开发者路径：{pathBoard.builderDone}/3 章节完成</li>
+          <li>核心贡献者路径：{pathBoard.coreDone}/5 章节完成</li>
+        </ul>
+      </section>
+
+      <section className="card">
         <h3>学习推荐引擎</h3>
         <p>{recommendation}</p>
       </section>
 
       <section className="card">
-        <h3>复习节奏建议</h3>
-        <ul>
-          <li>每日：1 章重点卡 + 1 次章节测评</li>
-          <li>隔日：执行“错题回放 + 二次测评”</li>
-          <li>每周：完成 1 个实战练习并复盘</li>
-        </ul>
+        <h3>内容内链接跳转</h3>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn" onClick={() => setOnlyPending((v) => !v)}>
+            {onlyPending ? '显示全部章节' : '仅看未完成章节'}
+          </button>
+          <Link to="/progress" className="btn">去错题本复习</Link>
+          <Link to="/glossary" className="btn">去术语页复习</Link>
+          <a className="btn" href="#el-core">跳 EL 核心</a>
+          <a className="btn" href="#cl-core">跳 CL 核心</a>
+          <a className="btn" href="#engine-api-core">跳 Engine API</a>
+        </div>
       </section>
 
       <section className="card">
@@ -152,13 +196,6 @@ export function CurriculumPage() {
         <p>总体进度：<strong>{completedCount}/{allChapters.length}</strong>（{progressPct}%）</p>
         <div style={{ background: '#e6f1e8', borderRadius: 10, height: 10, overflow: 'hidden', marginBottom: 10 }}>
           <div style={{ width: `${progressPct}%`, height: '100%', background: 'linear-gradient(90deg,#4a8f61,#5a76dc)' }} />
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn" onClick={() => setOnlyPending((v) => !v)}>
-            {onlyPending ? '显示全部章节' : '仅看未完成章节'}
-          </button>
-          <Link to="/progress" className="btn">去错题本复习</Link>
-          <Link to="/glossary" className="btn">去术语页复习</Link>
         </div>
         <ul>
           {allChapters.map((c, i) => (
@@ -186,10 +223,10 @@ export function CurriculumPage() {
         return (
           <section key={chapter.id} id={chapter.id} className="card">
             <h3>{idx + 1}. {chapter.title}</h3>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-            <span style={{ padding: '2px 8px', borderRadius: 999, background: done[chapter.id] ? '#daf4df' : '#f3f5f7' }}>章节状态：{done[chapter.id] ? '已完成' : '进行中'}</span>
-            <span style={{ padding: '2px 8px', borderRadius: 999, background: chapterResults[chapter.id]?.passed ? '#dbeafe' : '#fef3c7' }}>测评：{chapterResults[chapter.id] ? (chapterResults[chapter.id].passed ? '通过' : '待提高') : '未提交'}</span>
-          </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+              <span style={{ padding: '2px 8px', borderRadius: 999, background: done[chapter.id] ? '#daf4df' : '#f3f5f7' }}>章节状态：{done[chapter.id] ? '已完成' : '进行中'}</span>
+              <span style={{ padding: '2px 8px', borderRadius: 999, background: chapterResults[chapter.id]?.passed ? '#dbeafe' : '#fef3c7' }}>测评：{chapterResults[chapter.id] ? (chapterResults[chapter.id].passed ? '通过' : '待提高') : '未提交'}</span>
+            </div>
             <p><strong>学习目标：</strong>{chapter.objective}</p>
             <p><strong>难度：</strong>{chapter.level}</p>
 
