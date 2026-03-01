@@ -8,12 +8,22 @@ import { GlossaryPage } from './pages/GlossaryPage';
 import { CurriculumPage } from './pages/CurriculumPage';
 
 export function App() {
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('epq_theme') === 'dark');
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
-    document.body.dataset.theme = darkMode ? 'dark' : 'light';
-    localStorage.setItem('epq_theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const fn = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener?.('change', fn);
+    return () => mq.removeEventListener?.('change', fn);
+  }, []);
+
+  useEffect(() => {
+    const effectiveDark = themeMode === 'system' ? systemDark : themeMode === 'dark';
+    document.body.dataset.theme = effectiveDark ? 'dark' : 'light';
+    localStorage.setItem('epq_theme_mode', themeMode);
+  }, [themeMode, systemDark]);
 
   return (
     <>
@@ -25,7 +35,9 @@ export function App() {
             <Link to="/progress">总览</Link>
             <Link to="/curriculum">课程</Link>
             <Link to="/glossary">术语</Link>
-            <button className="btn btn-ghost" onClick={() => setDarkMode((v) => !v)}>{darkMode ? '浅色' : '暗色'}</button>
+            <button className="btn btn-ghost" onClick={() => setThemeMode('light')}>浅色</button>
+            <button className="btn btn-ghost" onClick={() => setThemeMode('dark')}>暗色</button>
+            <button className="btn btn-ghost" onClick={() => setThemeMode('system')}>跟随系统</button>
           </nav>
         </div>
       </header>

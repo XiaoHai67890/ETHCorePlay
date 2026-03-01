@@ -45,7 +45,10 @@ export function CurriculumPage() {
     addStudyEvent,
     studyHistory,
     knowledgeMap,
-    setKnowledgeStatus
+    setKnowledgeStatus,
+    badges,
+    awardBadge,
+    setLastVisitedChapter
   } = useProgressStore();
 
   useEffect(() => {
@@ -237,6 +240,13 @@ export function CurriculumPage() {
 
   const weeklyPlan = useMemo(() => generateWeeklyPlan(), [allChapters, done]);
 
+  useEffect(() => {
+    const passed = Object.values(chapterResults).filter((r) => r.passed).length;
+    if (passed >= 1) awardBadge('First Pass');
+    if (passed >= 5) awardBadge('Protocol Explorer');
+    if (wrongBook.length >= 10) awardBadge('Wrongbook Warrior');
+  }, [chapterResults, wrongBook.length, awardBadge]);
+
   const recommendation = useMemo(() => {
     const failed = Object.entries(chapterResults).filter(([, r]) => !r.passed);
     if (failed.length) {
@@ -409,6 +419,18 @@ export function CurriculumPage() {
         </div>
       </section>
 
+
+      <section className="card">
+        <h3>Badge 中心</h3>
+        <ul>
+          <li><strong>Starter Badge</strong>：完成首日四项任务</li>
+          <li><strong>First Pass</strong>：通过任意 1 个章节测评</li>
+          <li><strong>Protocol Explorer</strong>：累计通过 5 个章节测评</li>
+          <li><strong>Wrongbook Warrior</strong>：累计错题记录达到 10 条</li>
+        </ul>
+        <p>已获得：{badges.length ? badges.join(' · ') : '暂无'}</p>
+      </section>
+
       <section className="card">
         <h3>内容内链接跳转</h3>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -467,7 +489,7 @@ export function CurriculumPage() {
           <section key={chapter.id} id={chapter.id} className="card">
             <div className="accordion-header">
               <h3 style={{ margin: 0 }}>{idx + 1}. {chapter.title}</h3>
-              <button className="btn btn-ghost" onClick={() => toggleExpand(chapter.id)}>{expandedChapters[chapter.id] ? '收起详情' : '展开详情'}</button>
+              <button className="btn btn-ghost" onClick={() => { setLastVisitedChapter(chapter.id); toggleExpand(chapter.id); }}>{expandedChapters[chapter.id] ? '收起详情' : '展开详情'}</button>
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
               <span style={{ padding: '2px 8px', borderRadius: 999, background: done[chapter.id] ? '#daf4df' : '#f3f5f7' }}>章节状态：{done[chapter.id] ? '已完成' : '进行中'}</span>

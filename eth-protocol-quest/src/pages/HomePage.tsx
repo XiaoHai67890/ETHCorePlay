@@ -6,7 +6,7 @@ import { getDailyQuests } from '../game/daily';
 const ONBOARDING_KEY = 'epq_onboarding_v1';
 
 export function HomePage() {
-  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge } = useProgressStore();
+  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge, lastVisitedChapter } = useProgressStore();
   const daily = getDailyQuests();
   const passCount = Object.values(chapterResults).filter((r) => r.passed).length;
   const [tasks, setTasks] = useState<Record<string, boolean>>({ read: false, quiz: false, replay: false, report: false });
@@ -53,9 +53,20 @@ export function HomePage() {
             <div className="kpi"><small>已通过测评</small><br/><b>{passCount}</b></div>
           </div>
           <p style={{ marginTop: 10 }}>错题池：<strong>{wrongBook.length}</strong> 条（建议先去总览页复盘）</p>
-          <div className="notice">本周建议：优先完成 2 个章节测评 + 1 次错题回放，再进入深度实操章节。</div>
+          <div className="notice">本周建议：优先完成 2 个章节测评 + 1 次错题回放，再进入深度实操章节。
+            <br/>当前徽章：{badges.length ? badges.join(' · ') : '暂无'}
+          </div>
         </div>
       </section>
+
+      <div className="card">
+        <h3>最近学习继续</h3>
+        <p>{lastVisitedChapter ? `你上次停在：${lastVisitedChapter}` : '还没有最近学习记录，建议从 EL 核心开始。'}</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Link to={lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core'} className="btn">继续学习</Link>
+          <Link to="/curriculum" className="btn btn-ghost">打开课程总览</Link>
+        </div>
+      </div>
 
       <div className="card">
         <h3>内容覆盖（持续扩展）</h3>
