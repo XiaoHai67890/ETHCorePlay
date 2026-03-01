@@ -9,7 +9,7 @@ type WrongQuestion = {
   ts: number;
 };
 
-type ChapterResult = { score: number; total: number; passed: boolean; threshold?: number; wrongIds?: string[] };
+type ChapterResult = { score: number; total: number; passed: boolean; threshold?: number; wrongIds?: string[]; history?: number[] };
 
 type ProgressState = {
   xp: number;
@@ -18,11 +18,14 @@ type ProgressState = {
   wrongBook: WrongQuestion[];
   knowledgeMap: KnowledgeNode[];
   chapterResults: Record<string, ChapterResult>;
+  chapterMastery: Record<string, '初学' | '掌握' | '巩固'>;
+  studyMinutes: Record<string, number>;
   completeLevel: (id: number, gainedXp: number) => void;
   addWrongQuestion: (q: WrongQuestion) => void;
   clearWrongBook: () => void;
   setKnowledgeStatus: (id: string, status: KnowledgeNode['status']) => void;
   setChapterResult: (chapterId: string, result: ChapterResult) => void;
+  addStudyMinutes: (chapterId: string, minutes: number) => void;
 };
 
 export const useProgressStore = create<ProgressState>((set) => ({
@@ -32,6 +35,8 @@ export const useProgressStore = create<ProgressState>((set) => ({
   wrongBook: [],
   knowledgeMap: defaultKnowledgeMap,
   chapterResults: {},
+  chapterMastery: {},
+  studyMinutes: {},
   completeLevel: (id, gainedXp) =>
     set((s) => ({
       xp: s.xp + gainedXp,
@@ -50,7 +55,26 @@ export const useProgressStore = create<ProgressState>((set) => ({
       knowledgeMap: s.knowledgeMap.map((n) => (n.id === id ? { ...n, status } : n))
     })),
   setChapterResult: (chapterId, result) =>
+    set((s) => {
+      const prev = s.chapterResults[chapterId];
+      const prevHist = prev?.history || [];
+      const currRate = result.score / Math.max(1, result.total);
+      const history = [...prevHist, currRate].slice(-5);
+      const avg = history.reduce((a,b)=>a+b,0)/history.length;
+      let mastery: '初学' | '掌握' | '巩固' = '初学';
+      if (avg >= 0.7) mastery = '掌握';
+      if (avg >= 0.85 && history.length >= 2) mastery = '巩固';
+
+      return {
+        chapterResults: { ...s.chapterResults, [chapterId]: { ...result, history } },
+        chapterMastery: { ...s.chapterMastery, [chapterId]: mastery }
+      };
+    }),
+  addStudyMinutes: (chapterId, minutes) =>
     set((s) => ({
-      chapterResults: { ...s.chapterResults, [chapterId]: result }
+      studyMinutes: {
+        ...s.studyMinutes,
+        [chapterId]: Math.max(0, (s.studyMinutes[chapterId] || 0) + minutes)
+      }
     }))
 }));

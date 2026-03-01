@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { chapterMap } from '../data/chapterMap';
 import { chapterAssessments } from '../data/chapterAssessments';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
+import { chapterDependencies } from '../data/dependencies';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
@@ -31,7 +32,10 @@ export function CurriculumPage() {
   const {
     wrongBook,
     chapterResults,
+    chapterMastery,
+    studyMinutes,
     setChapterResult,
+    addStudyMinutes,
     knowledgeMap,
     setKnowledgeStatus
   } = useProgressStore();
@@ -108,21 +112,34 @@ export function CurriculumPage() {
     const failed = Object.entries(chapterResults).filter(([, r]) => !r.passed);
     if (failed.length) {
       const ranked = failed
-        .map(([cid, r]) => ({ cid, score: r.score / Math.max(1, r.total), wrong: (r as any).wrongIds?.length || 0 }))
-        .sort((a, b) => a.score - b.score || b.wrong - a.wrong);
+        .map(([cid, r]) => {
+          const hist = ((r as any).history || []) as number[];
+          const volatility = hist.length >= 2 ? Math.abs(hist[hist.length - 1] - hist[hist.length - 2]) : 0;
+          return {
+            cid,
+            score: r.score / Math.max(1, r.total),
+            wrong: (r as any).wrongIds?.length || 0,
+            volatility,
+            minutes: studyMinutes[cid] || 0
+          };
+        })
+        .sort((a, b) => a.score - b.score || b.volatility - a.volatility || a.minutes - b.minutes);
       const top = ranked[0];
       const c = allChapters.find((x) => x.id === top.cid);
-      return `优先复习低分章节：${c?.title ?? top.cid}（当前得分率 ${(top.score * 100).toFixed(0)}%，错题 ${top.wrong} 条）。`;
+      return `优先复习低分章节：${c?.title ?? top.cid}（得分率 ${(top.score * 100).toFixed(0)}%，波动 ${(top.volatility * 100).toFixed(0)}%，学习时长 ${top.minutes} 分钟）。`;
     }
     if (wrongBook.length > 0) {
       const themes = ['Gas/费用', '共识最终性', '执行语义', '接口协同', '测试与安全'];
       const theme = themes[wrongBook.length % themes.length];
-      return `建议先复习错题主题：${theme}（当前错题 ${wrongBook.length} 条），完成后再做下一章测评。`;
+      return `建议先复习错题主题：${theme}（当前错题 ${wrongBook.length} 条），再进行二次测评。`;
     }
     const next = allChapters.find((c) => !done[c.id]);
-    if (next) return `建议下一章学习：${next.title}`;
+    if (next) {
+      const mins = studyMinutes[next.id] || 0;
+      return `建议下一章学习：${next.title}（建议先投入 15~30 分钟，当前记录 ${mins} 分钟）。`;
+    }
     return '你已完成全部章节，建议进入核心贡献者路径并提交第一份可验证贡献。';
-  }, [chapterResults, wrongBook.length, done, allChapters]);
+  }, [chapterResults, wrongBook.length, done, allChapters, studyMinutes]);
 
   const pathBoard = useMemo(() => {
     const basicDone = ['el-core', 'cl-core', 'evm-core', 'tx-lifecycle-core'].filter((id) => done[id]).length;
@@ -229,11 +246,18 @@ export function CurriculumPage() {
             </div>
             <p><strong>学习目标：</strong>{chapter.objective}</p>
             <p><strong>难度：</strong>{chapter.level}</p>
+            <p><strong>掌握度：</strong>{chapterMastery[chapter.id] || '初学'} · <strong>学习时长：</strong>{studyMinutes[chapter.id] || 0} 分钟</p>
+            <button className="btn" onClick={() => addStudyMinutes(chapter.id, 15)}>+15 分钟学习记录</button>
 
             <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
               <input type="checkbox" checked={!!done[chapter.id]} onChange={() => toggleDone(chapter.id)} />
               标记本章已完成
             </label>
+
+            <div style={{ marginTop: 8 }}>
+              <strong>前置依赖</strong>
+              <div>{(chapterDependencies[chapter.id] || []).length ? (chapterDependencies[chapter.id] || []).map((d) => { const dep = allChapters.find((c) => c.id === d); return `${dep?.title || d}${done[d] ? ' ✅' : ' ⏳'}`; }).join(' / ') : '无（可直接学习）'}</div>
+            </div>
 
             <div style={{ marginTop: 8 }}>
               <strong>重点总结卡片</strong>
