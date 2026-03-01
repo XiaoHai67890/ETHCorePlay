@@ -12,6 +12,7 @@ import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
 
 type DoneMap = Record<string, boolean>;
+const COLLAPSED_KEY = 'epq_curriculum_collapsed_domains_v1';
 
 function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 'Economics' | 'EIP' | 'Client' | 'Testing' | 'Security' | 'L2' {
   if (chapterId.startsWith('el-') || chapterId.includes('tx-')) return 'EL';
@@ -35,6 +36,7 @@ export function CurriculumPage() {
   const [sortMode, setSortMode] = useState<'default' | 'difficulty' | 'progress'>('default');
   const [collapsedDomains, setCollapsedDomains] = useState<Record<string, boolean>>({});
   const [milestoneToast, setMilestoneToast] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(8);
   const {
     wrongBook,
     chapterResults,
@@ -61,6 +63,21 @@ export function CurriculumPage() {
 
 
   const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
+
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSED_KEY);
+      if (raw) setCollapsedDomains(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsedDomains));
+  }, [collapsedDomains]);
+
 
   const chapters = useMemo(() => {
     let base = onlyPending ? allChapters.filter((c) => !done[c.id]) : allChapters;
@@ -89,6 +106,10 @@ export function CurriculumPage() {
     }
     return result;
   }, [onlyPending, done, allChapters, query, levelFilter, domainFilter, sortMode]);
+
+  useEffect(() => {
+    setVisibleCount(8);
+  }, [query, levelFilter, domainFilter, sortMode, onlyPending]);
 
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = Math.round((completedCount / allChapters.length) * 100);
@@ -330,7 +351,7 @@ export function CurriculumPage() {
       <Link to="/">← 首页</Link>
       <h2>系统化学习课程（基础→进阶）</h2>
       <p>学习优先：先完整掌握章节，再用闯关做检验。</p>
-      {milestoneToast && <div className="toast">{milestoneToast}</div>}
+      {milestoneToast && <div className="toast milestone-burst">{milestoneToast}</div>}
 
       <section className="card">
         <h3>章节知识点检索</h3>
@@ -566,7 +587,7 @@ export function CurriculumPage() {
         ))}
       </section>
 
-      {chapters.map((chapter, idx) => {
+      {chapters.slice(0, visibleCount).map((chapter, idx) => {
         const assessment = chapterAssessments.find((a) => a.chapterId === chapter.id);
         return (
           <section key={chapter.id} id={chapter.id} className="card">
@@ -722,6 +743,13 @@ export function CurriculumPage() {
           </section>
         );
       })}
+
+      {visibleCount < chapters.length && (
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p>已显示 {visibleCount}/{chapters.length} 章节（轻量渲染模式）</p>
+          <button className="btn" onClick={() => setVisibleCount((v) => Math.min(v + 8, chapters.length))}>加载更多章节</button>
+        </section>
+      )}
     </main>
   );
 }
