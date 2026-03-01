@@ -16,5 +16,8 @@ export const chapterTemplateMapping: Record<string, string[]> = {
   'eip-reading-workbench': ['eip-workbench-template', 'pr-delivery-template'],
   'zk-proving-verification-deep': ['consistency-vector-template', 'regression-test-template'],
   'cross-rollup-interoperability-deep': ['cross-rollup-recovery-template', 'chaos-lite-template'],
-  'validator-economics-governance-deep': ['governance-eval-template', 'eip-workbench-template']
+  'validator-economics-governance-deep': ['governance-eval-template', 'eip-workbench-template'],
+  'wallet-security-signing-domain-deep': ['wallet-signing-check-template', 'issue-repro-template'],
+  'oracle-data-integrity-deep': ['oracle-integrity-template', 'chaos-lite-template'],
+  'upgrade-oncall-playbook-deep': ['upgrade-oncall-template', 'chaos-lite-template']
 };

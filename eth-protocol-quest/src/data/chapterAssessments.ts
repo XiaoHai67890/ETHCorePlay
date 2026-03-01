@@ -229,4 +229,31 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'val-a3', prompt: '治理闭环应包括？', options: ['提案后不跟踪', '执行后观测与反馈调整', '仅一次投票', '只写总结不行动'], answerIndex: 1, explanation: '闭环是长期稳定关键。' }
     ]
   }
+  ,{
+    chapterId: 'wallet-security-signing-domain-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'wallet-a1', prompt: '签名域隔离的核心作用是？', options: ['提升 UI 美观', '避免跨域/跨链重放与误用', '提高区块容量', '替代 nonce'], answerIndex: 1, explanation: '域隔离用于边界约束与防重放。' },
+      { id: 'wallet-a2', prompt: 'Permit 安全实践更推荐？', options: ['无限授权长期有效', '最小额度+短有效期', '不展示签名字段', '忽略 chainId'], answerIndex: 1, explanation: '授权最小化是关键。' },
+      { id: 'wallet-a3', prompt: '前端签名安全应至少展示？', options: ['主题颜色', 'spender/amount/deadline 等关键字段', '头像 URL', '社媒链接'], answerIndex: 1, explanation: '可解释签名可降低钓鱼风险。' }
+    ]
+  },
+  {
+    chapterId: 'oracle-data-integrity-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'oracle-a1', prompt: '预言机完整性风险中最常被忽略的是？', options: ['图标样式', '数据新鲜度(staleness)', '页面加载速度', '钱包品牌'], answerIndex: 1, explanation: 'staleness 直接影响决策正确性。' },
+      { id: 'oracle-a2', prompt: '异常期更稳妥策略是？', options: ['继续全量交易', '启用降级模式并限流', '关闭日志', '暂停监控'], answerIndex: 1, explanation: '异常时需要可控降级。' },
+      { id: 'oracle-a3', prompt: '降低价格操纵风险常用做法是？', options: ['单点数据源', 'TWAP/多源聚合', '固定价格', '不做校验'], answerIndex: 1, explanation: '多源与时间窗口是常见缓解手段。' }
+    ]
+  },
+  {
+    chapterId: 'upgrade-oncall-playbook-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'oncall-a1', prompt: '升级值班手册最关键要素之一是？', options: ['回滚触发条件', 'Logo 更新计划', '节日海报', '社媒排期'], answerIndex: 0, explanation: '回滚阈值决定故障处置时效。' },
+      { id: 'oncall-a2', prompt: '告警联动最佳实践是？', options: ['只看节点指标', '链上+节点+业务三层联动', '只看用户反馈', '只看 CPU'], answerIndex: 1, explanation: '跨层联动更能快速定位问题。' },
+      { id: 'oncall-a3', prompt: '升级后复盘应产出？', options: ['只写一句总结', '时间线+动作+改进项闭环', '不记录', '只保留截图'], answerIndex: 1, explanation: '复盘要支撑后续改进执行。' }
+    ]
+  }
 ];

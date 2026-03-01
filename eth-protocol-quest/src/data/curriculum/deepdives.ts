@@ -881,4 +881,148 @@ export const deepDiveChapters: Chapter[] = [
       }
     ]
   }
+  ,{
+    id: 'wallet-security-signing-domain-deep',
+    title: '钱包安全与签名域隔离：EIP-712、Permit 与重放防护实务',
+    level: 'advanced',
+    objective: '构建应用工程中的签名安全模型，避免跨域重放、钓鱼签名与权限滥用。',
+    sections: [
+      {
+        heading: '细粒度小节：签名域隔离与消息结构化',
+        points: [
+          '通过 domain separator 明确链、合约与上下文边界。',
+          '结构化签名可降低“看不懂签名内容”的风险。',
+          '同一签名不应跨协议/跨链复用。'
+        ]
+      },
+      {
+        heading: '细粒度小节：Permit 与授权最小化原则',
+        points: [
+          '授权应设置最小额度与最短有效期。',
+          '敏感操作应要求二次确认或多因子校验。',
+          '定期清理历史授权，降低长期暴露面。'
+        ]
+      },
+      {
+        heading: '细粒度小节：重放与钓鱼防护',
+        points: [
+          'nonce 管理是防重放核心机制。',
+          '前端需显式展示关键签名字段（spender/amount/deadline）。',
+          '建立可疑签名检测与风险提示机制。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '把签名当作“只要能过链就行”。',
+      '无限授权 + 长有效期叠加风险。',
+      '忽略多链环境下的签名重放边界。'
+    ],
+    glossary: ['EIP-712', 'Domain Separator', 'Permit', 'Nonce', 'Replay Attack'],
+    practice: [
+      {
+        title: '实战：签名安全检查清单',
+        steps: [
+          '列出签名字段并标注风险等级。',
+          '验证 nonce、deadline、chainId 边界。',
+          '输出用户可理解的签名前提示文案。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'oracle-data-integrity-deep',
+    title: '预言机与数据完整性：数据源、聚合、延迟与操纵防护',
+    level: 'advanced',
+    objective: '掌握预言机系统的数据完整性风险，建立应用层防操纵与降级策略。',
+    sections: [
+      {
+        heading: '细粒度小节：数据源与聚合模型',
+        points: [
+          '单一数据源是高风险架构，应优先多源聚合。',
+          '聚合逻辑需定义异常值过滤与容错阈值。',
+          '更新频率与业务容忍延迟要匹配。'
+        ]
+      },
+      {
+        heading: '细粒度小节：数据延迟与价格操纵窗口',
+        points: [
+          '高波动时期，延迟会放大清算与定价风险。',
+          '应监控 staleness（数据新鲜度）并设置熔断。',
+          '关键路径可引入 TWAP/多周期确认降低操纵影响。'
+        ]
+      },
+      {
+        heading: '细粒度小节：异常降级与恢复',
+        points: [
+          '预言机异常时应有只读模式或交易限流策略。',
+          '恢复后需执行一致性校验再解除限制。',
+          '事件复盘应沉淀数据完整性 runbook。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '只看价格值，不看更新时间与可信度。',
+      '异常时无降级路径导致系统继续暴露。',
+      '忽略预言机参数与业务风险耦合。'
+    ],
+    glossary: ['Oracle', 'Staleness', 'TWAP', 'Aggregation', 'Price Manipulation'],
+    practice: [
+      {
+        title: '实战：预言机异常响应卡',
+        steps: [
+          '定义 staleness 阈值与告警级别。',
+          '设计降级模式（限流/只读/暂停）。',
+          '编写恢复校验与复盘模板。'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'upgrade-oncall-playbook-deep',
+    title: '协议升级值班手册（On-call Playbook）：变更窗口、告警联动与回滚',
+    level: 'advanced',
+    objective: '建立升级值班体系，确保协议变更期间可观测、可响应、可回滚。',
+    sections: [
+      {
+        heading: '细粒度小节：升级前准备与变更窗口治理',
+        points: [
+          '定义升级窗口、冻结范围与审批链路。',
+          '列出关键依赖（客户端、RPC、索引器、预言机）。',
+          '准备演练脚本与应急联系人矩阵。'
+        ]
+      },
+      {
+        heading: '细粒度小节：值班期间告警联动',
+        points: [
+          '建立 P0/P1/P2 告警分级与处理 SLA。',
+          '将链上指标、节点指标、业务指标联动到同一面板。',
+          '异常事件必须记录时间线与处置动作。'
+        ]
+      },
+      {
+        heading: '细粒度小节：回滚策略与事后复盘',
+        points: [
+          '明确“回滚触发条件”与“回滚执行人”。',
+          '回滚后需校验数据一致性与业务可用性。',
+          '复盘输出应形成可执行改进项并跟踪闭环。'
+        ]
+      }
+    ],
+    pitfalls: [
+      '升级夜只盯一个面板，忽略跨系统信号。',
+      '无明确回滚阈值，导致迟滞决策。',
+      '值班记录碎片化，复盘无法复现过程。'
+    ],
+    glossary: ['On-call', 'Change Window', 'Incident SLA', 'Rollback Trigger', 'Postmortem'],
+    practice: [
+      {
+        title: '实战：升级值班当晚 Runbook',
+        steps: [
+          '按时间轴列出检查点与负责人。',
+          '定义每类告警的处置动作与升级路径。',
+          '编写“回滚决策树 + 复盘模板”。'
+        ]
+      }
+    ]
+  }
 ];

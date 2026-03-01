@@ -124,4 +124,43 @@ export const practiceTemplates: PracticeTemplate[] = [
       '用户通知与后续追踪'
     ]
   }
+  ,{
+    id: 'wallet-signing-check-template',
+    category: 'ops',
+    title: '签名安全检查模板（前端/合约）',
+    whenToUse: '设计签名流程、Permit 授权、风控提示时',
+    template: [
+      '签名域字段检查（chainId/verifyingContract/name/version）',
+      '关键参数展示（spender/amount/deadline/nonce）',
+      '授权最小化策略（额度+有效期）',
+      '重放防护验证与异常告警',
+      '用户提示与撤销授权入口'
+    ]
+  },
+  {
+    id: 'oracle-integrity-template',
+    category: 'ops',
+    title: '预言机完整性治理模板',
+    whenToUse: '接入或升级预言机数据源时',
+    template: [
+      '数据源清单与聚合逻辑',
+      '新鲜度阈值与异常检测规则',
+      '降级模式触发条件',
+      '恢复校验与回放验证',
+      '事故复盘与参数优化记录'
+    ]
+  },
+  {
+    id: 'upgrade-oncall-template',
+    category: 'ops',
+    title: '协议升级值班模板（On-call）',
+    whenToUse: '主网升级窗口与高风险变更值班',
+    template: [
+      '变更窗口与冻结范围',
+      '值班人员与升级链路',
+      'P0/P1/P2 告警与处置动作',
+      '回滚触发条件与执行步骤',
+      '复盘输出与改进项跟踪'
+    ]
+  }
 ];
