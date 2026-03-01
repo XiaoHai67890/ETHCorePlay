@@ -4,6 +4,7 @@ import { chapterMap } from '../data/chapterMap';
 import { chapterAssessments } from '../data/chapterAssessments';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
 import { chapterDependencies } from '../data/dependencies';
+import { chapterChecklists } from '../data/checklists';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
@@ -29,6 +30,7 @@ export function CurriculumPage() {
   const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
   const [retryMode, setRetryMode] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState('');
+  const [checklistState, setChecklistState] = useState<Record<string, Record<number, boolean>>>({});
   const {
     wrongBook,
     chapterResults,
@@ -75,6 +77,13 @@ export function CurriculumPage() {
   const progressPct = Math.round((completedCount / allChapters.length) * 100);
 
   const toggleDone = (id: string) => setDone((s) => ({ ...s, [id]: !s[id] }));
+
+  const toggleChecklist = (chapterId: string, idx: number) => {
+    setChecklistState((s) => ({
+      ...s,
+      [chapterId]: { ...(s[chapterId] || {}), [idx]: !(s[chapterId] || {})[idx] }
+    }));
+  };
 
   const setAnswer = (chapterId: string, qid: string, v: number) => {
     setAnswers((s) => ({ ...s, [chapterId]: { ...(s[chapterId] || {}), [qid]: v } }));
@@ -187,6 +196,7 @@ export function CurriculumPage() {
           <li>开发者路径：{pathBoard.builderDone}/3 章节完成</li>
           <li>核心贡献者路径：{pathBoard.coreDone}/5 章节完成</li>
         </ul>
+        <p>动态提示：{pathBoard.basicDone < 4 ? '先补齐基础四章，再进入开发者路径。' : pathBoard.builderDone < 3 ? '你已完成基础路径，建议推进 Engine/EIP/客户端测试。' : pathBoard.coreDone < 5 ? '进入核心贡献者路径，优先完成测试/安全/L2DA与深层章节。' : '三条路径均达成，建议开始持续开源贡献。'}</p>
       </section>
 
       <section className="card">
@@ -313,6 +323,24 @@ export function CurriculumPage() {
                 )}
               </div>
             )}
+
+            <div style={{ marginTop: 10 }}>
+              <strong>学习完成清单（Checklist）</strong>
+              <ul>
+                {(chapterChecklists.find((x) => x.chapterId === chapter.id)?.items || ['阅读本章','完成测评','完成1个练习']).map((item, i) => (
+                  <li key={item}>
+                    <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={!!(checklistState[chapter.id] || {})[i]}
+                        onChange={() => toggleChecklist(chapter.id, i)}
+                      />
+                      {item}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <div style={{ marginTop: 10 }}>
               <strong>常见误区</strong>

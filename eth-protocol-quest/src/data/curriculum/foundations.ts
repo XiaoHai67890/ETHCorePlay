@@ -247,7 +247,8 @@ export const foundationChapters: Chapter[] = [
         points: [
           'CL 请求候选 payload，EL 返回可执行候选。',
           'CL 推进链头时调用 EL 验证执行结果。',
-          'EL 返回状态与错误，帮助 CL 做后续决策。'
+          'EL 返回状态与错误，帮助 CL 做后续决策。',
+          '异常时应区分接口错误、执行错误、版本不兼容错误。'
         ]
       },
       {
@@ -303,7 +304,8 @@ export const foundationChapters: Chapter[] = [
         points: [
           '公开讨论中，反对意见是提案质量提升来源。',
           '状态流转（Draft/Review/Final）体现成熟度。',
-          '参考实现与测试会显著提升可信度。'
+          '参考实现与测试会显著提升可信度。',
+          '提案推进需要在规范、实现、测试三线同步迭代。'
         ]
       },
       {
