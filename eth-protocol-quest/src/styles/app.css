@@ -104,3 +104,53 @@ h1, h2, h3 { color: #1f4f35; }
 small { color: #4a6a56; }
 
 ul { padding-left: 18px; }
+
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; }
+}
+
+.hero-title {
+  font-size: clamp(24px, 3.6vw, 40px);
+  margin: 0 0 8px;
+  line-height: 1.15;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.kpi {
+  border-radius: 12px;
+  border: 1px solid #d4e8d9;
+  background: #fff;
+  padding: 10px;
+}
+
+.kpi b { font-size: 20px; color: #22543a; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.chip {
+  border: 1px solid #cde3d2;
+  background: #f5fbf6;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #2d5a43;
+}
+
+.notice {
+  border-left: 4px solid #5a76dc;
+  background: #f4f7ff;
+  padding: 10px 12px;
+  border-radius: 8px;
+}

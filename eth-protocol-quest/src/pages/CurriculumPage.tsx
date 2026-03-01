@@ -366,6 +366,40 @@ export function CurriculumPage() {
         </ol>
       </section>
 
+
+      <section className="card">
+        <h3>专题进阶内容（新增）</h3>
+        <div className="grid">
+          <div className="level">
+            <strong>跨客户端调试 Playbook</strong>
+            <small>定位一致性差异</small>
+            <ul>
+              <li>统一测试向量与输入快照</li>
+              <li>并行执行并收集差异日志</li>
+              <li>把差异沉淀为回归测试集</li>
+            </ul>
+          </div>
+          <div className="level">
+            <strong>从规范到实现</strong>
+            <small>EIP 与客户端代码对齐</small>
+            <ul>
+              <li>先抽取 MUST/SHOULD 行为约束</li>
+              <li>再建立测试断言映射</li>
+              <li>最后补“失败样例”防回归</li>
+            </ul>
+          </div>
+          <div className="level">
+            <strong>贡献者首个 14 天计划</strong>
+            <small>从阅读到首个 PR</small>
+            <ul>
+              <li>D1-D3: 环境与复现链路</li>
+              <li>D4-D9: 小范围修复 + 测试</li>
+              <li>D10-D14: PR 迭代与复盘</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <h3>内容内链接跳转</h3>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
