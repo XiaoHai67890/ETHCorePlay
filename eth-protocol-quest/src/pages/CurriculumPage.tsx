@@ -12,8 +12,6 @@ import { learningPaths } from '../data/learningPaths';
 import { useProgressStore } from '../game/store';
 
 type DoneMap = Record<string, boolean>;
-const STORAGE_KEY = 'epq_curriculum_done_v1';
-const EXPANDED_KEY = 'epq_curriculum_expanded_v1';
 
 function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 'Economics' | 'EIP' | 'Client' | 'Testing' | 'Security' | 'L2' {
   if (chapterId.startsWith('el-') || chapterId.includes('tx-')) return 'EL';
@@ -28,13 +26,10 @@ function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 
 }
 
 export function CurriculumPage() {
-  const [done, setDone] = useState<DoneMap>({});
   const [onlyPending, setOnlyPending] = useState(false);
   const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
   const [retryMode, setRetryMode] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState('');
-  const [checklistState, setChecklistState] = useState<Record<string, Record<number, boolean>>>({});
-  const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [levelFilter, setLevelFilter] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
   const [domainFilter, setDomainFilter] = useState<'all' | 'EL' | 'CL' | 'EVM' | 'EIP' | 'Client' | 'Testing' | 'Security' | 'L2'>('all');
   const [sortMode, setSortMode] = useState<'default' | 'difficulty' | 'progress'>('default');
@@ -52,27 +47,16 @@ export function CurriculumPage() {
     badges,
     awardBadge,
     setLastVisitedChapter,
-    setLastVisitedSection
+    setLastVisitedSection,
+    curriculumDone: done,
+    curriculumChecklist: checklistState,
+    curriculumExpanded: expandedChapters,
+    setCurriculumDone,
+    toggleCurriculumChecklist,
+    markCurriculumChecklist,
+    toggleCurriculumExpanded
   } = useProgressStore();
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setDone(JSON.parse(raw));
-      const exp = localStorage.getItem(EXPANDED_KEY);
-      if (exp) setExpandedChapters(JSON.parse(exp));
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
-  }, [done]);
-
-  useEffect(() => {
-    localStorage.setItem(EXPANDED_KEY, JSON.stringify(expandedChapters));
-  }, [expandedChapters]);
 
   const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
 
@@ -105,16 +89,11 @@ export function CurriculumPage() {
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = Math.round((completedCount / allChapters.length) * 100);
 
-  const toggleDone = (id: string) => setDone((s) => ({ ...s, [id]: !s[id] }));
+  const toggleDone = (id: string) => setCurriculumDone(id, !done[id]);
 
-  const toggleChecklist = (chapterId: string, idx: number) => {
-    setChecklistState((s) => ({
-      ...s,
-      [chapterId]: { ...(s[chapterId] || {}), [idx]: !(s[chapterId] || {})[idx] }
-    }));
-  };
+  const toggleChecklist = (chapterId: string, idx: number) => toggleCurriculumChecklist(chapterId, idx);
 
-  const toggleExpand = (chapterId: string) => setExpandedChapters((s) => ({ ...s, [chapterId]: !s[chapterId] }));
+  const toggleExpand = (chapterId: string) => toggleCurriculumExpanded(chapterId);
 
   const exportChapterReport = (chapterId: string, format: 'json' | 'html' = 'json') => {
     const chapter = allChapters.find((c) => c.id === chapterId);
@@ -225,10 +204,8 @@ export function CurriculumPage() {
     addStudyEvent(chapterId, onlyWrong ? 'retest_submit' : 'assessment_submit', `score=${score}/${total}`);
 
     // Checklist 联动：提交测评后自动勾选“完成章节测评”项（索引1）
-    setChecklistState((s) => ({
-      ...s,
-      [chapterId]: { ...(s[chapterId] || {}), 1: true, 0: true }
-    }));
+    markCurriculumChecklist(chapterId, 1, true);
+    markCurriculumChecklist(chapterId, 0, true);
 
     if (passed) {
       // 通过后自动提示可勾选“完成实战任务”（索引2由用户确认）
@@ -260,6 +237,17 @@ export function CurriculumPage() {
     if (passed >= 5) awardBadge('Protocol Explorer');
     if (wrongBook.length >= 10) awardBadge('Wrongbook Warrior');
   }, [chapterResults, wrongBook.length, awardBadge]);
+
+  const chapterQuality = (chapterId: string) => {
+    const r = chapterResults[chapterId] as any;
+    if (!r) return { score: 0, stability: 0, recencyWrong: 0 };
+    const hist = (r.history || []).slice(-3) as number[];
+    const avg = hist.length ? hist.reduce((a, b) => a + b, 0) / hist.length : r.score / Math.max(1, r.total);
+    const vol = hist.length >= 2 ? Math.abs(hist[hist.length - 1] - hist[0]) : 0;
+    const recencyWrong = (r.wrongIds || []).length;
+    const stability = Math.max(0, Math.round((1 - vol) * 100) - recencyWrong * 5);
+    return { score: Math.round(avg * 100), stability, recencyWrong };
+  };
 
   const recommendation = useMemo(() => {
     const failed = Object.entries(chapterResults).filter(([, r]) => !r.passed);
@@ -548,6 +536,7 @@ export function CurriculumPage() {
             <p><strong>学习目标：</strong>{chapter.objective}</p>
             <p><strong>难度：</strong>{chapter.level}</p>
             <p><strong>掌握度：</strong>{chapterMastery[chapter.id] || '初学'} · <strong>学习时长：</strong>{studyMinutes[chapter.id] || 0} 分钟</p>
+            <p><strong>质量评分：</strong>{chapterQuality(chapter.id).score} · <strong>稳定度：</strong>{chapterQuality(chapter.id).stability}</p>
             <p><strong>难度自适应提示：</strong>{adaptiveHint(chapter.id)}</p>
             <button className="btn" onClick={() => addStudyMinutes(chapter.id, 15)}>+15 分钟学习记录</button>
 

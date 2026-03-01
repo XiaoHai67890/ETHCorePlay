@@ -1,13 +1,28 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProgressStore } from '../game/store';
 import { getDailyQuests } from '../game/daily';
-
-const ONBOARDING_KEY = 'epq_onboarding_v1';
+import { chapterDependencies } from '../data/dependencies';
+import { foundationChapters } from '../data/curriculum/foundations';
+import { deepDiveChapters } from '../data/curriculum/deepdives';
 
 export function HomePage() {
-  const { xp, unlockedLevel, chapterResults, wrongBook, badges, awardBadge, lastVisitedChapter, lastVisitedSection, studyMinutes } = useProgressStore();
+  const {
+    xp,
+    unlockedLevel,
+    chapterResults,
+    wrongBook,
+    badges,
+    awardBadge,
+    lastVisitedChapter,
+    lastVisitedSection,
+    studyMinutes,
+    curriculumDone,
+    onboardingTasks,
+    setOnboardingTask
+  } = useProgressStore();
   const daily = getDailyQuests();
+  const allChapters = [...foundationChapters, ...deepDiveChapters];
   const passCount = Object.values(chapterResults).filter((r) => r.passed).length;
   const totalMinutes = Object.values(studyMinutes || {}).reduce((a, b) => a + b, 0);
   const weeklySummary = {
@@ -35,28 +50,36 @@ export function HomePage() {
     if (passCount < 6) return '建议推进 Engine API + Client Testing，开始进入工程实操层。';
     return '建议进入跨客户端调试与贡献实战模块，准备首个可验证 PR。';
   })();
-  const [tasks, setTasks] = useState<Record<string, boolean>>({ read: false, quiz: false, replay: false, report: false });
+
+  const nextBestAction = useMemo(() => {
+    if (wrongBook.length >= 3) {
+      return { label: '先回放错题再复测', to: '/progress', reason: `当前错题 ${wrongBook.length} 条，先清理高频错题最划算。` };
+    }
+    const next = allChapters.find((c) => !curriculumDone[c.id]);
+    if (!next) {
+      return { label: '进入贡献实战路径', to: '/curriculum#client-contrib-deep', reason: '基础章节已完成，建议转向真实贡献闭环。' };
+    }
+    const deps = chapterDependencies[next.id] || [];
+    const missing = deps.filter((d) => !curriculumDone[d]);
+    if (missing.length > 0) {
+      return { label: `先补前置章节（${missing[0]}）`, to: `/curriculum#${missing[0]}`, reason: `下一章 ${next.title} 依赖前置知识。` };
+    }
+    return { label: `继续学习 ${next.title}`, to: `/curriculum#${next.id}`, reason: '当前最优路径：按依赖顺序推进。' };
+  }, [wrongBook.length, allChapters, curriculumDone]);
+
   const [badgeToast, setBadgeToast] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(ONBOARDING_KEY);
-      if (raw) setTasks(JSON.parse(raw));
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(ONBOARDING_KEY, JSON.stringify(tasks));
-    const allDone = Object.values(tasks).every(Boolean);
+    const allDone = Object.values(onboardingTasks || {}).every(Boolean);
     const hadBadge = badges.includes('Starter Badge');
     if (allDone && !hadBadge) {
       awardBadge('Starter Badge');
       setBadgeToast('🏅 恭喜解锁 Starter Badge');
       setTimeout(() => setBadgeToast(null), 2500);
     }
-  }, [tasks, awardBadge, badges]);
+  }, [onboardingTasks, awardBadge, badges]);
 
-  const toggleTask = (k: string) => setTasks((s) => ({ ...s, [k]: !s[k] }));
+  const toggleTask = (k: string) => setOnboardingTask(k, !(onboardingTasks || {})[k]);
 
   return (
     <main className="container">
@@ -95,11 +118,12 @@ export function HomePage() {
       {badgeToast && <div className="toast">{badgeToast}</div>}
 
       <div className="card">
-        <h3>最近学习继续</h3>
-        <p>{lastVisitedSection ? `你上次停在小节：${lastVisitedSection}` : (lastVisitedChapter ? `你上次停在章节：${lastVisitedChapter}` : '还没有最近学习记录，建议从 EL 核心开始。')}</p>
+        <h3>继续学习智能入口（下一最佳动作）</h3>
+        <p><strong>建议动作：</strong>{nextBestAction.label}</p>
+        <p>{nextBestAction.reason}</p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn">继续学习</Link>
-          <Link to="/curriculum" className="btn btn-ghost">打开课程总览</Link>
+          <Link to={nextBestAction.to} className="btn">执行下一最佳动作</Link>
+          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn btn-ghost">回到上次学习位置</Link>
         </div>
       </div>
 
@@ -151,10 +175,10 @@ export function HomePage() {
 
       <div className="card">
         <h3>新手首日引导任务流</h3>
-        <div className="task-item"><input type="checkbox" checked={!!tasks.read} onChange={() => toggleTask('read')} /><span>完成「EL 核心」章节阅读（15-20 分钟）</span></div>
-        <div className="task-item"><input type="checkbox" checked={!!tasks.quiz} onChange={() => toggleTask('quiz')} /><span>提交第一次章节测评，建立基线分数</span></div>
-        <div className="task-item"><input type="checkbox" checked={!!tasks.replay} onChange={() => toggleTask('replay')} /><span>执行一次错题回放，记录改进点</span></div>
-        <div className="task-item"><input type="checkbox" checked={!!tasks.report} onChange={() => toggleTask('report')} /><span>导出首份学习报告（HTML）作为学习档案</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!onboardingTasks.read} onChange={() => toggleTask('read')} /><span>完成「EL 核心」章节阅读（15-20 分钟）</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!onboardingTasks.quiz} onChange={() => toggleTask('quiz')} /><span>提交第一次章节测评，建立基线分数</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!onboardingTasks.replay} onChange={() => toggleTask('replay')} /><span>执行一次错题回放，记录改进点</span></div>
+        <div className="task-item"><input type="checkbox" checked={!!onboardingTasks.report} onChange={() => toggleTask('report')} /><span>导出首份学习报告（HTML）作为学习档案</span></div>
         {badges.includes('Starter Badge') && <p style={{ marginTop: 8 }}>🏅 已获得：<strong>Starter Badge</strong></p>}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to="/curriculum#el-core" className="btn">开始首日任务</Link>
