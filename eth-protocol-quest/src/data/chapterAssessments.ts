@@ -90,7 +90,7 @@ export const chapterAssessments: ChapterAssessment[] = [
     passThreshold: 0.7,
     questions: [
       { id: 'sec-a1', prompt: '重组（reorg）本质是？', options: ['链头分支切换', '钱包签名失败', '私钥泄露', '代币增发'], answerIndex: 0, explanation: 'reorg 是分支重选。' },
-      { id: 'sec-a2', prompt: '提升系统鲁棒性的重要做法？', options: ['客户端单一化', '客户端多样性', '禁用测试', '关闭监控'], answerIndex: 1, explanation: '多样性降低系统性风险。' },
+      { id: 'sec-a2', prompt: '提升系统鲁棒性的重要做法？', options: ['客户端单一化', '客户端多样性', '禁用测试', '关闭监控'], answerIndex: 1, explanation: '客户端多样性降低系统性风险。' },
       { id: 'sec-a3', prompt: '安全运营应包含？', options: ['仅上线一次', '持续监控与演练', '仅靠人工记忆', '仅看社媒'], answerIndex: 1, explanation: '持续运营是安全前提。' }
     ]
   },

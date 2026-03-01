@@ -709,3 +709,78 @@ body[data-theme='dark'] .topbar nav {
   z-index: 1000;
 }
 .skip-link:focus { left: 12px; top: 8px; }
+
+/* UI overlay from local sync branch: keep new layout, apply local visual style */
+:root {
+  --overlay-font-serif: "Cormorant Garamond", "Libre Baskerville", serif;
+  --overlay-primary: #2f6b47;
+  --overlay-primary-hover: #1f4f35;
+  --overlay-primary-soft: #daf4df;
+  --overlay-topbar-bg: rgba(247, 255, 250, 0.6);
+  --overlay-page-gradient: radial-gradient(circle at 20% 10%, #ecfff1 0%, #e7f7ff 35%, #f4f9f2 100%);
+}
+
+body[data-theme='light'] {
+  background: var(--overlay-page-gradient);
+}
+
+body[data-theme='light'] h1,
+body[data-theme='light'] h2,
+body[data-theme='light'] h3,
+body[data-theme='light'] h4 {
+  font-family: var(--overlay-font-serif);
+  color: var(--overlay-primary-hover);
+}
+
+body[data-theme='light'] .topbar {
+  background: var(--overlay-topbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+body[data-theme='light'] .brand {
+  font-family: var(--overlay-font-serif);
+  color: var(--overlay-primary-hover);
+}
+
+body[data-theme='light'] .topbar nav a {
+  color: #4a6a56;
+  border-radius: var(--radius-pill);
+}
+
+body[data-theme='light'] .topbar nav a:hover,
+body[data-theme='light'] .topbar nav a.active {
+  color: var(--overlay-primary-hover);
+  background: var(--overlay-primary-soft);
+}
+
+body[data-theme='light'] .card {
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  box-shadow: 0 8px 32px rgba(47, 107, 71, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+body[data-theme='light'] .btn {
+  background: rgba(74, 143, 97, 0.10);
+  color: var(--overlay-primary);
+  border: 1px solid rgba(74, 143, 97, 0.22);
+  box-shadow: none;
+}
+
+body[data-theme='light'] .btn:hover {
+  background: rgba(74, 143, 97, 0.16);
+  border-color: rgba(74, 143, 97, 0.35);
+  color: var(--overlay-primary-hover);
+}
+
+body[data-theme='light'] .btn-ghost {
+  color: var(--overlay-primary);
+}
+
+body[data-theme='light'] .kpi {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(47, 107, 71, 0.16);
+}
