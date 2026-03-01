@@ -25,6 +25,7 @@ export function CurriculumPage() {
   const [done, setDone] = useState<DoneMap>({});
   const [onlyPending, setOnlyPending] = useState(false);
   const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
+  const [retryMode, setRetryMode] = useState<Record<string, boolean>>({});
   const {
     wrongBook,
     chapterResults,
@@ -60,18 +61,31 @@ export function CurriculumPage() {
     setAnswers((s) => ({ ...s, [chapterId]: { ...(s[chapterId] || {}), [qid]: v } }));
   };
 
-  const submitAssessment = (chapterId: string) => {
+  const submitAssessment = (chapterId: string, onlyWrong = false) => {
     const assessment = chapterAssessments.find((a) => a.chapterId === chapterId);
     if (!assessment) return;
+    const prev = chapterResults[chapterId];
     const user = answers[chapterId] || {};
-    const score = assessment.questions.reduce((acc, q) => acc + (user[q.id] === q.answerIndex ? 1 : 0), 0);
-    const total = assessment.questions.length;
-    const passed = score / total >= assessment.passThreshold;
-    setChapterResult(chapterId, { score, total, passed });
+
+    const previousWrongIds = (prev && (prev as any).wrongIds) ? (prev as any).wrongIds as string[] : [];
+    const baseQs = assessment.questions;
+    const scopedQs = onlyWrong && previousWrongIds.length
+      ? baseQs.filter((q) => previousWrongIds.includes(q.id))
+      : baseQs;
+
+    const score = scopedQs.reduce((acc, q) => acc + (user[q.id] === q.answerIndex ? 1 : 0), 0);
+    const total = scopedQs.length || 1;
+    const wrongIds = scopedQs.filter((q) => user[q.id] !== q.answerIndex).map((q) => q.id);
+    const threshold = assessment.passThreshold;
+    const passed = score / total >= threshold;
+
+    setChapterResult(chapterId, { score, total, passed, threshold, wrongIds } as any);
+
     if (passed) {
       const domain = chapterDomain(chapterId);
       const target = knowledgeMap.find((n) => n.domain === domain && n.status !== 'done');
       if (target) setKnowledgeStatus(target.id, 'done');
+      setRetryMode((s) => ({ ...s, [chapterId]: false }));
     }
   };
 
@@ -200,7 +214,20 @@ export function CurriculumPage() {
                     ))}
                   </div>
                 ))}
-                <button className="btn" onClick={() => submitAssessment(chapter.id)}>提交章节测评</button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button className="btn" onClick={() => submitAssessment(chapter.id, false)}>提交章节测评</button>
+                  <button className="btn" onClick={() => { setRetryMode((s) => ({ ...s, [chapter.id]: true })); submitAssessment(chapter.id, true); }}>
+                    错题回放 + 二次测评
+                  </button>
+                </div>
+                {chapterResults[chapter.id] && (
+                  <p>
+                    本章结果：{chapterResults[chapter.id].score}/{chapterResults[chapter.id].total}，
+                    {chapterResults[chapter.id].passed ? '已通过' : '未通过'}
+                    {((chapterResults[chapter.id] as any).wrongIds || []).length > 0 ? `，错题数：${(chapterResults[chapter.id] as any).wrongIds.length}` : ''}
+                    {retryMode[chapter.id] ? '（已执行错题回放模式）' : ''}
+                  </p>
+                )}
               </div>
             )}
 

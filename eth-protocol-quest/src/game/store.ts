@@ -9,16 +9,20 @@ type WrongQuestion = {
   ts: number;
 };
 
+type ChapterResult = { score: number; total: number; passed: boolean; threshold?: number; wrongIds?: string[] };
+
 type ProgressState = {
   xp: number;
   unlockedLevel: number;
   completed: Record<number, boolean>;
   wrongBook: WrongQuestion[];
   knowledgeMap: KnowledgeNode[];
+  chapterResults: Record<string, ChapterResult>;
   completeLevel: (id: number, gainedXp: number) => void;
   addWrongQuestion: (q: WrongQuestion) => void;
   clearWrongBook: () => void;
   setKnowledgeStatus: (id: string, status: KnowledgeNode['status']) => void;
+  setChapterResult: (chapterId: string, result: ChapterResult) => void;
 };
 
 export const useProgressStore = create<ProgressState>((set) => ({
@@ -27,6 +31,7 @@ export const useProgressStore = create<ProgressState>((set) => ({
   completed: {},
   wrongBook: [],
   knowledgeMap: defaultKnowledgeMap,
+  chapterResults: {},
   completeLevel: (id, gainedXp) =>
     set((s) => ({
       xp: s.xp + gainedXp,
@@ -43,5 +48,9 @@ export const useProgressStore = create<ProgressState>((set) => ({
   setKnowledgeStatus: (id, status) =>
     set((s) => ({
       knowledgeMap: s.knowledgeMap.map((n) => (n.id === id ? { ...n, status } : n))
+    })),
+  setChapterResult: (chapterId, result) =>
+    set((s) => ({
+      chapterResults: { ...s.chapterResults, [chapterId]: result }
     }))
 }));
