@@ -202,4 +202,31 @@ export const chapterAssessments: ChapterAssessment[] = [
       { id: 'eipw-a3', prompt: '安全维度输出应连接到？', options: ['美术设计', '测试向量与回归策略', '产品文案', '活动海报'], answerIndex: 1, explanation: '安全分析必须落地测试。' }
     ]
   }
+  ,{
+    chapterId: 'zk-proving-verification-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'zk-a1', prompt: 'ZK 系统中常见的成本瓶颈更可能是？', options: ['验证端', '证明生成端', 'UI 渲染', 'DNS 查询'], answerIndex: 1, explanation: '通常 prover 侧更重。' },
+      { id: 'zk-a2', prompt: '可信设置风险管理应包含？', options: ['忽略参数管理', '参数审计与更新流程', '仅看 TPS', '仅看页面速度'], answerIndex: 1, explanation: '参数治理是关键风险点。' },
+      { id: 'zk-a3', prompt: '容量规划更合理方式是？', options: ['凭经验估算', '基于基准测试的数据化评估', '只看社区讨论', '一次性固定配置'], answerIndex: 1, explanation: '应做系统基准评估。' }
+    ]
+  },
+  {
+    chapterId: 'cross-rollup-interoperability-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'xroll-a1', prompt: '跨 Rollup 消息处理更接近？', options: ['同步调用', '异步多阶段流程', '本地函数调用', '单步确认'], answerIndex: 1, explanation: '跨域是异步多阶段。' },
+      { id: 'xroll-a2', prompt: '幂等设计在跨域中的价值是？', options: ['增加复杂度', '避免重复执行风险', '降低安全性', '替代监控'], answerIndex: 1, explanation: '幂等是跨域稳定核心。' },
+      { id: 'xroll-a3', prompt: '失败补偿策略主要用于？', options: ['美化日志', '恢复异常状态并降低用户损失', '提升动画效果', '替代验证'], answerIndex: 1, explanation: '补偿机制保障异常恢复。' }
+    ]
+  },
+  {
+    chapterId: 'validator-economics-governance-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'val-a1', prompt: '验证者行为主要由什么驱动？', options: ['随机因素', '激励与惩罚结构', '界面配色', '社媒热度'], answerIndex: 1, explanation: '经济结构塑造行为。' },
+      { id: 'val-a2', prompt: '治理提案评估应避免？', options: ['角色影响分析', '敏感性测试', '只看理论最优不看运营成本', '场景化回测'], answerIndex: 2, explanation: '需结合运营现实。' },
+      { id: 'val-a3', prompt: '治理闭环应包括？', options: ['提案后不跟踪', '执行后观测与反馈调整', '仅一次投票', '只写总结不行动'], answerIndex: 1, explanation: '闭环是长期稳定关键。' }
+    ]
+  }
 ];

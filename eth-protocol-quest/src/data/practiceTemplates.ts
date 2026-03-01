@@ -98,4 +98,30 @@ export const practiceTemplates: PracticeTemplate[] = [
       '实现影响：客户端改动点与测试向量'
     ]
   }
+  ,{
+    id: 'governance-eval-template',
+    category: 'research',
+    title: '治理提案影响评估模板',
+    whenToUse: '分析协议提案对验证者/用户/基础设施影响时',
+    template: [
+      '提案目标与受影响角色',
+      '收益变化与风险变化拆解',
+      '敏感性测试场景（高/中/低）',
+      '观测指标与告警阈值',
+      '执行后复盘与反馈路径'
+    ]
+  },
+  {
+    id: 'cross-rollup-recovery-template',
+    category: 'ops',
+    title: '跨 Rollup 失败补偿模板',
+    whenToUse: '跨域消息失败、超时或重放异常时',
+    template: [
+      '异常类型（超时/失败/重放）',
+      '影响范围与用户状态',
+      '补偿动作与执行顺序',
+      '幂等检查与回滚策略',
+      '用户通知与后续追踪'
+    ]
+  }
 ];

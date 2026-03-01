@@ -13,5 +13,8 @@ export const chapterTemplateMapping: Record<string, string[]> = {
   'cl-deep-forkchoice-finality': ['issue-repro-template'],
   'client-labs-minimal-runs': ['client-min-lab-template', 'issue-repro-template'],
   'chaos-lite-ops-lab': ['chaos-lite-template', 'consistency-vector-template'],
-  'eip-reading-workbench': ['eip-workbench-template', 'pr-delivery-template']
+  'eip-reading-workbench': ['eip-workbench-template', 'pr-delivery-template'],
+  'zk-proving-verification-deep': ['consistency-vector-template', 'regression-test-template'],
+  'cross-rollup-interoperability-deep': ['cross-rollup-recovery-template', 'chaos-lite-template'],
+  'validator-economics-governance-deep': ['governance-eval-template', 'eip-workbench-template']
 };
