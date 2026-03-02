@@ -10,5 +10,34 @@ export const glossary = [
   { term: 'EIP', desc: 'Ethereum Improvement Proposal，协议改进提案。' },
   { term: 'Slashing', desc: '对验证者恶意行为的罚没机制。' },
   { term: 'Reorg', desc: '链头从一个分支切换到另一分支。' },
-  { term: 'Rollup', desc: 'L2 扩容方案，L2 执行、L1 结算。' }
+  { term: 'Rollup', desc: 'L2 扩容方案，L2 执行、L1 结算。' },
+
+  { term: 'Slot / Epoch', desc: 'CL 中的时间分片单位；多个 slot 组成一个 epoch。' },
+  { term: 'Checkpoint', desc: '最终性判断的锚点，通常按 epoch 边界组织。' },
+  { term: 'Base Fee', desc: 'EIP-1559 中随拥堵动态变化的基础费用。' },
+  { term: 'Priority Fee (Tip)', desc: '用户给提议者/打包者的额外激励费用。' },
+  { term: 'State Root', desc: '区块头中的状态承诺根，用于证明状态一致性。' },
+  { term: 'Receipt', desc: '交易执行结果记录，包含 status、gasUsed、logs 等。' },
+  { term: 'Calldata', desc: '交易/调用输入数据区，通常只读。' },
+  { term: 'Storage', desc: '合约持久化存储区域，写入成本较高。' },
+  { term: 'SSTORE', desc: 'EVM 中写入存储的关键操作，gas 开销常较高。' },
+  { term: 'ForkchoiceUpdated', desc: 'Engine API 中 CL 向 EL 更新链头状态的关键调用。' },
+
+  { term: 'PBS', desc: 'Proposer-Builder Separation，提议者与构建者角色分离机制。' },
+  { term: 'Inclusion List', desc: '提升交易可包含性的机制设计，常用于抗审查讨论。' },
+  { term: 'MEV', desc: 'Maximal Extractable Value，可从交易排序/打包中提取的价值。' },
+  { term: 'Blob (EIP-4844)', desc: '为 DA 场景提供更高性价比数据承载的对象。' },
+  { term: 'Data Availability (DA)', desc: '保证状态转移验证所需数据可获取性的属性。' },
+  { term: 'Verkle Tree', desc: '用于优化状态证明大小与验证效率的承诺结构方向。' },
+  { term: 'Stateless Ethereum', desc: '通过 witness 减少节点对完整状态长期依赖的方向。' },
+  { term: 'Witness', desc: '无状态执行时用于证明状态访问正确性的辅助数据。' },
+
+  { term: 'Account Abstraction (ERC-4337)', desc: '通过 UserOperation/Bundler 等机制扩展账户交互模型。' },
+  { term: 'Bundler', desc: '聚合 UserOperation 并提交到链上入口合约的角色。' },
+  { term: 'Paymaster', desc: '可为用户代付 gas 的组件，需配套风控策略。' },
+  { term: 'Oracle Staleness', desc: '预言机数据“过期不新鲜”的风险指标。' },
+  { term: 'TWAP', desc: '时间加权平均价格，常用于降低短时操纵影响。' },
+  { term: 'Bridge Trust Model', desc: '跨链桥验证与托管机制对应的信任假设模型。' },
+  { term: 'Chaos-lite', desc: '轻量故障注入演练方式，用于验证观测与恢复能力。' },
+  { term: 'Runbook / Playbook', desc: '标准化运维/故障处理手册，强调可复现执行。' }
 ];
