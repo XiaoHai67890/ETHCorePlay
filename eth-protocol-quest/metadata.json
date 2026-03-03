@@ -1,0 +1,5 @@
+{
+  "name": "ETHCorePlay",
+  "description": "A game-assisted, chapter-based learning platform for Ethereum protocol: EL, CL, EVM, transaction lifecycle, Engine API, EIP workflow, client testing, security, and L2/DA.",
+  "requestFramePermissions": []
+}
