@@ -13,6 +13,8 @@ export default defineConfig({
             if (id.includes('html2canvas')) return 'sharing';
             return 'vendor';
           }
+          if (id.includes('/src/data/curriculum/')) return 'curriculum-data';
+          if (id.includes('/src/data/chapterAssessments')) return 'assessment-data';
         }
       }
     }

@@ -5,8 +5,6 @@ import { getDailyQuests } from '../game/daily';
 import { chapterDependencies } from '../data/dependencies';
 import { MapRenderer } from '../components/map/MapRenderer';
 import { PlotCard } from '../components/ui/PlotCard';
-import { foundationChapters } from '../data/curriculum/foundations';
-import { deepDiveChapters } from '../data/curriculum/deepdives';
 
 export function HomePage() {
   const {
@@ -24,7 +22,15 @@ export function HomePage() {
     setOnboardingTask
   } = useProgressStore();
   const daily = getDailyQuests();
-  const allChapters = [...foundationChapters, ...deepDiveChapters];
+  const allChapters = [
+    { id: 'el-core', title: 'EL 执行层核心' },
+    { id: 'cl-core', title: 'CL 共识层核心' },
+    { id: 'evm-core', title: 'EVM 执行模型' },
+    { id: 'tx-lifecycle-core', title: '交易生命周期全链路' },
+    { id: 'engine-api-core', title: 'Engine API 协同' },
+    { id: 'client-testing-core', title: '客户端测试基础' },
+    { id: 'security-core', title: '安全专题' }
+  ];
   const passCount = Object.values(chapterResults).filter((r) => r.passed).length;
   const totalMinutes = Object.values(studyMinutes || {}).reduce((a, b) => a + b, 0);
   const weeklySummary = {
