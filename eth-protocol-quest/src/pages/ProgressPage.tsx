@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProgressStore } from '../game/store';
-import { cloudEnabled, signInWithOtp, pullState, pushState } from '../services/cloudSync';
+import { cloudEnabled, signInWithOtp } from '../services/cloudSync';
+import { getSyncDiagnostics, syncPullMerge, syncPushRobust } from '../services/syncEngine';
 import { exportElementPng } from '../components/ui/ShareReportCard';
 
 export function ProgressPage() {
   const storeState = useProgressStore();
   const { xp, completed, wrongBook, clearWrongBook, knowledgeMap, setKnowledgeStatus } = storeState;
   const [email, setEmail] = useState('');
+  const [syncMsg, setSyncMsg] = useState('');
 
   const doneCount = useMemo(() => Object.values(completed).filter(Boolean).length, [completed]);
   const totalNodes = knowledgeMap.length || 1;
@@ -20,12 +22,21 @@ export function ProgressPage() {
 
   useEffect(() => {
     if (!cloudEnabled) return;
-    const id = setInterval(() => {
-      pushState(useProgressStore.getState()).catch(() => {});
-    }, 45000);
-    const onUnload = () => {
-      pushState(useProgressStore.getState()).catch(() => {});
+
+    // on first load: pull & merge
+    syncPullMerge(useProgressStore.getState()).then((merged) => {
+      localStorage.setItem('epq-progress-v2', JSON.stringify({ state: merged, version: 2 }));
+      setSyncMsg('已完成云端拉取合并（刷新后生效）');
+    }).catch(() => {});
+
+    const runPush = () => {
+      syncPushRobust(useProgressStore.getState()).then((r: any) => {
+        if (!r.ok) setSyncMsg(`云同步待重试：${r.reason || 'unknown'}`);
+      });
     };
+
+    const id = setInterval(runPush, 45000);
+    const onUnload = () => { runPush(); };
     window.addEventListener('beforeunload', onUnload);
     return () => {
       clearInterval(id);
@@ -56,6 +67,8 @@ export function ProgressPage() {
           <small>知识图谱完成度：{doneNodes}/{totalNodes}（{completionPct}%）</small>
           <div className="progress-rail" style={{ marginTop: 6 }}><div className="progress-fill" style={{ width: `${completionPct}%` }} /></div>
         </div>
+        <small className="subtle">同步诊断：{JSON.stringify(getSyncDiagnostics())}</small>
+        {syncMsg && <div className="notice" style={{ marginTop: 8 }}>{syncMsg}</div>}
       </section>
 
 
@@ -64,10 +77,12 @@ export function ProgressPage() {
         <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
           <input placeholder="email for magic link" value={email} onChange={(e)=>setEmail(e.target.value)} style={{ padding:8, borderRadius:10, border:'1px solid var(--border-default)' }} />
           <button className="btn btn-ghost" onClick={() => signInWithOtp(email).then(()=>alert('Magic link sent')).catch((e)=>alert(String(e)))}>登录</button>
-          <button className="btn" onClick={() => pushState(useProgressStore.getState()).then(()=>alert('已推送云端')).catch((e)=>alert(String(e)))}>推送云端</button>
-          <button className="btn btn-ghost" onClick={async () => { const d = await pullState<any>().catch(()=>null); if (d) localStorage.setItem('epq-progress-v2', JSON.stringify({ state:d, version:2 })); alert(d ? '已拉取，请刷新页面' : '云端无数据'); }}>拉取云端</button>
+          <button className="btn" onClick={() => syncPushRobust(useProgressStore.getState()).then((r:any)=>alert(r.ok?'已推送云端':'已加入重试队列')).catch((e)=>alert(String(e)))}>推送云端</button>
+          <button className="btn btn-ghost" onClick={async () => { const merged = await syncPullMerge(useProgressStore.getState()); localStorage.setItem('epq-progress-v2', JSON.stringify({ state: merged, version:2 })); alert('已拉取并合并，请刷新页面'); }}>拉取云端</button>
           <button className="btn btn-ghost" onClick={() => exportElementPng('progress-share-card', 'ethcoreplay-progress.png')}>导出分享卡（PNG）</button>
         </div>
+        <small className="subtle">同步诊断：{JSON.stringify(getSyncDiagnostics())}</small>
+        {syncMsg && <div className="notice" style={{ marginTop: 8 }}>{syncMsg}</div>}
       </section>
 
       <section className="card card-hover">
@@ -76,6 +91,8 @@ export function ProgressPage() {
           {Object.entries(wrongClusters).map(([k,v]) => <span className="chip" key={k}>{k}: {v}</span>)}
           {Object.keys(wrongClusters).length===0 && <span className="chip">暂无错题聚类</span>}
         </div>
+        <small className="subtle">同步诊断：{JSON.stringify(getSyncDiagnostics())}</small>
+        {syncMsg && <div className="notice" style={{ marginTop: 8 }}>{syncMsg}</div>}
       </section>
       <section className="card card-hover">
         <div className="card-title-row">
@@ -105,6 +122,8 @@ export function ProgressPage() {
             );
           })}
         </div>
+        <small className="subtle">同步诊断：{JSON.stringify(getSyncDiagnostics())}</small>
+        {syncMsg && <div className="notice" style={{ marginTop: 8 }}>{syncMsg}</div>}
       </section>
 
       <section className="card card-hover">
