@@ -10,6 +10,7 @@ const CurriculumPage = lazy(() => import('./pages/CurriculumPage').then(m => ({ 
 const ZonePage = lazy(() => import('./pages/ZonePage').then(m => ({ default: m.ZonePage })));
 const PlotPage = lazy(() => import('./pages/PlotPage').then(m => ({ default: m.PlotPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const CmsAdminPage = lazy(() => import('./pages/CmsAdminPage').then(m => ({ default: m.CmsAdminPage })));
 
 export function App() {
   const [themeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
@@ -44,6 +45,7 @@ export function App() {
             <Link to="/curriculum">课程</Link>
             <Link to="/glossary">术语</Link>
             <Link to="/search">搜索</Link>
+            <Link to="/cms-admin">CMS</Link>
           </nav>
         </div>
       </header>
@@ -58,6 +60,7 @@ export function App() {
         <Route path="/zone/:zoneKey" element={<ZonePage />} />
         <Route path="/plot/:id" element={<PlotPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/cms-admin" element={<CmsAdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes></Suspense>
       </main>
