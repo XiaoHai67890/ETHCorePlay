@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { glossary as localGlossary, type GlossaryStatus } from '../data/glossary';
 import { useEffect, useMemo, useState } from 'react';
 import { loadCmsJson } from '../services/cms';
+import { GlossaryGraph } from '../components/GlossaryGraph';
 
 const statusOrder: GlossaryStatus[] = ['Mainnet', 'Ecosystem', 'Roadmap', 'Research', 'Concept', 'Depends', 'General'];
 const chapterHref = (id: string) => `/curriculum#${id}`;
@@ -57,6 +58,8 @@ export function GlossaryPage() {
         </div>
         <small className="subtle">当前术语：{filtered.length}/{glossary.length}</small>
       </section>
+
+      <GlossaryGraph glossary={filtered as any} />
 
       <div className="card card-hover">
         <div className="chips" style={{ marginBottom: 10 }}>
