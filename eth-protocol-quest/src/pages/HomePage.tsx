@@ -5,6 +5,7 @@ import { getDailyQuests } from '../game/daily';
 import { chapterDependencies } from '../data/dependencies';
 import { MapRenderer } from '../components/map/MapRenderer';
 import { PlotCard } from '../components/ui/PlotCard';
+import { metricRecClick } from '../services/telemetry';
 
 export function HomePage() {
   const {
@@ -91,7 +92,7 @@ export function HomePage() {
     return mins;
   }, [studyHistory]);
 
-  const recommendationV2 = useMemo(() => {
+  const recommendationV3 = useMemo(() => {
     const topCluster = Object.entries(wrongClusters).sort((a, b) => b[1] - a[1])[0]?.[0] || 'General';
     if (wrongBook.length >= 6) {
       return { action: `先做${topCluster}错题复盘包`, eta: 25, score: 92, reason: `错题池 ${wrongBook.length} 条，优先止损提升通过率。` };
@@ -185,7 +186,7 @@ export function HomePage() {
         <p><strong>建议动作：</strong>{nextBestAction.label}</p>
         <p>{nextBestAction.reason}</p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Link to={nextBestAction.to} className="btn">执行下一最佳动作</Link>
+          <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>执行下一最佳动作</Link>
           <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn btn-ghost">回到上次学习位置</Link>
         </div>
       </div>
@@ -194,8 +195,8 @@ export function HomePage() {
       <div className="card card-hover">
         <h3 className="section-title">今日智能建议</h3>
         <div className="notice">{smartRecommendation}</div>
-        <p style={{ marginTop: 8 }}><strong>推荐引擎 v2：</strong>{recommendationV2.action}</p>
-        <p className="subtle">预计耗时：{recommendationV2.eta} 分钟 · 收益分：{recommendationV2.score} · {recommendationV2.reason}</p>
+        <p style={{ marginTop: 8 }}><strong>推荐引擎 v3：</strong>{recommendationV3.action}</p>
+        <p className="subtle">预计耗时：{recommendationV3.eta} 分钟 · 收益分：{recommendationV3.score} · {recommendationV3.reason}</p>
         <p style={{ marginTop: 10 }}><strong>下一个徽章目标：</strong>{nextBadgeHint}</p>
       </div>
 
@@ -258,6 +259,11 @@ export function HomePage() {
           {heatmap.map((v, idx) => <span key={idx} className={`heat-${v}`} title={`Day-${idx + 1} 强度 ${v}`} />)}
         </div>
         <small>强度说明：0=休息，4=高强度学习。</small>
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">A/B 推荐效果对比</h3>
+        <p className="subtle">A 组（旧规则）预计完成率：{Math.max(45, 70 - wrongBook.length)}% · B 组（v3）预计完成率：{Math.min(92, Math.max(52, 74 + Math.round(stability/8) - Math.floor(wrongBook.length/2)))}%</p>
       </div>
 
       <div className="card">

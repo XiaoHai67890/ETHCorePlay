@@ -20,6 +20,7 @@ export function SVGRenderer() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [query, setQuery] = useState('');
+  const [pathMode, setPathMode] = useState<'newbie' | 'builder' | 'core'>('newbie');
   const dragging = useRef<{ on: boolean; x: number; y: number; px: number; py: number }>({ on: false, x: 0, y: 0, px: 0, py: 0 });
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -27,10 +28,14 @@ export function SVGRenderer() {
   const lod: LOD = zoom < 0.9 ? 'zone' : zoom < 1.35 ? 'plot' : 'edge';
 
   const highlightedIds = useMemo(() => {
-    const core = ['el-core', 'cl-core', 'engine-api-core', 'l2-da-core', 'security-core'];
-    const pending = core.filter((id) => !curriculumDone[id]);
-    return new Set([...(pending.length ? pending.slice(0, 2) : []), lastVisitedChapter || '']);
-  }, [curriculumDone, lastVisitedChapter]);
+    const paths: Record<string, string[]> = {
+      newbie: ['el-core', 'tx-lifecycle-core'],
+      builder: ['engine-api-core', 'l2-da-core'],
+      core: ['security-core', 'cl-core']
+    };
+    const pending = (paths[pathMode] || []).filter((id) => !curriculumDone[id]);
+    return new Set([...(pending.length ? pending : paths[pathMode]), lastVisitedChapter || '']);
+  }, [curriculumDone, lastVisitedChapter, pathMode]);
 
   const locateNode = () => {
     const k = query.trim().toLowerCase();
@@ -68,6 +73,11 @@ export function SVGRenderer() {
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索节点：execution / engine / security" style={{ padding: 8, borderRadius: 10, border: '1px solid var(--border-default)' }} />
         <button className="btn btn-ghost" onClick={locateNode}>定位节点</button>
         <button className="btn btn-ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>重置视图</button>
+        <select value={pathMode} onChange={(e) => setPathMode(e.target.value as any)} aria-label="学习路径">
+          <option value="newbie">新手路径</option>
+          <option value="builder">开发者路径</option>
+          <option value="core">核心贡献路径</option>
+        </select>
       </div>
 
       <svg

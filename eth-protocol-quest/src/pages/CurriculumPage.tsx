@@ -9,6 +9,8 @@ import { chapterChecklists } from '../data/checklists';
 import { practiceTemplates } from '../data/practiceTemplates';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { learningPaths } from '../data/learningPaths';
+import { chapterSources } from '../data/chapterSources';
+import { metricChapterComplete, metricRetryImprovement, telemetrySnapshot } from '../services/telemetry';
 import { loadCmsJson } from '../services/cms';
 import { useProgressStore } from '../game/store';
 
@@ -119,10 +121,22 @@ export function CurriculumPage() {
     setVisibleCount(8);
   }, [query, levelFilter, domainFilter, sortMode, onlyPending]);
 
+  const chapterQualityBoard = useMemo(() => {
+    return allChapters.map((c) => {
+      const quality = chapterQuality(c.id);
+      const deps = chapterDependencies[c.id] || [];
+      const prereqHit = deps.length ? Math.round((deps.filter((d) => done[d]).length / deps.length) * 100) : 100;
+      const pitfallCount = c.pitfalls.length;
+      return { id: c.id, title: c.title, quality: quality.score, stability: quality.stability, prereqHit, pitfallCount, level: c.level };
+    });
+  }, [allChapters, done, chapterResults]);
+
+  const telemetry = useMemo(() => telemetrySnapshot(), [chapterResults, done, wrongBook.length]);
+
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = Math.round((completedCount / allChapters.length) * 100);
 
-  const toggleDone = (id: string) => setCurriculumDone(id, !done[id]);
+  const toggleDone = (id: string) => { const next = !done[id]; setCurriculumDone(id, next); if (next) metricChapterComplete(id); };
 
   const toggleChecklist = (chapterId: string, idx: number) => toggleCurriculumChecklist(chapterId, idx);
 
@@ -233,7 +247,9 @@ export function CurriculumPage() {
     const threshold = assessment.passThreshold;
     const passed = score / total >= threshold;
 
+    const prevScore = (chapterResults[chapterId] as any)?.score || 0;
     setChapterResult(chapterId, { score, total, passed, threshold, wrongIds } as any);
+    metricRetryImprovement(score - prevScore);
     addStudyEvent(chapterId, onlyWrong ? 'retest_submit' : 'assessment_submit', `score=${score}/${total}`);
 
     // Checklist 联动：提交测评后自动勾选“完成章节测评”项（索引1）
@@ -360,6 +376,29 @@ export function CurriculumPage() {
       <h2>系统化学习课程（基础→进阶）</h2>
       <p>学习优先：先完整掌握章节，再用闯关做检验。</p>
       {milestoneToast && <div className="toast milestone-burst">{milestoneToast}</div>}
+
+      <section className="card">
+        <h3>课程质量体系看板</h3>
+        <div className="grid">
+          {chapterQualityBoard.slice(0, 10).map((r) => (
+            <article key={r.id} className="level" style={{ cursor: 'default' }}>
+              <strong>{r.title}</strong>
+              <small>难度曲线：{r.level} · 先修命中率：{r.prereqHit}% · 误区数：{r.pitfallCount}</small>
+              <small>质量：{r.quality} · 稳定度：{r.stability}</small>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="card">
+        <h3>可观测性与运营指标</h3>
+        <div className="chips">
+          <span className="chip">章节完成事件：{Object.values(telemetry.chapterCompletion || {}).reduce((a:any,b:any)=>a+b,0)}</span>
+          <span className="chip">错题复测提升样本：{(telemetry.retryImprovement || []).length}</span>
+          <span className="chip">推荐动作点击：{telemetry.recClicks || 0}</span>
+          <span className="chip">搜索失败词：{Object.keys(telemetry.searchMiss || {}).length}</span>
+        </div>
+      </section>
 
       <section className="card">
         <h3>章节知识点检索</h3>

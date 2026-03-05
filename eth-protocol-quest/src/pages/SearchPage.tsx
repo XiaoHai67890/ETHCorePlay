@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { glossary } from '../data/glossary';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
+import { metricSearchMiss } from '../services/telemetry';
 
 const aliases: Record<string, string[]> = {
   pbs: ['proposer builder separation', 'inclusion list'],
@@ -25,12 +26,14 @@ export function SearchPage() {
     return all.filter((x) => `${x.title} ${x.desc}`.toLowerCase().includes(k)).slice(0, 80);
   }, [q]);
 
+  const onBlurSearch = () => { if (q.trim() && rows.length === 0) metricSearchMiss(q); };
+
   return (
     <main className="container">
       <Link to="/">← 首页</Link>
       <h2>统一搜索</h2>
       <section className="card">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜索课程与术语（支持别名：pbs/blob/aa/verkle/mev）" style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--border-default)' }} />
+        <input value={q} onBlur={onBlurSearch} onChange={(e) => setQ(e.target.value)} placeholder="搜索课程与术语（支持别名：pbs/blob/aa/verkle/mev）" style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid var(--border-default)' }} />
         <small className="subtle">结果：{rows.length}</small>
       </section>
       <section className="card">

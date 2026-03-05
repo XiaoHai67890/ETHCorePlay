@@ -1,5 +1,6 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { Suspense, lazy, useEffect, useState } from 'react';
+import { getLang, setLang, type Lang } from './services/i18n';
 
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const LevelPage = lazy(() => import('./pages/LevelPage').then(m => ({ default: m.LevelPage })));
@@ -14,6 +15,7 @@ const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default:
 export function App() {
   const [themeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as any) || 'system');
   const [systemDark, setSystemDark] = useState(() => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const [lang, setLangState] = useState<Lang>(() => getLang());
 
   useEffect(() => {
     if (!window.matchMedia) return;
@@ -39,11 +41,12 @@ export function App() {
         <div className="topbar-inner">
           <Link to="/" className="brand">🌿 Ethereum Infinite Garden Quest</Link>
           <nav aria-label="主导航">
-            <Link to="/map">地图</Link>
-            <Link to="/progress">总览</Link>
-            <Link to="/curriculum">课程</Link>
-            <Link to="/glossary">术语</Link>
-            <Link to="/search">搜索</Link>
+            <Link to="/map">{lang==='zh'?'地图':'Map'}</Link>
+            <Link to="/progress">{lang==='zh'?'总览':'Progress'}</Link>
+            <Link to="/curriculum">{lang==='zh'?'课程':'Curriculum'}</Link>
+            <Link to="/glossary">{lang==='zh'?'术语':'Glossary'}</Link>
+            <Link to="/search">{lang==='zh'?'搜索':'Search'}</Link>
+            <button className="btn btn-ghost" onClick={() => { const n = lang==='zh'?'en':'zh'; setLangState(n); setLang(n); }}>{lang==='zh'?'EN':'中'}</button>
           </nav>
         </div>
       </header>
