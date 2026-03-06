@@ -13,6 +13,7 @@ import { chapterSources } from '../data/chapterSources';
 import { metricChapterComplete, metricRetryImprovement, telemetrySnapshot } from '../services/telemetry';
 import { loadCmsJson } from '../services/cms';
 import { useProgressStore } from '../game/store';
+import { getLang } from '../services/i18n';
 
 type DoneMap = Record<string, boolean>;
 const COLLAPSED_KEY = 'epq_curriculum_collapsed_domains_v1';
@@ -30,6 +31,7 @@ function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 
 }
 
 export function CurriculumPage() {
+  const lang = getLang();
   const [onlyPending, setOnlyPending] = useState(false);
   const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
   const [retryMode, setRetryMode] = useState<Record<string, boolean>>({});
@@ -384,8 +386,8 @@ export function CurriculumPage() {
   return (
     <main className="container">
       <Link to="/">← 首页</Link>
-      <h2>系统化学习课程（基础→进阶）</h2>
-      <p>学习优先：先完整掌握章节，再用闯关做检验。</p>
+      <h2>{lang==='zh'?'系统化学习课程（基础→进阶）':'Curriculum (Foundation → Advanced)'}</h2>
+      <p>{lang==='zh'?'学习优先：先完整掌握章节，再用闯关做检验。':'Learning first: master chapters, then validate with assessments.'}</p>
       {milestoneToast && <div className="toast milestone-burst">{milestoneToast}</div>}
 
       <section className="card">

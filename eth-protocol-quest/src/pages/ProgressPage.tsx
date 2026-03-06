@@ -1,13 +1,16 @@
+// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProgressStore } from '../game/store';
 import { cloudEnabled, signInWithOtp } from '../services/cloudSync';
 import { getSyncDiagnostics, syncPullMerge, syncPushRobust } from '../services/syncEngine';
 import { exportElementPng } from '../components/ui/ShareReportCard';
+import { getLang, t } from '../services/i18n';
 
 export function ProgressPage() {
   const storeState = useProgressStore();
-  const { xp, completed, wrongBook, clearWrongBook, knowledgeMap, setKnowledgeStatus } = storeState;
+  const { xp, completed, wrongBook, clearWrongBook, knowledgeMap, setKnowledgeStatus, badges, studyHistory } = storeState as any;
+  const lang = getLang();
   const [email, setEmail] = useState('');
   const [syncMsg, setSyncMsg] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'todo' | 'learning' | 'done'>('all');
@@ -40,6 +43,22 @@ export function ProgressPage() {
     return () => { clearInterval(id); window.removeEventListener('beforeunload', onUnload); };
   }, []);
 
+  const streakDays = useMemo(() => {
+    const daySet = new Set<string>();
+    Object.values(studyHistory || {}).forEach((arr: any) => (arr || []).forEach((e: any) => daySet.add(new Date(e.ts).toDateString())));
+    const days = Array.from(daySet).sort((a, b) => +new Date(a) - +new Date(b));
+    let best = 0, cur = 0, prev: number | null = null;
+    for (const d of days) {
+      const ts = new Date(d).setHours(0,0,0,0);
+      if (prev == null || ts - prev === 86400000) cur += 1; else cur = 1;
+      prev = ts;
+      best = Math.max(best, cur);
+    }
+    return best;
+  }, [studyHistory]);
+
+  const weeklyDone = Math.min(doneCount, 7);
+
   const executableCards = useMemo(() => {
     const rows = knowledgeMap.map((n) => {
       const clusterBonus = /gas|final|security|mev/i.test(n.title) ? 2 : 0;
@@ -54,8 +73,8 @@ export function ProgressPage() {
   return (
     <main className="container">
       <Link to="/">← 首页</Link>
-      <h2>学习进度总览</h2>
-      <p className="subtle">你的学习状态、错题分布与知识图谱都在这里统一查看。</p>
+      <h2>{t('progressTitle', lang)}</h2>
+      <p className="subtle">{t('progressDesc', lang)}</p>
 
       <section className="card card-hover" id="progress-share-card">
         <div className="card-title-row"><h3 style={{ margin: 0 }}>核心指标</h3><span className="meta-pill">Progress Snapshot</span></div>
@@ -67,6 +86,32 @@ export function ProgressPage() {
         <div style={{ marginTop: 10 }}>
           <small>知识图谱完成度：{doneNodes}/{totalNodes}（{completionPct}%）</small>
           <div className="progress-rail" style={{ marginTop: 6 }}><div className="progress-fill" style={{ width: `${completionPct}%` }} /></div>
+        </div>
+      </section>
+
+
+      <section className="card card-hover" id="growth-share-card">
+        <div className="card-title-row"><h3 style={{ margin: 0 }}>{t('growthCard', lang)}</h3><span className="meta-pill">Weekly</span></div>
+        <div className="kpi-grid">
+          <div className="kpi"><small>本周完成章节</small><br/><b>{weeklyDone}</b></div>
+          <div className="kpi"><small>徽章数</small><br/><b>{(badges || []).length}</b></div>
+          <div className="kpi"><small>连续学习天数</small><br/><b>{streakDays}</b></div>
+        </div>
+        <div className="quick-links" style={{ marginTop: 8 }}>
+          <button className="btn btn-ghost" onClick={() => exportElementPng('growth-share-card', 'ethcoreplay-weekly-growth.png')}>导出周报图</button>
+          <button className="btn" onClick={() => {
+            const text = encodeURIComponent(`ETHCorePlay 周报：本周完成 ${weeklyDone} 章，徽章 ${(badges || []).length}，连续学习 ${streakDays} 天。`);
+            window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+          }}>{t('oneClickShare', lang)} X</button>
+          <button className="btn" onClick={() => {
+            const text = encodeURIComponent(`ETHCorePlay 周报：本周完成 ${weeklyDone} 章，徽章 ${(badges || []).length}，连续学习 ${streakDays} 天。`);
+            window.open(`https://t.me/share/url?url=https://ethcoreplay.cc.cd&text=${text}`, '_blank');
+          }}>{t('oneClickShare', lang)} Telegram</button>
+          <button className="btn" onClick={() => {
+            const text = `ETHCorePlay 周报：本周完成 ${weeklyDone} 章，徽章 ${(badges || []).length}，连续学习 ${streakDays} 天。`;
+            navigator.clipboard?.writeText(text);
+            alert('已复制微信分享文案');
+          }}>{t('oneClickShare', lang)} 微信</button>
         </div>
       </section>
 

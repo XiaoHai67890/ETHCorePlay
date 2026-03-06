@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useProgressStore } from '../game/store';
 import { getDailyQuests } from '../game/daily';
 import { chapterDependencies } from '../data/dependencies';
-import { MapRenderer } from '../components/map/MapRenderer';
+import { t, getLang } from '../services/i18n';
+import { glossary as localGlossary } from '../data/glossary';
 import { PlotCard } from '../components/ui/PlotCard';
+const MapRenderer = lazy(() => import('../components/map/MapRenderer').then(m => ({ default: m.MapRenderer })));
+const GlossaryGraph = lazy(() => import('../components/GlossaryGraph').then(m => ({ default: m.GlossaryGraph })));
 import { metricRecClick } from '../services/telemetry';
 
 export function HomePage() {
+  const lang = getLang();
   const {
     xp,
     unlockedLevel,
@@ -132,6 +136,12 @@ export function HomePage() {
 
   const [badgeToast, setBadgeToast] = useState<string | null>(null);
   const [showSecondary, setShowSecondary] = useState(false);
+  const [showHeavyPanels, setShowHeavyPanels] = useState(false);
+
+  useEffect(() => {
+    const id = setTimeout(() => setShowHeavyPanels(true), 380);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const allDone = Object.values(onboardingTasks || {}).every(Boolean);
@@ -149,23 +159,23 @@ export function HomePage() {
     <main className="container">
       <section className="hero dashboard-grid">
         <div className="card banner-glow card-hover">
-          <h1 className="hero-title">今天只做一件事</h1>
-          <p className="brand-tagline">下一步学习动作：<strong>{nextBestAction.label}</strong></p>
-          <p className="subtle">预计耗时：{recommendationV3.eta} 分钟</p>
+          <h1 className="hero-title">{t('homeMainGoal', lang)}</h1>
+          <p className="brand-tagline">{t('nextAction', lang)}：<strong>{nextBestAction.label}</strong></p>
+          <p className="subtle">{t('etaMins', lang)}：{recommendationV3.eta} 分钟</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>开始学习</Link>
-            <button className="btn btn-ghost" onClick={() => setShowSecondary((v) => !v)}>{showSecondary ? '收起次屏信息' : '展开次屏信息'}</button>
+            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
+            <button className="btn btn-ghost" onClick={() => setShowSecondary((v) => !v)}>{showSecondary ? t('collapseSecondary', lang) : t('expandSecondary', lang)}</button>
           </div>
           <div className="sticky-action-bar">
-            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>开始学习</Link>
-            <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : '/curriculum#el-core'} className="btn btn-ghost">继续学习</Link>
+            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
+            <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : '/curriculum#el-core'} className="btn btn-ghost">{t('continueLearning', lang)}</Link>
           </div>
         </div>
       </section>
 
       {showSecondary && (
         <section className="card card-hover">
-          <h3>次屏：统计 / 图谱 / 推荐解释</h3>
+          <h3>{t('secondaryTitle', lang)}</h3>
           <div className="kpi-grid">
             <div className="kpi"><small>当前 XP</small><br/><b>{xp}</b></div>
             <div className="kpi"><small>已通过测评</small><br/><b>{passCount}</b></div>
@@ -182,8 +192,8 @@ export function HomePage() {
         <p><strong>建议动作：</strong>{nextBestAction.label}</p>
         <p>{nextBestAction.reason}</p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>开始学习</Link>
-          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn btn-ghost">继续学习</Link>
+          <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
+          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn btn-ghost">{t('continueLearning', lang)}</Link>
         </div>
       </div>
 
@@ -283,7 +293,17 @@ export function HomePage() {
         </div>
       </div>
 
-      <MapRenderer mode="svg" />
+      {showHeavyPanels ? (
+        <>
+          <Suspense fallback={<div className="card skeleton">{t('mapSkeleton', lang)}</div>}><MapRenderer mode="svg" /></Suspense>
+          <Suspense fallback={<div className="card skeleton">{t('graphSkeleton', lang)}</div>}><GlossaryGraph glossary={localGlossary.slice(0, 18) as any} /></Suspense>
+        </>
+      ) : (
+        <>
+          <div className="card skeleton">{t('mapSkeleton', lang)}</div>
+          <div className="card skeleton">{t('graphSkeleton', lang)}</div>
+        </>
+      )}
 
       <div className="card card-hover">
         <h3 className="section-title">协议雷达（本周）</h3>
@@ -293,7 +313,7 @@ export function HomePage() {
           <div className="level"><strong>扩容热点</strong><small>EIP-4844 blob 成本窗口与批次调优</small></div>
         </div>
         <div className="quick-links" style={{ marginTop: 10 }}>
-          <Link to="/curriculum#eip4844-da-economics-deep" className="btn">开始学习</Link>
+          <Link to="/curriculum#eip4844-da-economics-deep" className="btn">{t('startLearning', lang)}</Link>
           <Link to="/curriculum#pbs-inclusion-censorship-deep" className="btn">去复测</Link>
           <Link to="/curriculum#verkle-stateless-deep" className="btn">去实战</Link>
         </div>
