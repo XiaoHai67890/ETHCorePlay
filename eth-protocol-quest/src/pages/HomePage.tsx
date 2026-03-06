@@ -160,8 +160,8 @@ export function HomePage() {
       <section className="hero dashboard-grid">
         <div className="card banner-glow card-hover">
           <h1 className="hero-title">{t('homeMainGoal', lang)}</h1>
-          <p className="brand-tagline">{t('nextAction', lang)}：<strong>{nextBestAction.label}</strong></p>
-          <p className="subtle">{t('etaMins', lang)}：{recommendationV3.eta} 分钟</p>
+          <p className="brand-tagline">{t('nextAction', lang)}：<span className="hero-action-pill">{nextBestAction.label}</span></p>
+          <p className="subtle">{t('etaMins', lang)}：<strong>{recommendationV3.eta} 分钟</strong></p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
             <button className="btn btn-ghost" onClick={() => setShowSecondary((v) => !v)}>{showSecondary ? t('collapseSecondary', lang) : t('expandSecondary', lang)}</button>
@@ -187,15 +187,7 @@ export function HomePage() {
 
       {badgeToast && <div className="toast">{badgeToast}</div>}
 
-      <div className="card">
-        <h3>继续学习智能入口（下一最佳动作）</h3>
-        <p><strong>建议动作：</strong>{nextBestAction.label}</p>
-        <p>{nextBestAction.reason}</p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
-          <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : (lastVisitedChapter ? `/curriculum#${lastVisitedChapter}` : '/curriculum#el-core')} className="btn btn-ghost">{t('continueLearning', lang)}</Link>
-        </div>
-      </div>
+
 
       <div className="stagger">
       <div className="card card-hover">
