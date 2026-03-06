@@ -998,3 +998,60 @@ svg {
     z-index: 50;
   }
 }
+
+
+/* Glossary Graph elegant refresh */
+.glossary-graph-card {
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 16%, var(--border-default));
+}
+
+.glossary-graph-toolbar {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.zoom-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-surface) 92%, var(--bg-elevated));
+}
+
+.graph-canvas-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-surface) 90%, var(--bg-elevated));
+  padding: 6px;
+}
+
+.glossary-graph-svg {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+}
+
+.graph-panel {
+  border: 1px solid color-mix(in srgb, var(--brand-garden) 16%, var(--border-default));
+}
+
+.graph-panel .quick-links .btn {
+  border-radius: 10px;
+}
+
+@media (max-width: 860px) {
+  .glossary-graph-toolbar {
+    align-items: stretch;
+  }
+  .zoom-wrap {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 12px;
+  }
+}
