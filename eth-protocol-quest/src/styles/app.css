@@ -1094,3 +1094,80 @@ svg {
   padding: 8px 10px;
   background: color-mix(in srgb, var(--bg-surface) 92%, var(--bg-elevated));
 }
+
+
+/* Garden language v1 */
+:root {
+  --garden-bg-1: radial-gradient(900px 540px at 12% 8%, rgba(127,162,123,.12), transparent 65%);
+  --garden-bg-2: radial-gradient(860px 520px at 84% 18%, rgba(111,91,255,.10), transparent 68%);
+  --garden-bg-3: radial-gradient(820px 480px at 50% 95%, rgba(201,214,242,.12), transparent 70%);
+}
+
+body {
+  background-image: var(--garden-bg-1), var(--garden-bg-2), var(--garden-bg-3), var(--bg-main);
+  background-attachment: fixed;
+}
+
+.container {
+  max-width: 1140px;
+  padding-top: 22px;
+  padding-bottom: 28px;
+}
+
+.card {
+  border-radius: 20px;
+  border-color: color-mix(in srgb, var(--border-default) 84%, #d6dfef);
+}
+
+.hero-title {
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.brand-tagline {
+  font-size: 1.03rem;
+}
+
+.section-block {
+  margin-top: 22px;
+}
+
+.island-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.island-main { grid-column: span 8; }
+.island-side { grid-column: span 4; }
+
+@media (max-width: 980px) {
+  .island-main, .island-side { grid-column: span 12; }
+}
+
+.garden-entrance {
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 22%, var(--border-default));
+  background: linear-gradient(165deg, color-mix(in srgb, var(--bg-surface) 95%, #ffffff), color-mix(in srgb, var(--bg-elevated) 92%, #f8fafc));
+}
+
+.path-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--bg-surface) 92%, var(--bg-elevated));
+}
+
+.path-card strong { display: block; margin-bottom: 4px; }
+
+.cta-copy {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.btn-garden {
+  background: linear-gradient(90deg, #6F5BFF 0%, #7FA27B 100%);
+}
+
+.trail-links .btn {
+  border-radius: 12px;
+}

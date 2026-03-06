@@ -157,18 +157,18 @@ export function HomePage() {
 
   return (
     <main className="container">
-      <section className="hero dashboard-grid">
-        <div className="card banner-glow card-hover">
-          <h1 className="hero-title">{t('homeMainGoal', lang)}</h1>
-          <p className="brand-tagline">{t('nextAction', lang)}：<span className="hero-action-pill">{nextBestAction.label}</span></p>
+      <section className="hero dashboard-grid section-block">
+        <div className="card banner-glow card-hover garden-entrance">
+          <h1 className="hero-title">进入协议花园，今天先生长一小步</h1>
+          <p className="brand-tagline">下一步学习动作：<span className="hero-action-pill">{nextBestAction.label}</span></p>
           <p className="subtle">{t('etaMins', lang)}：<strong>{recommendationV3.eta} 分钟</strong></p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
+            <Link to={nextBestAction.to} className="btn btn-garden" onClick={() => metricRecClick()}>进入花园</Link>
             <button className="btn btn-ghost" onClick={() => setShowSecondary((v) => !v)}>{showSecondary ? t('collapseSecondary', lang) : t('expandSecondary', lang)}</button>
           </div>
           <div className="sticky-action-bar">
-            <Link to={nextBestAction.to} className="btn" onClick={() => metricRecClick()}>{t('startLearning', lang)}</Link>
-            <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : '/curriculum#el-core'} className="btn btn-ghost">{t('continueLearning', lang)}</Link>
+            <Link to={nextBestAction.to} className="btn btn-garden" onClick={() => metricRecClick()}>进入花园</Link>
+            <Link to={lastVisitedSection ? `/curriculum#${lastVisitedSection}` : '/curriculum#el-core'} className="btn btn-ghost">继续生长</Link>
           </div>
         </div>
 
@@ -210,6 +210,19 @@ export function HomePage() {
       {badgeToast && <div className="toast">{badgeToast}</div>}
 
 
+
+      <section className="card card-hover section-block">
+        <div className="card-title-row">
+          <h3 className="section-title" style={{ margin: 0 }}>Learning Trails · 学习路径</h3>
+          <small className="subtle">弱中心化探索：可从任一路径进入</small>
+        </div>
+        <div className="grid trail-links" style={{ marginTop: 8 }}>
+          <article className="path-card"><strong>Beginner Trail</strong><span className="cta-copy">从 EL/CL/EVM 建立协议直觉</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#el-core">进入路径</Link></div></article>
+          <article className="path-card"><strong>EVM Trail</strong><span className="cta-copy">执行语义、Gas、状态变化机制</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#evm-core">进入路径</Link></div></article>
+          <article className="path-card"><strong>Consensus Trail</strong><span className="cta-copy">fork choice、finality、验证者经济</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#cl-core">进入路径</Link></div></article>
+          <article className="path-card"><strong>Research Trail</strong><span className="cta-copy">Verkle、PBS、跨 Rollup 互操作</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#verkle-stateless-deep">进入路径</Link></div></article>
+        </div>
+      </section>
 
       <div className="stagger">
       <div className="card card-hover">

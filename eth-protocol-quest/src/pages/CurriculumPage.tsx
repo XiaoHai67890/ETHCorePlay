@@ -387,6 +387,7 @@ export function CurriculumPage() {
     <main className="container">
       <Link to="/">← 首页</Link>
       <h2>{lang==='zh'?'系统化学习课程（基础→进阶）':'Curriculum (Foundation → Advanced)'}</h2>
+      <p className="subtle">Garden &gt; Trails &gt; Chapters · 你可以从不同路径进入同一知识点。</p>
       <p>{lang==='zh'?'学习优先：先完整掌握章节，再用闯关做检验。':'Learning first: master chapters, then validate with assessments.'}</p>
       {milestoneToast && <div className="toast milestone-burst">{milestoneToast}</div>}
 
@@ -447,6 +448,7 @@ export function CurriculumPage() {
 
       <section className="card">
         <h3>学习路径推荐</h3>
+        <div className="notice" style={{ marginBottom: 8 }}>Related Paths：如果你在执行层卡住，可以切到共识或客户端工程路径再回跳。</div>
         <div className="grid">
           {learningPaths.map((path) => (
             <div key={path.id} className="level">
