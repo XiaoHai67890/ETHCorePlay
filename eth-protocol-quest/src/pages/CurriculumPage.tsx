@@ -730,6 +730,24 @@ export function CurriculumPage() {
             {expandedChapters[chapter.id] && (
               <>
             <div className="article-reading-shell">
+            <div className="callout" style={{ marginTop: 8 }}>
+              <strong>阅读进度（本章）</strong>
+              {(() => {
+                const checklist = chapterChecklists.find((x) => x.chapterId === chapter.id)?.items || ['阅读本章','完成测评','完成1个练习'];
+                const st = checklistState[chapter.id] || {};
+                const doneCount = checklist.filter((_, i) => !!st[i]).length;
+                const pct = Math.round((doneCount / checklist.length) * 100);
+                return <><div className="progress-rail" style={{ marginTop: 6 }}><div className="progress-fill" style={{ width: `${pct}%` }} /></div><small className="subtle">{doneCount}/{checklist.length} · {pct}%</small></>;
+              })()}
+            </div>
+
+            <div className="callout" style={{ marginTop: 10 }}>
+              <strong>TOC（章节目录）</strong>
+              <ul>
+                {chapter.sections.map((sec, si) => <li key={sec.heading}><a href={`#${chapter.id}-sec-${si}`}>{sec.heading}</a></li>)}
+              </ul>
+            </div>
+
             <div className="taskflow" style={{ marginTop: 8 }}>
               <strong>任务流（学什么→做什么→怎么测→完成奖励）</strong>
               <div className="chips" style={{ marginTop: 6 }}>
@@ -875,6 +893,15 @@ export function CurriculumPage() {
                   </ol>
                 </div>
               ))}
+            </div>
+
+            <div className="callout" style={{ marginTop: 10 }}>
+              <strong>继续漫游出口</strong>
+              <div className="quick-links" style={{ marginTop: 8 }}>
+                <a className="btn btn-ghost" href="#">Continue the Trail</a>
+                <Link className="btn btn-ghost" to="/glossary">Explore Related Concepts</Link>
+                <Link className="btn btn-ghost" to="/map">Return to Garden Map</Link>
+              </div>
             </div>
 
             <div className="callout insight" style={{ marginTop: 10 }}>

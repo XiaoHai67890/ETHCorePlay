@@ -1370,3 +1370,36 @@ body {
 
 .callout.warning { border-color: color-mix(in srgb, var(--g-warning) 45%, var(--g-border-1)); }
 .callout.insight { border-color: color-mix(in srgb, var(--g-mist-cyan) 45%, var(--g-border-1)); }
+
+
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 18, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 90px;
+  z-index: 80;
+}
+
+.cmdk-panel {
+  width: min(780px, 92vw);
+  max-height: 72vh;
+  overflow: auto;
+  border: 1px solid var(--g-border-2);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--g-bg-1) 90%, var(--bg-surface));
+  padding: 12px;
+}
+
+.cmdk-results {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.cmdk-group ul { margin: 6px 0 0; }
+.cmdk-group li { margin-bottom: 8px; }
+
+.cmdk-group a { text-decoration: none; color: var(--text-primary); }

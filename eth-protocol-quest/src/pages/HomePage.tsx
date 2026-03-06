@@ -139,6 +139,21 @@ export function HomePage() {
   const [showHeavyPanels, setShowHeavyPanels] = useState(false);
   const [showAdvancedPanels, setShowAdvancedPanels] = useState(false);
 
+  const topicsIslands = [
+    { id: 'execution', title: 'Execution Layer', desc: '交易执行、Gas、状态变化', to: '/curriculum#el-core' },
+    { id: 'consensus', title: 'Consensus Layer', desc: 'fork choice、finality、验证者机制', to: '/curriculum#cl-core' },
+    { id: 'state', title: 'State / Trie', desc: '状态存储与证明结构', to: '/curriculum#el-deep-state-trie' },
+    { id: 'networking', title: 'P2P / Networking', desc: 'mempool 与传播拓扑', to: '/curriculum#tx-lifecycle-core' },
+    { id: 'rollup', title: 'Rollups / L2', desc: 'DA 经济与跨层协同', to: '/curriculum#l2-da-core' },
+    { id: 'future', title: 'Future Upgrades', desc: 'Verkle / PBS / Stateless', to: '/curriculum#verkle-stateless-deep' }
+  ];
+
+  const crossPollination = [
+    { from: 'Gas', to: 'State Access Patterns', why: 'Gas 热点常由状态访问路径决定', href: '/curriculum#evm-core' },
+    { from: 'Finality', to: 'Fork Choice', why: '最终性理解依赖 fork-choice 信号', href: '/curriculum#cl-core' },
+    { from: 'Rollup DA', to: 'EIP-4844', why: 'DA 成本与 blob 机制直接关联', href: '/curriculum#eip4844-da-economics-deep' }
+  ];
+
   useEffect(() => {
     const id = setTimeout(() => setShowHeavyPanels(true), 380);
     return () => clearTimeout(id);
@@ -247,6 +262,39 @@ export function HomePage() {
           <article className="protocol-milestone"><strong>The Merge</strong><small className="subtle">PoS 共识接管，执行/共识分层清晰。</small></article>
           <article className="protocol-milestone"><strong>Rollup-centric</strong><small className="subtle">4844 与 DA 经济推动 L2 生态。</small></article>
           <article className="protocol-milestone"><strong>Future Upgrades</strong><small className="subtle">Verkle、Stateless、PBS 等研究演进。</small></article>
+        </div>
+      </section>
+
+
+      <section className="card card-hover garden-section garden-shell">
+        <div className="card-title-row">
+          <h3 className="section-title" style={{ margin: 0 }}>Topics Islands · 知识岛屿</h3>
+          <span className="meta-pill">Protocol Ecology</span>
+        </div>
+        <div className="grid" style={{ marginTop: 8 }}>
+          {topicsIslands.map((t) => (
+            <article key={t.id} className="path-card">
+              <strong>{t.title}</strong>
+              <small className="subtle">{t.desc}</small>
+              <div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to={t.to}>探索节点</Link></div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="card card-hover garden-section garden-shell">
+        <div className="card-title-row">
+          <h3 className="section-title" style={{ margin: 0 }}>Cross-pollination · 交叉授粉推荐</h3>
+          <span className="meta-pill">Related Paths</span>
+        </div>
+        <div className="grid" style={{ marginTop: 8 }}>
+          {crossPollination.map((r) => (
+            <article key={`${r.from}-${r.to}`} className="path-card">
+              <strong>{r.from} → {r.to}</strong>
+              <small className="subtle">{r.why}</small>
+              <div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to={r.href}>查看相关节点</Link></div>
+            </article>
+          ))}
         </div>
       </section>
 

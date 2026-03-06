@@ -4,6 +4,7 @@ import { useProgressStore } from '../../game/store';
 
 type LOD = 'zone' | 'plot' | 'edge';
 type Node = { id: string; name: string; zone: string; x: number; y: number };
+type EdgeType = 'depends' | 'related' | 'research';
 
 const nodes: Node[] = [
   { id: 'el-core', name: 'Execution', zone: 'Execution', x: 80, y: 140 },
@@ -11,6 +12,13 @@ const nodes: Node[] = [
   { id: 'engine-api-core', name: 'Engine API', zone: 'Tooling', x: 380, y: 150 },
   { id: 'l2-da-core', name: 'Scaling', zone: 'Scaling', x: 520, y: 90 },
   { id: 'security-core', name: 'Security', zone: 'Security', x: 660, y: 160 }
+];
+
+const edgeDefs: Array<{ a: number; b: number; type: EdgeType }> = [
+  { a: 0, b: 1, type: 'depends' },
+  { a: 1, b: 2, type: 'related' },
+  { a: 2, b: 3, type: 'depends' },
+  { a: 2, b: 4, type: 'research' }
 ];
 
 export function SVGRenderer() {
@@ -21,10 +29,11 @@ export function SVGRenderer() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [query, setQuery] = useState('');
   const [pathMode, setPathMode] = useState<'newbie' | 'builder' | 'core'>('newbie');
+  const [edgeTypeFilter, setEdgeTypeFilter] = useState<Record<EdgeType, boolean>>({ depends: true, related: true, research: true });
   const dragging = useRef<{ on: boolean; x: number; y: number; px: number; py: number }>({ on: false, x: 0, y: 0, px: 0, py: 0 });
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  const edges = useMemo(() => [[0, 1], [1, 2], [2, 3], [2, 4]], []);
+  const edges = useMemo(() => edgeDefs.filter((e) => edgeTypeFilter[e.type]), [edgeTypeFilter]);
   const lod: LOD = zoom < 0.9 ? 'zone' : zoom < 1.35 ? 'plot' : 'edge';
 
   const highlightedIds = useMemo(() => {
@@ -66,6 +75,12 @@ export function SVGRenderer() {
     setPan({ x: mx - wx * next, y: my - wy * next });
   };
 
+  const edgeStyle = (type: EdgeType) => {
+    if (type === 'depends') return { stroke: 'var(--brand-primary)', dash: '2 0' };
+    if (type === 'related') return { stroke: 'var(--brand-garden)', dash: '5 4' };
+    return { stroke: 'var(--brand-highlight)', dash: '2 6' };
+  };
+
   return (
     <div className="card card-hover">
       <div className="card-title-row">
@@ -83,6 +98,13 @@ export function SVGRenderer() {
         </select>
       </div>
 
+      <div className="chips" style={{ marginBottom: 8 }}>
+        <span className="chip">图例：</span>
+        <button className={`chip-btn ${edgeTypeFilter.depends ? 'on' : ''}`} onClick={() => setEdgeTypeFilter((s) => ({ ...s, depends: !s.depends }))}>depends</button>
+        <button className={`chip-btn ${edgeTypeFilter.related ? 'on' : ''}`} onClick={() => setEdgeTypeFilter((s) => ({ ...s, related: !s.related }))}>related</button>
+        <button className={`chip-btn ${edgeTypeFilter.research ? 'on' : ''}`} onClick={() => setEdgeTypeFilter((s) => ({ ...s, research: !s.research }))}>research</button>
+      </div>
+
       <svg
         ref={svgRef}
         viewBox="0 0 760 230"
@@ -97,9 +119,10 @@ export function SVGRenderer() {
         onMouseLeave={() => { dragging.current.on = false; }}
       >
         <g transform={`translate(${pan.x} ${pan.y}) scale(${zoom})`}>
-          {lod === 'edge' && edges.map(([a, b], i) => (
-            <line key={i} x1={nodes[a].x} y1={nodes[a].y} x2={nodes[b].x} y2={nodes[b].y} stroke="var(--border-default)" strokeDasharray="5 4" />
-          ))}
+          {lod === 'edge' && edges.map((e, i) => {
+            const st = edgeStyle(e.type);
+            return <line key={i} x1={nodes[e.a].x} y1={nodes[e.a].y} x2={nodes[e.b].x} y2={nodes[e.b].y} stroke={st.stroke} strokeDasharray={st.dash} strokeOpacity="0.85" />;
+          })}
 
           {nodes.map((n) => {
             const highlighted = highlightedIds.has(n.id);

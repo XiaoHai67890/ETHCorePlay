@@ -1,6 +1,7 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { getLang, setLang, type Lang } from './services/i18n';
+import { CommandK } from './components/CommandK';
 
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
 const LevelPage = lazy(() => import('./pages/LevelPage').then(m => ({ default: m.LevelPage })));
@@ -50,6 +51,7 @@ export function App() {
           </nav>
         </div>
       </header>
+      <CommandK />
       <main id="main-content" role="main" tabIndex={-1}>
       <Suspense fallback={<div className="container"><div className="card">加载中...</div></div>}><Routes>
         <Route path="/" element={<HomePage />} />
