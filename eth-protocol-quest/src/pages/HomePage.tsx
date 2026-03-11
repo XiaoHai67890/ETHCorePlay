@@ -194,13 +194,16 @@ export function HomePage() {
             <span className="meta-pill">Garden Nodes</span>
           </div>
           <p className="subtle" style={{ marginTop: 6 }}>选择任意入口开始漫游，不必按单一路径推进。</p>
-          <div className="garden-node-grid">
-            <Link className="garden-node" to="/curriculum#el-core"><strong>Execution</strong><small>执行语义 / 状态变化</small></Link>
-            <Link className="garden-node" to="/curriculum#cl-core"><strong>Consensus</strong><small>Fork choice / Finality</small></Link>
-            <Link className="garden-node" to="/curriculum#tx-lifecycle-core"><strong>Networking</strong><small>Mempool / Propagation</small></Link>
-            <Link className="garden-node" to="/curriculum#eip-workflow-core"><strong>Governance</strong><small>EIP workflow</small></Link>
-            <Link className="garden-node" to="/curriculum#security-core"><strong>Security</strong><small>威胁模型 / 防护</small></Link>
-            <Link className="garden-node" to="/curriculum#verkle-stateless-deep"><strong>Research</strong><small>Verkle / Stateless</small></Link>
+          <div className="hero-mini-map" role="group" aria-label="协议花园自由布局地图">
+            <span className="map-link l1" />
+            <span className="map-link l2" />
+            <span className="map-link l3" />
+            <Link className="garden-node node-execution" to="/curriculum#el-core"><strong>Execution</strong><small>执行语义 / 状态变化</small></Link>
+            <Link className="garden-node node-consensus" to="/curriculum#cl-core"><strong>Consensus</strong><small>Fork choice / Finality</small></Link>
+            <Link className="garden-node node-networking" to="/curriculum#tx-lifecycle-core"><strong>Networking</strong><small>Mempool / Propagation</small></Link>
+            <Link className="garden-node node-governance" to="/curriculum#eip-workflow-core"><strong>Governance</strong><small>EIP workflow</small></Link>
+            <Link className="garden-node node-security" to="/curriculum#security-core"><strong>Security</strong><small>威胁模型 / 防护</small></Link>
+            <Link className="garden-node node-research" to="/curriculum#verkle-stateless-deep"><strong>Research</strong><small>Verkle / Stateless</small></Link>
           </div>
         </aside>
 
@@ -271,7 +274,7 @@ export function HomePage() {
           <h3 className="section-title" style={{ margin: 0 }}>Topics Islands · 知识岛屿</h3>
           <span className="meta-pill">Protocol Ecology</span>
         </div>
-        <div className="grid" style={{ marginTop: 8 }}>
+        <div className="islands-free-layout" style={{ marginTop: 10 }}>
           {topicsIslands.map((t) => (
             <article key={t.id} className={`path-card island-card island-${t.id}`}>
               <strong>{t.title}</strong>

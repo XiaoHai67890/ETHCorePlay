@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { getLang, setLang, type Lang } from './services/i18n';
 import { CommandK } from './components/CommandK';
@@ -42,12 +42,12 @@ export function App() {
         <div className="topbar-inner">
           <Link to="/" className="brand">🌿 Ethereum Infinite Garden Quest</Link>
           <nav aria-label="主导航">
-            <Link to="/map">{lang==='zh'?'地图':'Map'}</Link>
-            <Link to="/progress">{lang==='zh'?'总览':'Progress'}</Link>
-            <Link to="/curriculum">{lang==='zh'?'课程':'Curriculum'}</Link>
-            <Link to="/glossary">{lang==='zh'?'术语':'Glossary'}</Link>
-            <Link to="/search">{lang==='zh'?'搜索':'Search'}</Link>
-            <button className="btn btn-ghost" onClick={() => { const n = lang==='zh'?'en':'zh'; setLangState(n); setLang(n); }}>{lang==='zh'?'EN':'中'}</button>
+            <NavLink to="/map" className={({isActive}) => isActive ? 'active' : ''}>{lang==='zh'?'地图':'Map'}</NavLink>
+            <NavLink to="/progress" className={({isActive}) => isActive ? 'active' : ''}>{lang==='zh'?'总览':'Progress'}</NavLink>
+            <NavLink to="/curriculum" className={({isActive}) => isActive ? 'active' : ''}>{lang==='zh'?'课程':'Curriculum'}</NavLink>
+            <NavLink to="/glossary" className={({isActive}) => isActive ? 'active' : ''}>{lang==='zh'?'术语':'Glossary'}</NavLink>
+            <NavLink to="/search" className={({isActive}) => isActive ? 'active' : ''}>{lang==='zh'?'搜索':'Search'}</NavLink>
+            <button className="lang-switch" onClick={() => { const n = lang==='zh'?'en':'zh'; setLangState(n); setLang(n); }}>{lang==='zh'?'EN':'中'}</button>
           </nav>
         </div>
       </header>
