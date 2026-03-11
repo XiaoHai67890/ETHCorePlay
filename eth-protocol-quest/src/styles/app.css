@@ -1580,3 +1580,117 @@ body {
   .islands-free-layout { grid-template-columns: 1fr; }
   .island-execution,.island-consensus,.island-state,.island-networking,.island-rollup,.island-future { grid-column: auto; }
 }
+
+
+/* Home layout fix pass */
+.hero.dashboard-grid {
+  align-items: stretch;
+  gap: 14px;
+}
+
+.garden-entrance {
+  min-height: 290px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.profile-intro-card {
+  min-height: 290px;
+}
+
+.profile-intro-card .card-title-row {
+  margin-bottom: 4px;
+}
+
+.hero-mini-map {
+  margin-top: 6px;
+  padding: 8px;
+}
+
+.hero-mini-map .garden-node {
+  backdrop-filter: blur(2px);
+}
+
+.section-block {
+  margin-top: 26px;
+}
+
+.stagger {
+  margin-top: 6px;
+}
+
+.stagger > .card {
+  margin-top: 14px;
+}
+
+.path-card {
+  min-height: 108px;
+}
+
+.primary-focus .card-title-row,
+.garden-shell .card-title-row {
+  margin-bottom: 2px;
+}
+
+.secondary-module {
+  opacity: .96;
+}
+
+@media (max-width: 1100px) {
+  .hero-mini-map .garden-node {
+    max-width: 145px;
+    padding: 7px 9px;
+  }
+}
+
+@media (max-width: 900px) {
+  .garden-entrance,
+  .profile-intro-card {
+    min-height: auto;
+  }
+
+  .hero-mini-map {
+    min-height: 300px;
+  }
+
+  .hero-mini-map .map-link {
+    opacity: .6;
+  }
+
+  .hero-mini-map .garden-node {
+    position: static;
+    max-width: none;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .hero-mini-map {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-top: 14px;
+  }
+
+  .hero-title {
+    font-size: clamp(24px, 8.2vw, 34px);
+    line-height: 1.2;
+  }
+
+  .brand-tagline {
+    font-size: .95rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-links {
+    gap: 6px;
+  }
+}
