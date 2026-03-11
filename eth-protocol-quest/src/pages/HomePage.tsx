@@ -260,11 +260,11 @@ export function HomePage() {
           <span className="meta-pill">Protocol Evolution</span>
         </div>
         <div className="protocol-timeline" style={{ marginTop: 10 }}>
-          <article className="protocol-milestone"><span className="timeline-year">2015</span><strong>Frontier</strong><small className="subtle">主网启动，账户模型与 EVM 执行语义确立。</small></article>
-          <article className="protocol-milestone"><span className="timeline-year">2017-2019</span><strong>Byzantium / Istanbul</strong><small className="subtle">预编译、Gas 计价与 opcode 安全边界持续演化。</small></article>
-          <article className="protocol-milestone key"><span className="timeline-year">2022</span><strong>The Merge</strong><small className="subtle">PoS 接管，共识层与执行层正式分工协作。</small></article>
-          <article className="protocol-milestone key"><span className="timeline-year">2024+</span><strong>Rollup-centric</strong><small className="subtle">EIP-4844 带来 blob DA 经济窗口，L2 成本结构重塑。</small></article>
-          <article className="protocol-milestone future"><span className="timeline-year">Next</span><strong>Future Upgrades</strong><small className="subtle">Verkle / Stateless / PBS 持续推进，长期扩展性为核心目标。</small></article>
+          <article className="protocol-milestone"><span className="timeline-year">2015</span><strong>Frontier</strong><small className="subtle">主网启动，账户模型与 EVM 执行语义确立。</small><small className="subtle">关键词：账户 / nonce / gas</small></article>
+          <article className="protocol-milestone"><span className="timeline-year">2017-2019</span><strong>Byzantium / Istanbul</strong><small className="subtle">预编译、Gas 计价与 opcode 安全边界持续演化。</small><small className="subtle">关键词：precompile / repricing / hardfork</small></article>
+          <article className="protocol-milestone key"><span className="timeline-year">2022</span><strong>The Merge</strong><small className="subtle">PoS 接管，共识层与执行层正式分工协作。</small><small className="subtle">影响：验证者经济 / finality / EL-CL Engine API</small></article>
+          <article className="protocol-milestone key"><span className="timeline-year">2024+</span><strong>Rollup-centric</strong><small className="subtle">EIP-4844 带来 blob DA 经济窗口，L2 成本结构重塑。</small><small className="subtle">影响：L2 吞吐 / 数据可用性成本 / batch 策略</small></article>
+          <article className="protocol-milestone future"><span className="timeline-year">Next</span><strong>Future Upgrades</strong><small className="subtle">Verkle / Stateless / PBS 持续推进，长期扩展性为核心目标。</small><small className="subtle">趋势：state witness / proposer-builder 分工 / 抗审查</small></article>
         </div>
       </section>
 

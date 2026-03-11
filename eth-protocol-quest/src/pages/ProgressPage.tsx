@@ -26,8 +26,9 @@ export function ProgressPage() {
   const [highValueOnly, setHighValueOnly] = useState(false);
 
   const doneCount = useMemo(() => Object.values(completed).filter(Boolean).length, [completed]);
-  const totalNodes = knowledgeMap.length || 1;
-  const doneNodes = knowledgeMap.filter((n) => n.status === 'done').length;
+  const safeKnowledgeMap = Array.isArray(knowledgeMap) ? knowledgeMap : [];
+  const totalNodes = safeKnowledgeMap.length || 1;
+  const doneNodes = safeKnowledgeMap.filter((n) => n?.status === 'done').length;
   const completionPct = Math.round((doneNodes / totalNodes) * 100);
   const growthStage = completionPct < 25 ? 'Seed' : completionPct < 50 ? 'Sprout' : completionPct < 75 ? 'Branch' : 'Bloom';
 
@@ -75,8 +76,16 @@ export function ProgressPage() {
 
   const weeklyDone = Math.min(doneCount, 7);
 
+  const diagText = useMemo(() => {
+    try {
+      return JSON.stringify(getSyncDiagnostics());
+    } catch {
+      return '{"sync":"unavailable"}';
+    }
+  }, [syncMsg]);
+
   const executableCards = useMemo(() => {
-    const rows = knowledgeMap.map((n) => {
+    const rows = safeKnowledgeMap.map((n) => {
       const clusterBonus = /gas|final|security|mev/i.test(n.title) ? 2 : 0;
       const score = (n.status === 'todo' ? 3 : n.status === 'learning' ? 2 : 0) + clusterBonus;
       return { ...n, score };
@@ -84,7 +93,7 @@ export function ProgressPage() {
     let out = rows.filter((r) => statusFilter === 'all' ? true : r.status === statusFilter);
     if (highValueOnly) out = out.filter((r) => r.score >= 3);
     return out.sort((a, b) => b.score - a.score || Number(a.status === 'done') - Number(b.status === 'done'));
-  }, [knowledgeMap, statusFilter, highValueOnly]);
+  }, [safeKnowledgeMap, statusFilter, highValueOnly]);
 
   return (
     <main className="container">
@@ -167,7 +176,7 @@ export function ProgressPage() {
           <button className="btn btn-ghost" onClick={async () => { const merged = await syncPullMerge(useProgressStore.getState()); localStorage.setItem('epq-progress-v2', JSON.stringify({ state: merged, version:2 })); alert('已拉取并合并，请刷新页面'); }}>拉取云端</button>
           <button className="btn btn-ghost" onClick={() => exportElementPng('progress-share-card', 'ethcoreplay-progress.png')}>导出分享卡（PNG）</button>
         </div>
-        <small className="subtle">同步诊断：{JSON.stringify(getSyncDiagnostics())}</small>
+        <small className="subtle">同步诊断：{diagText}</small>
         {syncMsg && <div className="notice" style={{ marginTop: 8 }}>{syncMsg}</div>}
       </section>
 

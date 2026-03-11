@@ -1759,3 +1759,24 @@ body {
     padding-top: 16px;
   }
 }
+
+
+/* alignment hotfix */
+.islands-free-layout .island-card strong {
+  min-height: 40px;
+}
+
+.islands-free-layout .island-card .subtle {
+  line-height: 1.5;
+}
+
+.protocol-milestone .subtle {
+  display: block;
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+.protocol-milestone .subtle + .subtle {
+  margin-top: 6px;
+  color: color-mix(in srgb, var(--text-muted) 88%, var(--text-secondary));
+}
