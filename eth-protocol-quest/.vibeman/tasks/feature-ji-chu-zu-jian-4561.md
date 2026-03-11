@@ -2,11 +2,11 @@
 id: feature-ji-chu-zu-jian-4561
 title: 基础组件库：按钮/卡片/标签
 type: feature
-status: in-progress
+status: backlog
 priority: medium
 tags: []
 created_at: '2026-03-11T22:11:03.408Z'
-updated_at: '2026-03-11T22:28:11.507Z'
+updated_at: '2026-03-11T22:34:11.010Z'
 ---
 
 - 在 src/components 创建 Button/Card/Tag
