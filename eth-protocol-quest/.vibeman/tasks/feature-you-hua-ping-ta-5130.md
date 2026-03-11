@@ -2,11 +2,11 @@
 id: feature-you-hua-ping-ta-5130
 title: 优化平台 UI
 type: feature
-status: in-progress
+status: review
 priority: high
 tags: [ui, frontend]
 created_at: '2026-03-11T22:52:49.572Z'
-updated_at: '2026-03-11T22:52:51.588Z'
+updated_at: '2026-03-11T22:59:11.626Z'
 ---
 
 4 个核心问题
