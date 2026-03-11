@@ -2,11 +2,11 @@
 id: feature-ping-tai-zheng-5119
 title: 平台整体优化
 type: feature
-status: review
+status: done
 priority: medium
 tags: [refactor]
 created_at: '2026-03-11T23:02:47.253Z'
-updated_at: '2026-03-11T23:11:41.840Z'
+updated_at: '2026-03-11T23:13:57.000Z'
 ---
 
 1. 首页主价值还可以再更聚焦
