@@ -188,7 +188,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <aside className="card profile-intro-card card-hover">
+        <aside className="card profile-intro-card card-hover garden-node-panel primary-focus">
           <div className="card-title-row">
             <h3 style={{ margin: 0 }}>协议花园地图入口</h3>
             <span className="meta-pill">Garden Nodes</span>
@@ -222,13 +222,13 @@ export function HomePage() {
 
 
 
-      <section className="card card-hover section-block garden-section garden-shell">
+      <section className="card card-hover section-block garden-section garden-shell primary-focus">
         <div className="card-title-row">
           <h3 className="section-title" style={{ margin: 0 }}>Learning Trails · 学习路径</h3>
           <small className="subtle">弱中心化探索：可从任一路径进入</small>
         </div>
         <div className="grid trail-links" style={{ marginTop: 8 }}>
-          <article className="path-card"><strong>Beginner Trail</strong><span className="cta-copy">从 EL/CL/EVM 建立协议直觉</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#el-core">进入路径</Link></div></article>
+          <article className="path-card recommended"><span className="garden-kicker">Recommended</span><strong>Beginner Trail</strong><span className="cta-copy">从 EL/CL/EVM 建立协议直觉</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#el-core">进入路径</Link></div></article>
           <article className="path-card"><strong>EVM Trail</strong><span className="cta-copy">执行语义、Gas、状态变化机制</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#evm-core">进入路径</Link></div></article>
           <article className="path-card"><strong>Consensus Trail</strong><span className="cta-copy">fork choice、finality、验证者经济</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#cl-core">进入路径</Link></div></article>
           <article className="path-card"><strong>Research Trail</strong><span className="cta-copy">Verkle、PBS、跨 Rollup 互操作</span><div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to="/curriculum#verkle-stateless-deep">进入路径</Link></div></article>
@@ -266,14 +266,14 @@ export function HomePage() {
       </section>
 
 
-      <section className="card card-hover garden-section garden-shell">
+      <section className="card card-hover garden-section garden-shell primary-focus">
         <div className="card-title-row">
           <h3 className="section-title" style={{ margin: 0 }}>Topics Islands · 知识岛屿</h3>
           <span className="meta-pill">Protocol Ecology</span>
         </div>
         <div className="grid" style={{ marginTop: 8 }}>
           {topicsIslands.map((t) => (
-            <article key={t.id} className="path-card">
+            <article key={t.id} className={`path-card island-card island-${t.id}`}>
               <strong>{t.title}</strong>
               <small className="subtle">{t.desc}</small>
               <div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to={t.to}>探索节点</Link></div>
@@ -282,15 +282,15 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="card card-hover garden-section garden-shell">
+      <section className="card card-hover garden-section garden-shell secondary-module">
         <div className="card-title-row">
           <h3 className="section-title" style={{ margin: 0 }}>Cross-pollination · 交叉授粉推荐</h3>
           <span className="meta-pill">Related Paths</span>
         </div>
         <div className="grid" style={{ marginTop: 8 }}>
           {crossPollination.map((r) => (
-            <article key={`${r.from}-${r.to}`} className="path-card">
-              <strong>{r.from} → {r.to}</strong>
+            <article key={`${r.from}-${r.to}`} className="path-card pollination-link">
+              <strong>{r.from} <span aria-hidden>→</span> {r.to}</strong>
               <small className="subtle">{r.why}</small>
               <div className="quick-links" style={{ marginTop: 8 }}><Link className="btn btn-ghost" to={r.href}>查看相关节点</Link></div>
             </article>
@@ -299,16 +299,16 @@ export function HomePage() {
       </section>
 
       <div className="stagger">
-      <div className="card card-hover">
-        <h3 className="section-title">今日智能建议</h3>
+      <div className="card card-hover secondary-module">
+        <h3 className="section-title">今日生长建议</h3>
         <div className="notice">{smartRecommendation}</div>
         <p style={{ marginTop: 8 }}><strong>推荐引擎 v3：</strong>{recommendationV3.action}</p>
         <p className="subtle">预计耗时：{recommendationV3.eta} 分钟 · 收益分：{recommendationV3.score} · {recommendationV3.reason}</p>
         <p style={{ marginTop: 10 }}><strong>下一个徽章目标：</strong>{nextBadgeHint}</p>
       </div>
 
-      <div className="card card-hover">
-        <h3 className="section-title">Badge 墙</h3>
+      <div className="card card-hover secondary-module">
+        <h3 className="section-title">Garden Marks（生长印记）</h3>
         <div className="badge-wall">
           {['Starter Badge', 'First Pass', 'Protocol Explorer', 'Wrongbook Warrior'].map((b) => (
             <div key={b} className={`badge-item ${badges.includes(b) ? 'badge-on' : 'badge-off'}`}>
@@ -319,7 +319,7 @@ export function HomePage() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card secondary-module">
         <h3 className="section-title">内容覆盖（持续扩展）</h3>
         <ul>
           <li>执行层：状态树、Gas、交易执行语义、mempool 行为</li>
@@ -329,8 +329,8 @@ export function HomePage() {
         </ul>
       </div>
 
-      <section className="card card-hover">
-        <h3>🔥 新增专题导览（PlotCard 统一体系）</h3>
+      <section className="card card-hover primary-focus">
+        <h3>🔥 新手专题导览（Featured Newcomer Topics）</h3>
         <div className="grid">
           {featuredPlots.map((p) => <PlotCard key={p.id} {...p} status="new" />)}
         </div>
