@@ -2,11 +2,11 @@
 id: ethcoreplay-regression-check
 title: ethcoreplay-regression-check.md
 type: feature
-status: in-progress
+status: backlog
 priority: medium
 tags: []
 created_at: '2026-03-11T22:28:07.215Z'
-updated_at: '2026-03-11T22:28:07.215Z'
+updated_at: '2026-03-11T22:34:13.760Z'
 ---
 
 # 回归检查任务（ETHCorePlay）
