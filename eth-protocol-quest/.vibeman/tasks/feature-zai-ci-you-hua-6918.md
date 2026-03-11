@@ -2,10 +2,11 @@
 id: feature-zai-ci-you-hua-6918
 title: 再次优化 UI
 type: feature
-status: backlog
+status: in-progress
 priority: high
 tags: [frontend, ui]
 created_at: '2026-03-11T22:51:08.694Z'
+updated_at: '2026-03-11T22:51:15.895Z'
 ---
 
 4 个核心问题
