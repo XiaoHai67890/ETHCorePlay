@@ -259,12 +259,12 @@ export function HomePage() {
           <h3 className="section-title" style={{ margin: 0 }}>协议演化时间轴</h3>
           <span className="meta-pill">Protocol Evolution</span>
         </div>
-        <div className="protocol-timeline" style={{ marginTop: 8 }}>
-          <article className="protocol-milestone"><strong>Frontier</strong><small className="subtle">初始执行语义与账户模型。</small></article>
-          <article className="protocol-milestone"><strong>Byzantium / Istanbul</strong><small className="subtle">Gas、opcode 与安全边界持续调整。</small></article>
-          <article className="protocol-milestone"><strong>The Merge</strong><small className="subtle">PoS 共识接管，执行/共识分层清晰。</small></article>
-          <article className="protocol-milestone"><strong>Rollup-centric</strong><small className="subtle">4844 与 DA 经济推动 L2 生态。</small></article>
-          <article className="protocol-milestone"><strong>Future Upgrades</strong><small className="subtle">Verkle、Stateless、PBS 等研究演进。</small></article>
+        <div className="protocol-timeline" style={{ marginTop: 10 }}>
+          <article className="protocol-milestone"><span className="timeline-year">2015</span><strong>Frontier</strong><small className="subtle">主网启动，账户模型与 EVM 执行语义确立。</small></article>
+          <article className="protocol-milestone"><span className="timeline-year">2017-2019</span><strong>Byzantium / Istanbul</strong><small className="subtle">预编译、Gas 计价与 opcode 安全边界持续演化。</small></article>
+          <article className="protocol-milestone key"><span className="timeline-year">2022</span><strong>The Merge</strong><small className="subtle">PoS 接管，共识层与执行层正式分工协作。</small></article>
+          <article className="protocol-milestone key"><span className="timeline-year">2024+</span><strong>Rollup-centric</strong><small className="subtle">EIP-4844 带来 blob DA 经济窗口，L2 成本结构重塑。</small></article>
+          <article className="protocol-milestone future"><span className="timeline-year">Next</span><strong>Future Upgrades</strong><small className="subtle">Verkle / Stateless / PBS 持续推进，长期扩展性为核心目标。</small></article>
         </div>
       </section>
 

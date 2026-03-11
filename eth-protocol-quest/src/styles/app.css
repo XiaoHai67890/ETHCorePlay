@@ -1694,3 +1694,68 @@ body {
     gap: 6px;
   }
 }
+
+
+/* Topics islands + timeline alignment refinement */
+.islands-free-layout {
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.islands-free-layout .island-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.islands-free-layout .island-card .quick-links {
+  margin-top: 10px;
+}
+
+.protocol-timeline {
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.protocol-milestone {
+  padding: 20px 12px 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-surface) 90%, #eef3ff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g-border-1) 18%, transparent);
+  min-height: 132px;
+}
+
+.protocol-milestone strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.timeline-year {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1;
+  border: 1px solid color-mix(in srgb, var(--g-border-1) 30%, transparent);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-surface) 92%, #f4f6ff);
+}
+
+.protocol-milestone.key {
+  box-shadow: inset 0 0 0 1px rgba(111,114,246,.28), 0 6px 16px rgba(111,114,246,.08);
+}
+
+.protocol-milestone.future {
+  border-style: dashed;
+  border-width: 1px;
+  border-color: color-mix(in srgb, #6f72f6 35%, var(--g-border-1));
+}
+
+@media (max-width: 900px) {
+  .protocol-milestone {
+    min-height: auto;
+    padding-top: 16px;
+  }
+}
