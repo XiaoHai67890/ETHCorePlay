@@ -2,10 +2,11 @@
 id: feature-you-hua-ui-6266
 title: 优化 UI
 type: feature
-status: backlog
+status: in-progress
 priority: medium
 tags: [ui, frontend]
 created_at: '2026-03-11T22:27:59.515Z'
+updated_at: '2026-03-11T22:28:14.062Z'
 ---
 
 1. 首页气质从“课程目录”改成“花园入口”
