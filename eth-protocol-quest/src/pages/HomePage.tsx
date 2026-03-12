@@ -149,11 +149,76 @@ export function HomePage() {
   ];
 
   const timelineMilestones = [
-    { id:'frontier', year:'2015', title:'Frontier', summary:'主网启动，账户模型与 EVM 执行语义确立。', detail:'内容聚焦：账户/nonce/gas 基础，初代执行语义。', link:'https://forkcast.org/upgrades?focus=frontier' },
-    { id:'istanbul', year:'2017-2019', title:'Byzantium / Istanbul', summary:'预编译、Gas 计价与 opcode 安全边界持续演化。', detail:'内容聚焦：opcode repricing、预编译、硬分叉治理。', link:'https://forkcast.org/upgrades?focus=byzantium-istanbul' },
-    { id:'merge', year:'2022', title:'The Merge', summary:'PoS 接管，共识层与执行层正式分工协作。', detail:'内容聚焦：EL-CL 分层、验证者经济与 finality。', link:'https://forkcast.org/upgrades?focus=merge' },
-    { id:'rollup', year:'2024+', title:'Rollup-centric', summary:'EIP-4844 带来 blob DA 经济窗口，L2 成本结构重塑。', detail:'内容聚焦：blob DA、batch economics、L2 吞吐。', link:'https://forkcast.org/upgrades?focus=rollup-centric' },
-    { id:'future', year:'Next', title:'Future Upgrades', summary:'Verkle / Stateless / PBS 持续推进，长期扩展性为核心目标。', detail:'内容聚焦：state witness、PBS 分工、抗审查路径。', link:'https://forkcast.org/upgrades?focus=future' }
+    {
+      id:'frontier',
+      year:'2015',
+      title:'Frontier',
+      summary:'主网启动，账户模型与 EVM 执行语义确立。',
+      detail:'Ethereum 主网正式上线，最小可用协议开始在真实经济环境中运行。',
+      highlights:[
+        '确立账户模型（EOA / Contract）与 nonce、gas 基础规则。',
+        'EVM 字节码执行成为核心执行环境，交易状态转换路径被定义。',
+        'PoW 出块与全网同步在真实网络中验证，暴露客户端一致性问题。'
+      ],
+      impact:'奠定执行层最底层心智模型：交易 → 执行 → 状态变更。',
+      link:'https://forkcast.org/upgrades?focus=frontier'
+    },
+    {
+      id:'istanbul',
+      year:'2017-2019',
+      title:'Byzantium / Istanbul',
+      summary:'预编译、Gas 计价与 opcode 安全边界持续演化。',
+      detail:'这一阶段通过多次硬分叉持续修正“性能、安全、开发者体验”的平衡。',
+      highlights:[
+        '新增/调整预编译（precompile），降低特定密码学操作开销。',
+        '多轮 opcode gas repricing，缓解 DoS 向量与资源滥用。',
+        '客户端执行细节与一致性测试持续收敛，协议治理进入常态化。'
+      ],
+      impact:'理解 gas 不是固定常量，而是伴随攻击面与硬件现实持续校准。',
+      link:'https://forkcast.org/upgrades?focus=byzantium-istanbul'
+    },
+    {
+      id:'merge',
+      year:'2022',
+      title:'The Merge',
+      summary:'PoS 接管，共识层与执行层正式分工协作。',
+      detail:'以太坊从 PoW 迁移至 PoS，EL/CL 双客户端架构成为主流运行范式。',
+      highlights:[
+        'PoW 退出，验证者与质押经济成为安全预算核心。',
+        'EL 专注交易执行，CL 专注 fork choice 与 finality。',
+        'Engine API 成为 EL/CL 协作主干，客户端组合复杂度上升。'
+      ],
+      impact:'协议理解从“单层链”升级为“分层协作系统”。',
+      link:'https://forkcast.org/upgrades?focus=merge'
+    },
+    {
+      id:'rollup',
+      year:'2024+',
+      title:'Rollup-centric',
+      summary:'EIP-4844 带来 blob DA 经济窗口，L2 成本结构重塑。',
+      detail:'以太坊明确走向 Rollup-centric Roadmap，L1 聚焦数据可用性与结算。',
+      highlights:[
+        'EIP-4844 引入 blob-carrying transactions，形成独立 DA 成本通道。',
+        'L2 batch 提交成本下降，吞吐与用户体验改善空间扩大。',
+        '从“L1 执行扩容”转向“L1 结算 + L2 执行”的分工模式。'
+      ],
+      impact:'学习重点转向 DA economics、跨层消息与安全边界。',
+      link:'https://forkcast.org/upgrades?focus=rollup-centric'
+    },
+    {
+      id:'future',
+      year:'Next',
+      title:'Future Upgrades',
+      summary:'Verkle / Stateless / PBS 持续推进，长期扩展性为核心目标。',
+      detail:'后续升级围绕状态规模、出块流程、抗审查与节点运行门槛优化。',
+      highlights:[
+        'Verkle/Stateless：降低状态证明成本，优化节点验证路径。',
+        'PBS / Inclusion 机制：降低 MEV 中心化与审查风险。',
+        '持续推进客户端多样性与协议韧性，保持开放演化。'
+      ],
+      impact:'协议进入“长期演化工程”，没有终局版本，只有持续迭代。',
+      link:'https://forkcast.org/upgrades?focus=future'
+    }
   ];
   const [activeMilestone, setActiveMilestone] = useState(timelineMilestones[2]);
 
@@ -280,6 +345,10 @@ export function HomePage() {
         <div className="callout insight" style={{ marginTop: 10 }}>
           <strong>{activeMilestone.title} · 深入内容</strong>
           <p className="subtle" style={{ margin: '6px 0' }}>{activeMilestone.detail}</p>
+          <ul style={{ marginTop: 6 }}>
+            {activeMilestone.highlights.map((h: string) => <li key={h}>{h}</li>)}
+          </ul>
+          <p className="subtle" style={{ marginTop: 6 }}><strong>学习价值：</strong>{activeMilestone.impact}</p>
           <a className="btn btn-ghost" href={activeMilestone.link} target="_blank" rel="noreferrer">前往 Forkcast 查看升级详情</a>
         </div>
       </section>
