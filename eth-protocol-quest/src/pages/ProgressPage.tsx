@@ -1,120 +1,120 @@
+import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useProgressStore } from '../game/store';
-import { Trash2, Activity, Award, BookX, CheckCircle } from 'lucide-react';
-import { CustomSelect } from '../components/CustomSelect';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { MetricCard } from '../components/ui/MetricCard';
 
 export function ProgressPage() {
   const { xp, completed, wrongBook, clearWrongBook, knowledgeMap, setKnowledgeStatus } = useProgressStore();
 
-  const doneCount = useMemo(() => Object.values(completed).filter(Boolean).length, [completed]);
+  const completedLevels = useMemo(() => Object.values(completed).filter(Boolean).length, [completed]);
+  const totalNodes = knowledgeMap.length || 1;
+  const doneNodes = knowledgeMap.filter((node) => node.status === 'done').length;
+  const completionPct = Math.round((doneNodes / totalNodes) * 100);
+
   const domainGroups = useMemo(() => {
-    return knowledgeMap.reduce<Record<string, typeof knowledgeMap>>((acc, n) => {
-      if (!acc[n.domain]) acc[n.domain] = [];
-      acc[n.domain].push(n);
+    return knowledgeMap.reduce<Record<string, typeof knowledgeMap>>((acc, node) => {
+      if (!acc[node.domain]) acc[node.domain] = [];
+      acc[node.domain].push(node);
       return acc;
     }, {});
   }, [knowledgeMap]);
 
-  const selectOptions = [
-    { value: 'todo', label: '待学习' },
-    { value: 'learning', label: '学习中' },
-    { value: 'done', label: '已掌握' }
-  ];
+  const weakDomains = useMemo(() => {
+    return Object.entries(domainGroups)
+      .map(([domain, nodes]) => {
+        const done = nodes.filter((node) => node.status === 'done').length;
+        const pct = Math.round((done / nodes.length) * 100);
+        return { domain, pct, total: nodes.length, done };
+      })
+      .sort((a, b) => a.pct - b.pct);
+  }, [domainGroups]);
 
   return (
-    <main className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2>学习进度总览</h2>
+    <main className="container container-wide">
+      <div className="page-head">
+        <nav className="breadcrumb" aria-label="breadcrumb">
+          <Link to="/">首页</Link> / <span>总览</span>
+        </nav>
+        <h2>总览</h2>
       </div>
 
-      <div className="grid">
-        <MetricCard
-          icon={<Activity size={32} />}
-          label="总 XP"
-          value={xp}
-          color="#2f6b47"
-          bgGradient="linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(218,244,223,0.4) 100%)"
-          iconBg="#daf4df"
-          shadowColor="rgba(47,107,71,0.1)"
-        />
-        <MetricCard
-          icon={<Award size={32} />}
-          label="已通关"
-          value={<>{doneCount} <span style={{ fontSize: '1rem', fontWeight: 500 }}>关</span></>}
-          color="#5a76dc"
-          bgGradient="linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(231,247,255,0.4) 100%)"
-          iconBg="#e7f7ff"
-          shadowColor="rgba(90,118,220,0.1)"
-        />
-        <MetricCard
-          icon={<BookX size={32} />}
-          label="错题数量"
-          value={wrongBook.length}
-          color="#d97706"
-          bgGradient="linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(254,243,199,0.4) 100%)"
-          iconBg="#fef3c7"
-          shadowColor="rgba(217,119,6,0.1)"
-        />
-      </div>
-
-      <Card>
-        <h3>知识图谱（协议全栈）</h3>
-        <div className="grid">
-          {Object.entries(domainGroups).map(([domain, nodes]) => (
-            <div key={domain} style={{ background: 'rgba(255,255,255,0.5)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.8)' }}>
-              <strong style={{ display: 'block', marginBottom: '16px', color: 'var(--primary-hover)', fontSize: '1.1rem', borderBottom: '2px solid rgba(47,107,71,0.1)', paddingBottom: '8px' }}>{domain}</strong>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {nodes.map((n) => (
-                  <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px dashed rgba(47,107,71,0.1)' }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>{n.title}</span>
-                    <CustomSelect 
-                      value={n.status} 
-                      onChange={(val) => setKnowledgeStatus(n.id, val as any)}
-                      options={selectOptions}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3>错题本</h3>
-          {wrongBook.length > 0 && (
-            <Button variant="ghost" onClick={clearWrongBook} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-              <Trash2 size={16} /> 清空错题本
-            </Button>
-          )}
-        </div>
-        
-        {wrongBook.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-            <CheckCircle size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-            <p>暂无错题，继续闯关吧。</p>
+      <section className="tri-layout progress-layout">
+        <aside className="card tri-left">
+          <h3>KPI</h3>
+          <div className="kpi-grid compact">
+            <div className="kpi"><small>总 XP</small><br /><b>{xp}</b></div>
+            <div className="kpi"><small>关卡</small><br /><b>{completedLevels}</b></div>
+            <div className="kpi"><small>节点</small><br /><b>{doneNodes}/{totalNodes}</b></div>
+            <div className="kpi"><small>错题</small><br /><b>{wrongBook.length}</b></div>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {wrongBook.map((w) => (
-              <div key={`${w.levelId}-${w.questionId}`} style={{ background: 'rgba(255,255,255,0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(47,107,71,0.1)' }}>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                  <Badge variant="warning">Lv.{w.levelId}</Badge>
-                  <strong>{w.prompt}</strong>
-                </div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.95rem', paddingLeft: '8px', borderLeft: '3px solid #fef3c7' }}>
-                  解析：{w.explanation}
-                </div>
-              </div>
+          <div style={{ marginTop: 10 }}>
+            <small>完成度 {completionPct}%</small>
+            <div className="progress-rail" style={{ marginTop: 6 }}>
+              <div className="progress-fill" style={{ width: `${completionPct}%` }} />
+            </div>
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link className="btn btn-ghost" to="/curriculum">课程</Link>
+            <Link className="btn btn-ghost" to="/map">地图</Link>
+          </div>
+        </aside>
+
+        <article className="card tri-main">
+          <h3>领域明细</h3>
+          <div className="domain-stack">
+            {Object.entries(domainGroups).map(([domain, nodes]) => (
+              <details key={domain} open>
+                <summary>
+                  <strong>{domain}</strong> · {nodes.filter((node) => node.status === 'done').length}/{nodes.length}
+                </summary>
+                <ul>
+                  {nodes.map((node) => (
+                    <li key={node.id} className="domain-item">
+                      <span>{node.title}</span>
+                      <select value={node.status} onChange={(e) => setKnowledgeStatus(node.id, e.target.value as any)}>
+                        <option value="todo">todo</option>
+                        <option value="learning">learning</option>
+                        <option value="done">done</option>
+                      </select>
+                    </li>
+                  ))}
+                </ul>
+              </details>
             ))}
           </div>
-        )}
-      </Card>
+        </article>
+
+        <aside className="card tri-right">
+          <h3>优先领域</h3>
+          <ol>
+            {weakDomains.slice(0, 5).map((row) => (
+              <li key={row.domain}>
+                {row.domain}：{row.pct}%（{row.done}/{row.total}）
+              </li>
+            ))}
+          </ol>
+
+          <section style={{ marginTop: 14 }}>
+            <div className="card-title-row">
+              <h4 style={{ margin: 0 }}>错题</h4>
+              {wrongBook.length > 0 ? (
+                <button className="btn btn-ghost" onClick={clearWrongBook}>清空</button>
+              ) : null}
+            </div>
+            {wrongBook.length === 0 ? (
+              <p className="subtle">暂无错题。</p>
+            ) : (
+              <ul>
+                {wrongBook.slice(0, 6).map((item) => (
+                  <li key={`${item.levelId}-${item.questionId}`}>
+                    <strong>Lv{item.levelId}</strong> {item.prompt}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </aside>
+      </section>
     </main>
   );
 }
+

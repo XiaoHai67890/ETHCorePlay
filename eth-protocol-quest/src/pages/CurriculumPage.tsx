@@ -1,30 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useProgressStore } from '../game/store';
+import { Link } from 'react-router-dom';
 import { foundationChapters } from '../data/curriculum/foundations';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
-import { learningPaths } from '../data/learningPaths';
-import { LearningPathNode } from '../components/curriculum/LearningPathNode';
-import { ChapterItem } from '../components/curriculum/ChapterItem';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { SearchInput } from '../components/ui/SearchInput';
-import { ProgressBar } from '../components/ui/ProgressBar';
+import { chapterDependencies } from '../data/dependencies';
 
 type DoneMap = Record<string, boolean>;
-const STORAGE_KEY = 'epq_curriculum_done_v1';
+const STORAGE_KEY = 'epq_curriculum_done_v3';
 
 export function CurriculumPage() {
   const [done, setDone] = useState<DoneMap>({});
   const [onlyPending, setOnlyPending] = useState(false);
   const [query, setQuery] = useState('');
-  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setDone(JSON.parse(raw));
     } catch {
-      // ignore
+      // ignore bad storage
     }
   }, []);
 
@@ -32,98 +28,159 @@ export function CurriculumPage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(done));
   }, [done]);
 
-  const allChapters = useMemo(() => [...foundationChapters, ...deepDiveChapters], []);
-
   const chapters = useMemo(() => {
-    const base = onlyPending ? allChapters.filter((c) => !done[c.id]) : allChapters;
-    const q = query.trim().toLowerCase();
-    if (!q) return base;
-    return base.filter((c) => {
-      const blob = [
-        c.title,
-        c.objective,
-        ...c.glossary,
-        ...c.sections.flatMap((s) => [s.heading, ...s.points]),
-        ...c.practice.flatMap((p) => [p.title, ...p.steps])
-      ].join(' ').toLowerCase();
-      return blob.includes(q);
-    });
-  }, [onlyPending, done, allChapters, query]);
+    let base = onlyPending ? allChapters.filter((c) => !done[c.id]) : allChapters;
+    if (query.trim()) {
+      const q = query.trim().toLowerCase();
+      base = base.filter((chapter) => {
+        const haystack = [chapter.title, chapter.objective, ...chapter.glossary].join(' ').toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+    return base;
+  }, [allChapters, done, onlyPending, query]);
+
+  useEffect(() => {
+    if (!chapters.length) {
+      setActiveId(null);
+      return;
+    }
+    if (!activeId || !chapters.some((c) => c.id === activeId)) setActiveId(chapters[0].id);
+  }, [chapters, activeId]);
+
+  const activeChapter = useMemo(
+    () => chapters.find((chapter) => chapter.id === activeId) || null,
+    [chapters, activeId]
+  );
 
   const completedCount = Object.values(done).filter(Boolean).length;
-  const progressPct = Math.round((completedCount / allChapters.length) * 100);
+  const progressPct = allChapters.length ? Math.round((completedCount / allChapters.length) * 100) : 0;
 
-  const toggleDone = (id: string) => setDone((s) => ({ ...s, [id]: !s[id] }));
+  const toggleDone = (id: string) => {
+    setDone((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
-  const pathBoard = useMemo(() => {
-    const basicDone = ['el-core', 'cl-core', 'evm-core', 'tx-lifecycle-core'].filter((id) => done[id]).length;
-    const builderDone = ['engine-api-core', 'eip-workflow-core', 'client-testing-core'].filter((id) => done[id]).length;
-    const coreDone = ['testing-systems-core', 'security-core', 'l2-da-core', 'el-deep-state-trie', 'cl-deep-forkchoice-finality'].filter((id) => done[id]).length;
-    return { basicDone, builderDone, coreDone };
-  }, [done]);
+  const pendingCount = allChapters.length - completedCount;
 
   return (
-    <main className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2>系统化学习课程</h2>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Button variant="ghost" onClick={() => setOnlyPending((v) => !v)}>
-            {onlyPending ? '显示全部章节' : '仅看未完成'}
-          </Button>
-        </div>
+    <main className="container container-wide">
+      <div className="page-head">
+        <nav className="breadcrumb" aria-label="breadcrumb">
+          <Link to="/">首页</Link> / <span>课程</span>
+        </nav>
+        <h2>课程</h2>
       </div>
 
-      <Card>
-        <h3>学习路径：无限花园的生长</h3>
-        <p>从一颗种子开始，逐步成长为以太坊协议森林中的参天大树。</p>
-        
-        <div className="garden-path">
-          {learningPaths.map((path, idx) => {
-            const isBasic = idx === 0;
-            const isBuilder = idx === 1;
-            const progress = isBasic ? pathBoard.basicDone : isBuilder ? pathBoard.builderDone : pathBoard.coreDone;
-            const total = isBasic ? 4 : isBuilder ? 3 : 5;
+      <section className="tri-layout curriculum-layout">
+        <aside className="card tri-left curriculum-sidebar">
+          <h3>章节目录</h3>
+          <div className="layout-filters">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="搜索章节"
+              aria-label="搜索章节"
+            />
+            <button className="btn btn-ghost" onClick={() => setOnlyPending((v) => !v)}>
+              {onlyPending ? '显示全部' : '仅看未完成'}
+            </button>
+          </div>
+          <div className="curriculum-list">
+            {chapters.map((chapter, idx) => (
+              <button
+                key={chapter.id}
+                className={`curriculum-item ${activeId === chapter.id ? 'active' : ''}`}
+                onClick={() => setActiveId(chapter.id)}
+              >
+                <span>{idx + 1}. {chapter.title}</span>
+                <small>{done[chapter.id] ? '已完成' : chapter.level}</small>
+              </button>
+            ))}
+          </div>
+        </aside>
 
-            return (
-              <LearningPathNode 
-                key={path.id}
-                path={path}
-                index={idx}
-                progress={progress}
-                total={total}
-              />
-            );
-          })}
-        </div>
-      </Card>
+        <article className="card tri-main curriculum-content">
+          {!activeChapter ? (
+            <p className="subtle">暂无章节。</p>
+          ) : (
+            <>
+              <div className="card-title-row">
+                <h3 style={{ margin: 0 }}>{activeChapter.title}</h3>
+                <span className="meta-pill">{activeChapter.level}</span>
+              </div>
+              <p>{activeChapter.objective}</p>
 
-      <Card>
-        <h3>章节检索</h3>
-        <SearchInput 
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索知识点：如 Engine API / Finality / Gas / Rollup..."
-          resultCount={query ? chapters.length : undefined}
-        />
-      </Card>
+              <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={!!done[activeChapter.id]}
+                  onChange={() => toggleDone(activeChapter.id)}
+                />
+                标记本章已完成
+              </label>
 
-      <ProgressBar progress={progressPct} label={`总体进度 ${progressPct}%`} />
+              <section style={{ marginTop: 16 }}>
+                <h4>章节结构</h4>
+                {activeChapter.sections.map((section, i) => (
+                  <details key={`${activeChapter.id}-sec-${i}`} open={i === 0}>
+                    <summary>{section.heading}</summary>
+                    <ul>
+                      {section.points.map((point) => <li key={point}>{point}</li>)}
+                    </ul>
+                  </details>
+                ))}
+              </section>
 
-      <div className="chapter-list">
-        {chapters.map((chapter, idx) => (
-          <ChapterItem
-            key={chapter.id}
-            chapter={chapter}
-            index={idx}
-            isExpanded={expandedChapter === chapter.id}
-            isDone={!!done[chapter.id]}
-            onToggleExpand={() => setExpandedChapter(expandedChapter === chapter.id ? null : chapter.id)}
-            onToggleDone={() => toggleDone(chapter.id)}
-            allChapters={allChapters}
-            doneMap={done}
-          />
-        ))}
-      </div>
+              <section style={{ marginTop: 16 }}>
+                <h4>实战任务</h4>
+                {activeChapter.practice.map((task) => (
+                  <div key={task.title} className="practice-block">
+                    <strong>{task.title}</strong>
+                    <ol>
+                      {task.steps.map((step) => <li key={step}>{step}</li>)}
+                    </ol>
+                  </div>
+                ))}
+              </section>
+            </>
+          )}
+        </article>
+
+        <aside className="card tri-right curriculum-sidepanel">
+          <h3>概览</h3>
+          <div className="kpi-grid compact">
+            <div className="kpi"><small>完成</small><br /><b>{completedCount}</b></div>
+            <div className="kpi"><small>待完成</small><br /><b>{pendingCount}</b></div>
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <small>总体进度 {progressPct}%</small>
+            <div className="progress-rail" style={{ marginTop: 6 }}>
+              <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+
+          {activeChapter ? (
+            <section style={{ marginTop: 14 }}>
+              <h4>当前章节</h4>
+              <p>{activeChapter.title}</p>
+              <div className="chips">
+                {(chapterDependencies[activeChapter.id] || []).length ? (
+                  (chapterDependencies[activeChapter.id] || []).map((dep) => (
+                    <span key={`${activeChapter.id}-${dep}`} className="chip">前置 {dep}</span>
+                  ))
+                ) : (
+                  <span className="chip">无前置</span>
+                )}
+              </div>
+              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Link className="btn btn-ghost" to="/map">地图</Link>
+                <Link className="btn btn-ghost" to="/progress">总览</Link>
+              </div>
+            </section>
+          ) : null}
+        </aside>
+      </section>
     </main>
   );
 }
+
