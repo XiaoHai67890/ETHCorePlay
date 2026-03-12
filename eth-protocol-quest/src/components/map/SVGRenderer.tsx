@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useProgressStore } from '../../game/store';
+import { CustomSelect } from '../CustomSelect';
 
 type LOD = 'zone' | 'plot' | 'edge';
 type Node = { id: string; name: string; zone: string; x: number; y: number };
@@ -27,6 +28,11 @@ const edgeDefs: Array<{ a: number; b: number; type: EdgeType }> = [
   { a: 5, b: 6, type: 'related' },
   { a: 5, b: 7, type: 'research' },
   { a: 1, b: 7, type: 'research' }
+];
+const pathModeOptions = [
+  { value: 'newbie', label: '新手路径', hint: '基础节点优先' },
+  { value: 'builder', label: '开发者路径', hint: '偏工程实现' },
+  { value: 'core', label: '核心贡献路径', hint: '高阶链路与治理' }
 ];
 
 export function SVGRenderer() {
@@ -99,11 +105,12 @@ export function SVGRenderer() {
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索节点：execution / engine / security" style={{ padding: 8, borderRadius: 10, border: '1px solid var(--border-default)' }} />
         <button className="btn btn-ghost" onClick={locateNode}>定位节点</button>
         <button className="btn btn-ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>重置视图</button>
-        <select value={pathMode} onChange={(e) => setPathMode(e.target.value as any)} aria-label="学习路径">
-          <option value="newbie">新手路径</option>
-          <option value="builder">开发者路径</option>
-          <option value="core">核心贡献路径</option>
-        </select>
+        <CustomSelect
+          value={pathMode}
+          onChange={(next) => setPathMode(next as any)}
+          options={pathModeOptions}
+          ariaLabel="学习路径"
+        />
       </div>
 
       <div className="chips" style={{ marginBottom: 8 }}>

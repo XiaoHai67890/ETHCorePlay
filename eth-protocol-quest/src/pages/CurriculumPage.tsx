@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CustomSelect } from '../components/CustomSelect';
 import { chapterMap } from '../data/chapterMap';
 import { chapterAssessments as localAssessments } from '../data/chapterAssessments';
 import { deepDiveChapters } from '../data/curriculum/deepdives';
@@ -17,6 +18,28 @@ import { getLang } from '../services/i18n';
 
 type DoneMap = Record<string, boolean>;
 const COLLAPSED_KEY = 'epq_curriculum_collapsed_domains_v1';
+const curriculumLevelOptions = [
+  { value: 'all', label: '全部难度', hint: '显示基础到进阶全部章节' },
+  { value: 'beginner', label: 'Beginner', hint: '适合打底' },
+  { value: 'intermediate', label: 'Intermediate', hint: '进入中段机制' },
+  { value: 'advanced', label: 'Advanced', hint: '只看深度章节' }
+];
+const curriculumDomainOptions = [
+  { value: 'all', label: '全部领域', hint: '跨域浏览全量章节' },
+  { value: 'EL', label: 'EL', hint: '执行与状态' },
+  { value: 'CL', label: 'CL', hint: '共识与最终性' },
+  { value: 'EVM', label: 'EVM', hint: '执行语义与字节码' },
+  { value: 'EIP', label: 'EIP', hint: '提案与规范' },
+  { value: 'Client', label: 'Client', hint: '客户端协同' },
+  { value: 'Testing', label: 'Testing', hint: '验证与回归' },
+  { value: 'Security', label: 'Security', hint: '风险与防护' },
+  { value: 'L2', label: 'L2', hint: '扩容与 DA' }
+];
+const curriculumSortOptions = [
+  { value: 'default', label: '默认排序', hint: '按主线路径展开' },
+  { value: 'difficulty', label: '按难度', hint: '从浅到深浏览' },
+  { value: 'progress', label: '按完成状态', hint: '优先看未完成' }
+];
 
 function chapterDomain(chapterId: string): 'EL' | 'CL' | 'EVM' | 'Networking' | 'Economics' | 'EIP' | 'Client' | 'Testing' | 'Security' | 'L2' {
   if (chapterId.startsWith('el-') || chapterId.includes('tx-')) return 'EL';
@@ -417,31 +440,107 @@ export function CurriculumPage() {
   }, [done]);
 
   return (
-    <main className="container">
-      <Link to="/">← 首页</Link>
-      <h2>{lang==='zh'?'系统化学习课程（基础→进阶）':'Curriculum (Foundation → Advanced)'}</h2>
-      <p className="subtle">Garden &gt; Trails &gt; Chapters · 你可以从不同路径进入同一知识点。</p>
-      <p>{lang==='zh'?'学习优先：先完整掌握章节，再用闯关做检验。':'Learning first: master chapters, then validate with assessments.'}</p>
+    <main className="container container-wide">
+      <div className="page-head curriculum-page-head">
+        <nav className="breadcrumb" aria-label="breadcrumb">
+          <Link to="/">首页</Link> / <span>{lang==='zh'?'课程':'Curriculum'}</span>
+        </nav>
+        <h2>{lang==='zh'?'系统化学习课程（基础→进阶）':'Curriculum (Foundation → Advanced)'}</h2>
+        <p className="subtle">Garden &gt; Trails &gt; Chapters · 现在左栏负责路径与导航，主栏只负责学习内容本身。</p>
+      </div>
 
-      <div className="curriculum-layout">
-        <aside className="card trail-sidebar">
-          <h3 style={{ marginTop: 0 }}>Trail 导航</h3>
-          {trailCurrent && <p><strong>当前节点：</strong><a href={`#${trailCurrent.id}`}>{trailCurrent.title}</a></p>}
-          <div style={{ marginBottom: 8 }}>
-            <small>路径进度：{progressPct}%</small>
-            <div className="progress-rail" style={{ marginTop: 4 }}><div className="progress-fill" style={{ width: `${progressPct}%` }} /></div>
+      <div className="curriculum-layout curriculum-layout-shell">
+        <aside className="card trail-sidebar curriculum-side-rail">
+          <div className="card-title-row">
+            <h3 style={{ margin: 0 }}>Trail 导航</h3>
+            <span className="meta-pill">{progressPct}%</span>
           </div>
-          <div><strong>上游前置</strong><ul>{trailUpstream.length ? trailUpstream.map((c:any)=><li key={c.id}><a href={`#${c.id}`}>{c.title}</a></li>) : <li>无</li>}</ul></div>
-          <div><strong>下游延伸</strong><ul>{trailDownstream.length ? trailDownstream.map((c:any)=><li key={c.id}><a href={`#${c.id}`}>{c.title}</a></li>) : <li>暂无</li>}</ul></div>
-          <div style={{ marginTop: 8 }}><strong>路径小地图</strong>
+          {trailCurrent && <p><strong>当前节点：</strong><a href={`#${trailCurrent.id}`}>{trailCurrent.title}</a></p>}
+          <div style={{ marginBottom: 12 }}>
+            <small>路径进度</small>
+            <div className="progress-rail" style={{ marginTop: 6 }}><div className="progress-fill" style={{ width: `${progressPct}%` }} /></div>
+          </div>
+          <div className="curriculum-side-block">
+            <strong>上游前置</strong>
+            <ul>{trailUpstream.length ? trailUpstream.map((c:any)=><li key={c.id}><a href={`#${c.id}`}>{c.title}</a></li>) : <li>无</li>}</ul>
+          </div>
+          <div className="curriculum-side-block">
+            <strong>下游延伸</strong>
+            <ul>{trailDownstream.length ? trailDownstream.map((c:any)=><li key={c.id}><a href={`#${c.id}`}>{c.title}</a></li>) : <li>暂无</li>}</ul>
+          </div>
+          <div className="curriculum-side-block">
+            <strong>路径小地图</strong>
             <div className="trail-mini-map">
               {trailNodes.map((c:any) => <a id={`trail-node-${c.id}`} key={c.id} href={`#${c.id}`} className={`trail-mini-node ${trailCurrent?.id===c.id?'active':''} ${done[c.id]?'done':''}`}>{c.title}</a>)}
+            </div>
+          </div>
+          <div className="curriculum-side-block">
+            <strong>筛选器</strong>
+            <div className="curriculum-side-filters">
+              <CustomSelect
+                value={levelFilter}
+                onChange={(next) => setLevelFilter(next as any)}
+                options={curriculumLevelOptions}
+                ariaLabel="课程难度筛选"
+                fullWidth
+              />
+              <CustomSelect
+                value={domainFilter}
+                onChange={(next) => setDomainFilter(next as any)}
+                options={curriculumDomainOptions}
+                ariaLabel="课程领域筛选"
+                fullWidth
+              />
+              <CustomSelect
+                value={sortMode}
+                onChange={(next) => setSortMode(next as any)}
+                options={curriculumSortOptions}
+                ariaLabel="课程排序方式"
+                fullWidth
+              />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="检索章节、术语、机制"
+              />
+            </div>
+            <small className="subtle">当前命中章节：{chapters.length}</small>
+          </div>
+          <div className="curriculum-side-block">
+            <strong>学习路径</strong>
+            <div className="curriculum-path-stack">
+              {learningPaths.map((path) => (
+                <article key={path.id} className="curriculum-path-card">
+                  <strong>{path.title}</strong>
+                  <small>{path.audience}</small>
+                  <div className="chips">
+                    {path.milestones.slice(0, 3).map((milestone) => <span key={milestone} className="chip">{milestone}</span>)}
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </aside>
 
         <div className="curriculum-main">
       {milestoneToast && <div className="toast milestone-burst">{milestoneToast}</div>}
+
+      <section className="card curriculum-hero-card">
+        <div className="card-title-row">
+          <div>
+            <p className="home-kicker">Curriculum Flow</p>
+            <h3 style={{ marginBottom: 6 }}>主栏只保留课程主线，不再让路径推荐占住中间区域</h3>
+          </div>
+          <span className="meta-pill">{completedCount}/{allChapters.length}</span>
+        </div>
+        <p className="subtle">学习优先：先完整掌握章节，再用测评与练习做检验。左侧已经收纳了路径、筛选器和小地图。</p>
+        <div className="chips">
+          <span className="chip">完成章节：{completedCount}/{allChapters.length}</span>
+          <span className="chip">平均测评分：{avgScore}%</span>
+          <span className="chip">错题数：{wrongBook.length}</span>
+          <span className="chip">已获徽章：{badges.length}</span>
+        </div>
+      </section>
 
       <section className="card garden-shell">
         <h3>课程质量体系看板</h3>
@@ -465,55 +564,6 @@ export function CurriculumPage() {
           <span className="chip">搜索失败词：{Object.keys(telemetry.searchMiss || {}).length}</span>
         </div>
       </section>
-
-      <section className="card">
-        <h3>章节知识点检索</h3>
-        <div className="filter-row">
-          <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as any)}>
-            <option value="all">全部难度</option><option value="beginner">beginner</option><option value="intermediate">intermediate</option><option value="advanced">advanced</option>
-          </select>
-          <select value={domainFilter} onChange={(e) => setDomainFilter(e.target.value as any)}>
-            <option value="all">全部领域</option><option value="EL">EL</option><option value="CL">CL</option><option value="EVM">EVM</option><option value="EIP">EIP</option><option value="Client">Client</option><option value="Testing">Testing</option><option value="Security">Security</option><option value="L2">L2</option>
-          </select>
-          <select value={sortMode} onChange={(e) => setSortMode(e.target.value as any)}>
-            <option value="default">默认排序</option><option value="difficulty">按难度</option><option value="progress">按完成状态</option>
-          </select>
-        </div>
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="输入关键词：如 Engine API / Finality / Gas / Rollup"
-          style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #cde3d2' }}
-        />
-        <small>当前命中章节：{chapters.length}（支持别名检索：pbs/blob/aa/verkle/mev/eof/lst/lrt）</small>
-      </section>
-
-      <section className="card">
-        <h3>学习概览快照</h3>
-        <div className="chips">
-          <span className="chip">完成章节：{completedCount}/{allChapters.length}</span>
-          <span className="chip">平均测评分：{avgScore}%</span>
-          <span className="chip">错题数：{wrongBook.length}</span>
-          <span className="chip">已获徽章：{badges.length}</span>
-        </div>
-      </section>
-
-      <section className="card">
-        <h3>学习路径推荐</h3>
-        <div className="notice" style={{ marginBottom: 8 }}>Related Paths：如果你在执行层卡住，可以切到共识或客户端工程路径再回跳。</div>
-        <div className="grid">
-          {learningPaths.map((path) => (
-            <div key={path.id} className="level">
-              <strong>{path.title}</strong>
-              <small>{path.audience}</small>
-              <ul>
-                {path.milestones.map((m) => <li key={m}>{m}</li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
-
 
       <section className="card">
         <h3>按领域分组折叠</h3>

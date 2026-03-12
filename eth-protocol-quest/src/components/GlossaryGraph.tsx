@@ -1,167 +1,438 @@
-import { useMemo, useState } from 'react';
-import { type GlossaryItem } from '../data/glossary';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import * as echarts from 'echarts';
 import { Link } from 'react-router-dom';
+import { type GlossaryItem, type GlossaryStatus } from '../data/glossary';
+
+const MIN_ZOOM = 0.32;
+const MAX_ZOOM = 2.55;
+
+type LinkKind = 'primary' | 'chapter' | 'status';
+
+const statusTones: Record<GlossaryStatus | 'General', { accent: string; soft: string; tag: string; halo: string }> = {
+  Mainnet: { accent: '#2f7b51', soft: '#dcefe3', tag: '#eef8f1', halo: 'rgba(47, 123, 81, 0.22)' },
+  Ecosystem: { accent: '#5a7be7', soft: '#e3e9ff', tag: '#eef2ff', halo: 'rgba(90, 123, 231, 0.2)' },
+  Roadmap: { accent: '#8b6ec9', soft: '#eee6ff', tag: '#f4efff', halo: 'rgba(139, 110, 201, 0.2)' },
+  Research: { accent: '#c5873f', soft: '#f8ead7', tag: '#fcf5eb', halo: 'rgba(197, 135, 63, 0.2)' },
+  Concept: { accent: '#4d8ca3', soft: '#dceff4', tag: '#ecf7fa', halo: 'rgba(77, 140, 163, 0.18)' },
+  Depends: { accent: '#8c6d5a', soft: '#efe4db', tag: '#f8f1eb', halo: 'rgba(140, 109, 90, 0.18)' },
+  General: { accent: '#5f6f82', soft: '#e8edf2', tag: '#f4f7fa', halo: 'rgba(95, 111, 130, 0.18)' },
+};
+
+const statusOrder = Object.keys(statusTones) as Array<GlossaryStatus | 'General'>;
+
+function clampZoom(value: number) {
+  return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value));
+}
+
+function sortTerms(a: string, b: string) {
+  return a.localeCompare(b, 'en');
+}
+
+function matchesQuery(item: GlossaryItem, keyword: string) {
+  return `${item.term} ${item.desc} ${(item.relatedTerms || []).join(' ')}`.toLowerCase().includes(keyword);
+}
+
+function readZoom(chart: echarts.EChartsType | null) {
+  const rawOption = chart?.getOption() as { series?: Array<{ zoom?: number }> } | undefined;
+  return clampZoom(typeof rawOption?.series?.[0]?.zoom === 'number' ? rawOption.series[0].zoom : 0.9);
+}
 
 export function GlossaryGraph({ glossary }: { glossary: GlossaryItem[] }) {
-  const [active, setActive] = useState<GlossaryItem | null>(null);
-  const [zoom, setZoom] = useState(1);
   const [query, setQuery] = useState('');
   const [focusMode, setFocusMode] = useState(false);
+  const [zoom, setZoom] = useState(0.9);
   const [pinnedTerm, setPinnedTerm] = useState<string | null>(null);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
+  const chartHostRef = useRef<HTMLDivElement | null>(null);
+  const chartRef = useRef<echarts.EChartsType | null>(null);
+  const deferredQuery = useDeferredValue(query);
 
-  const items = useMemo(() => glossary.slice(0, 30), [glossary]);
+  const graph = useMemo(() => {
+    const items = [...glossary].sort((a, b) => sortTerms(a.term, b.term));
+    const byTerm = new Map(items.map((item) => [item.term, item]));
+    const neighbors = new Map<string, Set<string>>();
+    const linkMap = new Map<string, { source: string; target: string; weight: number; kinds: Set<LinkKind>; sharedChapters: number }>();
 
-  const pos = useMemo(() => {
-    const cx = 410;
-    const cy = 220;
-    return items.map((g, i) => {
-      const ring = i < 10 ? 92 : i < 20 ? 150 : 205;
-      const a = (Math.PI * 2 * i) / Math.max(1, items.length);
-      return { ...g, x: cx + Math.cos(a) * ring, y: cy + Math.sin(a) * ring };
-    });
-  }, [items]);
+    items.forEach((item) => neighbors.set(item.term, new Set()));
 
-  const edges = useMemo(() => {
-    const idx = new Map(pos.map((p, i) => [p.term, i]));
-    const pairs = new Map<string, { a: number; b: number; w: number }>();
-    pos.forEach((p, i) => {
-      (p.relatedTerms || []).forEach((t) => {
-        const j = idx.get(t);
-        if (j == null || j === i) return;
-        const a = Math.min(i, j);
-        const b = Math.max(i, j);
-        const key = `${a}-${b}`;
-        const cur = pairs.get(key);
-        pairs.set(key, { a, b, w: (cur?.w || 0) + 1 });
+    const registerLink = (sourceTerm: string, targetTerm: string, kind: LinkKind, weight = 1, sharedChapters = 0) => {
+      if (!byTerm.has(sourceTerm) || !byTerm.has(targetTerm) || sourceTerm === targetTerm) return;
+      const source = sourceTerm < targetTerm ? sourceTerm : targetTerm;
+      const target = sourceTerm < targetTerm ? targetTerm : sourceTerm;
+      const key = `${source}__${target}`;
+      const current = linkMap.get(key);
+
+      if (current) {
+        current.kinds.add(kind);
+        current.weight += weight;
+        current.sharedChapters = Math.max(current.sharedChapters, sharedChapters);
+      } else {
+        linkMap.set(key, {
+          source,
+          target,
+          weight,
+          kinds: new Set([kind]),
+          sharedChapters,
+        });
+      }
+
+      neighbors.get(source)?.add(target);
+      neighbors.get(target)?.add(source);
+    };
+
+    items.forEach((item) => {
+      (item.relatedTerms || []).forEach((related) => {
+        registerLink(item.term, related, 'primary', 1);
       });
     });
-    return Array.from(pairs.values());
-  }, [pos]);
 
-  const located = useMemo(() => {
-    const k = query.trim().toLowerCase();
-    if (!k) return null;
-    return pos.find((p) => `${p.term} ${p.desc}`.toLowerCase().includes(k)) || null;
-  }, [query, pos]);
+    for (let index = 0; index < items.length; index += 1) {
+      for (let offset = index + 1; offset < items.length; offset += 1) {
+        const current = items[index];
+        const next = items[offset];
+        const sharedChapters = (current.relatedChapters || []).filter((chapterId) => (next.relatedChapters || []).includes(chapterId));
+        if (sharedChapters.length > 0) {
+          registerLink(current.term, next.term, 'chapter', 0.45 + sharedChapters.length * 0.2, sharedChapters.length);
+        }
+      }
+    }
 
-  const pinned = pinnedTerm ? pos.find((p) => p.term === pinnedTerm) || null : null;
-  const panel = pinned || active || located;
+    const statusBuckets = new Map<string, string[]>();
+    items.forEach((item) => {
+      const status = item.status || 'General';
+      if (status === 'General') return;
+      const bucket = statusBuckets.get(status) || [];
+      bucket.push(item.term);
+      statusBuckets.set(status, bucket);
+    });
 
-  const activePaths = useMemo(() => {
-    if (!panel) return [] as Array<{x1:number;y1:number;x2:number;y2:number}>;
-    const src = pos.find((p) => p.term === panel.term);
-    if (!src) return [];
-    const rel = new Set(panel.relatedTerms || []);
-    return pos.filter((p) => rel.has(p.term)).map((p) => ({ x1: src.x, y1: src.y, x2: p.x, y2: p.y }));
-  }, [panel, pos]);
+    statusBuckets.forEach((terms) => {
+      const ordered = [...terms].sort(sortTerms);
+      ordered.forEach((term, index) => {
+        if (ordered[index + 1]) registerLink(term, ordered[index + 1], 'status', 0.28);
+        if (ordered[index + 2]) registerLink(term, ordered[index + 2], 'status', 0.16);
+      });
+    });
+
+    const degrees = new Map(items.map((item) => [item.term, neighbors.get(item.term)?.size || 0]));
+    return { items, byTerm, neighbors, links: Array.from(linkMap.values()), degrees };
+  }, [glossary]);
+
+  useEffect(() => {
+    if (pinnedTerm && !graph.byTerm.has(pinnedTerm)) setPinnedTerm(null);
+  }, [graph.byTerm, pinnedTerm]);
+
+  const searchKey = deferredQuery.trim().toLowerCase();
+  const matchedTerms = useMemo(
+    () => (searchKey ? graph.items.filter((item) => matchesQuery(item, searchKey)).map((item) => item.term) : []),
+    [graph.items, searchKey]
+  );
+  const matchedSet = useMemo(() => new Set(matchedTerms), [matchedTerms]);
+  const locatedTerm = matchedTerms[0] || null;
+  const currentTerm = pinnedTerm || locatedTerm;
+  const panel = currentTerm ? graph.byTerm.get(currentTerm) || null : null;
+
+  const highlightSet = useMemo(() => {
+    const highlighted = new Set<string>(matchedTerms);
+    if (!currentTerm) return highlighted;
+    highlighted.add(currentTerm);
+    (graph.neighbors.get(currentTerm) || new Set()).forEach((term) => highlighted.add(term));
+    return highlighted;
+  }, [currentTerm, graph.neighbors, matchedTerms]);
+
+  const panelRelatedTerms = useMemo(
+    () => (panel ? [...(graph.neighbors.get(panel.term) || new Set())].sort(sortTerms) : []),
+    [graph.neighbors, panel]
+  );
+
+  const chartData = useMemo(
+    () =>
+      graph.items.map((item) => {
+        const status = item.status || 'General';
+        const tone = statusTones[status];
+        const degree = graph.degrees.get(item.term) || 0;
+        const isCurrent = currentTerm === item.term;
+        const isHit = matchedSet.has(item.term);
+        const shouldDim = !!(focusMode && currentTerm && !highlightSet.has(item.term));
+        const showLabel = isCurrent || isHit || degree >= 3;
+
+        return {
+          id: item.term,
+          name: item.term,
+          value: degree,
+          category: statusOrder.indexOf(status),
+          fixed: pinnedTerm === item.term,
+          symbolSize: isCurrent ? 33 : isHit ? 28 : 18 + Math.min(degree, 5) * 2.2,
+          itemStyle: {
+            color: isCurrent ? tone.accent : isHit ? tone.soft : '#ffffff',
+            borderColor: tone.accent,
+            borderWidth: isCurrent ? 3 : 2.2,
+            shadowBlur: isCurrent ? 28 : 14,
+            shadowColor: tone.halo,
+            opacity: shouldDim ? 0.16 : 1,
+          },
+          label: {
+            show: showLabel,
+            position: 'right',
+            distance: 10,
+            color: isCurrent ? '#111827' : '#364152',
+            fontWeight: isCurrent ? 700 : 500,
+            fontSize: isCurrent ? 13 : 12,
+            backgroundColor: 'rgba(255,255,255,0.88)',
+            borderColor: 'rgba(229,231,235,0.92)',
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: [4, 8],
+            overflow: 'truncate',
+            width: 150,
+            opacity: shouldDim ? 0.18 : 1,
+          },
+        };
+      }),
+    [currentTerm, focusMode, graph.degrees, graph.items, highlightSet, matchedSet, pinnedTerm]
+  );
+
+  const chartLinks = useMemo(
+    () =>
+      graph.links.map((link) => {
+        const touchesCurrent = currentTerm && (link.source === currentTerm || link.target === currentTerm);
+        const touchesHighlighted = highlightSet.has(link.source) && highlightSet.has(link.target);
+        const shouldDim = !!(focusMode && currentTerm && !touchesHighlighted);
+        const isPrimary = link.kinds.has('primary');
+        const isChapter = link.kinds.has('chapter');
+
+        return {
+          source: link.source,
+          target: link.target,
+          value: link.weight,
+          lineStyle: {
+            color: touchesCurrent
+              ? 'rgba(59, 130, 246, 0.82)'
+              : isPrimary
+                ? 'rgba(128, 147, 168, 0.84)'
+                : isChapter
+                  ? 'rgba(122, 157, 118, 0.72)'
+                  : 'rgba(164, 174, 190, 0.58)',
+            width: touchesCurrent ? 2.7 : isPrimary ? 1.8 + link.weight * 0.38 : isChapter ? 1.45 + link.weight * 0.28 : 1.15 + link.weight * 0.22,
+            opacity: shouldDim ? 0.18 : touchesCurrent ? 0.98 : isPrimary ? 0.88 : isChapter ? 0.62 : 0.46,
+            curveness: isPrimary ? 0.08 : isChapter ? 0.12 : 0.16,
+            type: isPrimary ? 'solid' : 'dashed',
+          },
+        };
+      }),
+    [currentTerm, focusMode, graph.links, highlightSet]
+  );
+
+  useEffect(() => {
+    if (!chartHostRef.current) return;
+
+    const chart = echarts.init(chartHostRef.current, undefined, { renderer: 'svg' });
+    chartRef.current = chart;
+
+    const onNodeClick = (params: any) => {
+      if (params.dataType !== 'node') return;
+      const term = String(params.data.id);
+      setPinnedTerm((current) => (current === term ? null : term));
+    };
+
+    const onBlankClick = (event: any) => {
+      if (!event.target) setPinnedTerm(null);
+    };
+
+    const onGraphRoam = () => {
+      const nextZoom = readZoom(chart);
+      setZoom((current) => (Math.abs(current - nextZoom) > 0.001 ? nextZoom : current));
+    };
+
+    chart.on('click', onNodeClick);
+    chart.on('graphRoam', onGraphRoam);
+    chart.getZr().on('click', onBlankClick);
+
+    const observer = new ResizeObserver(() => chart.resize());
+    observer.observe(chartHostRef.current);
+
+    return () => {
+      observer.disconnect();
+      chart.getZr().off('click', onBlankClick);
+      chart.off('click', onNodeClick);
+      chart.off('graphRoam', onGraphRoam);
+      chart.dispose();
+      chartRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    chart.setOption(
+      {
+        animationDuration: 0,
+        animationDurationUpdate: 0,
+        tooltip: { show: false },
+        series: [
+          {
+            id: 'glossary-force',
+            type: 'graph',
+            layout: 'force',
+            roam: true,
+            draggable: true,
+            zoom: clampZoom(zoom),
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: 20,
+            scaleLimit: { min: MIN_ZOOM, max: MAX_ZOOM },
+            force: {
+              initLayout: 'circular',
+              repulsion: 420,
+              gravity: 0.045,
+              edgeLength: [84, 132],
+              friction: 0.18,
+              layoutAnimation: false,
+            },
+            nodeScaleRatio: 0.72,
+            lineStyle: {
+              color: 'rgba(128, 147, 168, 0.84)',
+              width: 1.9,
+              curveness: 0.06,
+              opacity: 0.88,
+            },
+            emphasis: {
+              focus: 'adjacency',
+              scale: true,
+              lineStyle: { width: 2.35, opacity: 0.92 },
+            },
+            data: chartData,
+            links: chartLinks,
+          },
+        ],
+      },
+      { lazyUpdate: true }
+    );
+  }, [chartData, chartLinks, graph.items.length]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    chart.setOption(
+      {
+        series: [
+          {
+            id: 'glossary-force',
+            zoom: clampZoom(zoom),
+          },
+        ],
+      },
+      { lazyUpdate: true }
+    );
+  }, [zoom]);
+
+  const panelTone = panel ? statusTones[panel.status || 'General'] : statusTones.General;
+  const hasNodes = graph.items.length > 0;
 
   return (
     <section className="card card-hover glossary-graph-card">
-      <div className="card-title-row">
-        <h3 className="section-title" style={{ margin: 0 }}>术语关系图谱（v2）</h3>
-        <small className="subtle">节点 {pos.length} · 连线 {edges.length}</small>
+      <div className="glossary-graph-head">
+        <div className="glossary-graph-title">
+          <span className="glossary-graph-mark" aria-hidden="true" />
+          <div>
+            <h3 className="section-title" style={{ margin: 0 }}>术语关系图谱</h3>
+            <p className="subtle glossary-graph-subtitle">Force layout · whiteboard grid · 术语关系动态聚合</p>
+          </div>
+        </div>
+        <div className="glossary-graph-stats">
+          <span>节点 {graph.items.length}</span>
+          <span>连线 {graph.links.length}</span>
+          <span>命中 {matchedTerms.length}</span>
+        </div>
       </div>
 
       <div className="glossary-graph-toolbar">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索术语（自动高亮）"
-          style={{ flex: 1, minWidth: 220, padding: 10, borderRadius: 12, border: '1px solid var(--border-default)' }}
-        />
-        <button className={`chip-btn ${focusMode?'on':''}`} onClick={() => setFocusMode((v) => !v)}>{focusMode ? '聚焦模式：开' : '聚焦模式：关'}</button>
-        <button className="btn btn-ghost" onClick={() => setPinnedTerm(null)}>取消固定节点</button>
-        <div className="zoom-wrap">
-          <small className="subtle">缩放</small>
-          <input type="range" min={0.8} max={2.1} step={0.01} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} style={{ width: 150 }} />
+        <div className="glossary-graph-search-wrap">
+          <span className="glossary-graph-search-icon" aria-hidden="true">⌕</span>
+          <input
+            className="glossary-graph-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索术语（自动高亮）"
+          />
         </div>
+
+        <div className="graph-toolbar-actions">
+          <button className={`graph-toolbar-btn ${focusMode ? 'is-on' : ''}`} onClick={() => setFocusMode((value) => !value)}>
+            {focusMode ? '聚焦模式：开' : '聚焦模式：关'}
+          </button>
+          <button className="graph-toolbar-btn" onClick={() => setPinnedTerm(null)}>取消固定节点</button>
+        </div>
+
+        <label className="graph-toolbar-slider">
+          <span className="subtle">缩放</span>
+          <input type="range" min={MIN_ZOOM} max={MAX_ZOOM} step={0.01} value={zoom} onChange={(e) => setZoom(clampZoom(Number(e.target.value)))} />
+        </label>
       </div>
 
       <div className="graph-layout">
-        <div className="graph-canvas-wrap" onMouseDown={() => setDragging(true)} onMouseUp={() => setDragging(false)} onMouseLeave={() => setDragging(false)} onMouseMove={(e) => { if (!dragging) return; setPan((p) => ({ x: p.x + e.movementX * 0.35, y: p.y + e.movementY * 0.35 })); }}>
-          <svg viewBox="0 0 820 460" className="glossary-graph-svg">
-            <defs>
-              <radialGradient id="graphBg" cx="50%" cy="45%" r="60%">
-                <stop offset="0%" stopColor="rgba(98,126,234,0.08)" />
-                <stop offset="55%" stopColor="rgba(47,168,121,0.05)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-              </radialGradient>
-            </defs>
-            <rect x="0" y="0" width="820" height="460" fill="url(#graphBg)" />
-            <g transform={`translate(${410 - 410 * zoom + pan.x} ${230 - 230 * zoom + pan.y}) scale(${zoom})`}>
-
-              {(focusMode && panel ? edges.filter((e)=> pos[e.a].term===panel.term || pos[e.b].term===panel.term) : edges).map((e, i) => (
-                <line
-                  key={i}
-                  x1={pos[e.a].x}
-                  y1={pos[e.a].y}
-                  x2={pos[e.b].x}
-                  y2={pos[e.b].y}
-                  stroke="var(--border-default)"
-                  strokeOpacity={Math.min(0.8, 0.22 + e.w * 0.25)}
-                  strokeWidth={1 + e.w * 0.42}
-                />
-              ))}
-
-              {activePaths.map((l, i) => (
-                <line key={`ap-${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} className="related-path-line" />
-              ))}
-
-              {pos.map((p) => {
-                const isActive = panel?.term === p.term;
-                const isHit = !!query && `${p.term} ${p.desc}`.toLowerCase().includes(query.toLowerCase());
-                return (
-                  <g key={p.term} onMouseEnter={() => setActive(p)} onMouseLeave={() => setActive(null)} onClick={() => setPinnedTerm((old) => old===p.term?null:p.term)}>
-                    <circle
-                      cx={p.x}
-                      cy={p.y}
-                      r={isActive ? 12 : isHit ? 10 : 8}
-                      fill={isHit ? 'var(--brand-highlight)' : isActive ? 'var(--brand-garden)' : 'var(--brand-primary)'}
-                      opacity="0.93"
-                    />
-                    <text x={p.x + 12} y={p.y + 4} fontSize="11" fill="var(--text-secondary)">{p.term.slice(0, 18)}</text>
-                  </g>
-                );
-              })}
-            </g>
-          </svg>
+        <div className="graph-canvas-stage">
+          <div ref={chartHostRef} className="graph-canvas-wrap" />
         </div>
 
         <aside className="graph-panel">
-          {!panel && <div className="subtle">点击或搜索节点，查看右侧学习面板。</div>}
-          {panel && (
-            <>
-              <div className="card-title-row" style={{ alignItems: 'baseline' }}>
-                <h4 style={{ margin: 0 }}>{panel.term}</h4>
-                <span className="meta-pill">学习面板</span>
-              </div>
-              <p className="subtle" style={{ marginTop: 6 }}>{panel.desc}</p>
+          {!hasNodes && <div className="graph-panel-empty">当前筛选条件下没有可展示的术语节点。</div>}
 
-              {!!panel.relatedTerms?.length && (
-                <div style={{ marginTop: 10 }}>
-                  <small className="subtle">相关术语（Related Paths 已高亮）</small>
-                  <div className="chips" style={{ marginTop: 6 }}>
-                    {panel.relatedTerms.map((t) => <span className="chip" key={t}>{t}</span>)}
-                  </div>
+          {hasNodes && !panel && (
+            <div className="graph-panel-empty">
+              <div className="graph-panel-empty-icon" aria-hidden="true" />
+              <div className="graph-panel-empty-copy">
+                <strong>点击图谱中的节点</strong>
+                <span>右侧会显示术语简介、关联概念和对应章节入口。</span>
+              </div>
+            </div>
+          )}
+
+          {hasNodes && panel && (
+            <div className="graph-panel-note">
+              <div className="card-title-row" style={{ alignItems: 'center', gap: 10 }}>
+                <h4 style={{ margin: 0 }}>{panel.term}</h4>
+                <span
+                  className="graph-panel-status"
+                  style={{
+                    borderColor: panelTone.accent,
+                    background: panelTone.tag,
+                    color: panelTone.accent,
+                  }}
+                >
+                  {panel.status || 'General'}
+                </span>
+              </div>
+
+              <p className="graph-panel-desc">{panel.desc}</p>
+
+              <div className="graph-panel-block">
+                <small className="subtle">关联节点</small>
+                <div className="graph-panel-pills">
+                  {panelRelatedTerms.length > 0 ? (
+                    panelRelatedTerms.map((term) => (
+                      <button key={term} className="graph-panel-pill" onClick={() => setPinnedTerm(term)}>
+                        {term}
+                      </button>
+                    ))
+                  ) : (
+                    <span className="subtle">暂无直接关联节点</span>
+                  )}
                 </div>
-              )}
+              </div>
 
               {!!panel.relatedChapters?.length && (
-                <div style={{ marginTop: 12 }}>
-                  <small className="subtle">快捷动作</small>
-                  <div className="quick-links" style={{ marginTop: 8 }}>
-                    {panel.relatedChapters.slice(0, 3).map((cid) => (
-                      <Link key={`${cid}-learn`} to={`/curriculum#${cid}`} className="btn btn-ghost" style={{ padding: '6px 10px' }}>开始学习</Link>
-                    ))}
-                    {panel.relatedChapters.slice(0, 3).map((cid) => (
-                      <Link key={`${cid}-quiz`} to={`/curriculum#${cid}`} className="btn btn-ghost" style={{ padding: '6px 10px' }}>去复测</Link>
-                    ))}
-                  </div>
+                <div className="graph-panel-links">
+                  {panel.relatedChapters.slice(0, 4).map((chapterId) => (
+                    <Link key={chapterId} to={`/curriculum#${chapterId}`} className="graph-panel-link">
+                      相关章节：{chapterId}
+                    </Link>
+                  ))}
                 </div>
               )}
-            </>
+            </div>
           )}
         </aside>
       </div>
