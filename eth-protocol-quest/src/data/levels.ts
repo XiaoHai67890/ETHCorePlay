@@ -74,12 +74,12 @@ export const levels: Level[] = [
     knowledgeCards: [
       'CL 负责区块提议、证明与最终性。',
       'Fork choice 选择当前最优链头。',
-      'Finality 通过检查点机制提供强不可逆保障。',
+      'Finality 通过检查点机制提供经济上强不可逆保障。',
       'Slashing 用于惩罚恶意验证者行为。'
     ],
-    bossChallenge: '解释“链头正确”和“最终不可逆”为什么是两个层次。',
+    bossChallenge: '解释“链头正确”和“经济上最终不可逆”为什么是两个层次。',
     quiz: [
-      { id: '4-1', type: 'single', prompt: 'Finality 的意义是？', options: ['更快 UI 刷新', '交易几乎不可回滚', '减少磁盘占用', '替代执行层'], answerIndex: 1, explanation: 'Finality 是强安全保证。' },
+      { id: '4-1', type: 'single', prompt: 'Finality 的意义是？', options: ['更快 UI 刷新', '交易经济上极低回滚概率', '减少磁盘占用', '替代执行层'], answerIndex: 1, explanation: 'Finality 是强安全保证。' },
       { id: '4-2', type: 'single', prompt: 'Fork choice 主要解决什么？', options: ['价格预言机', '当前链头选择', '节点发现', '交易签名'], answerIndex: 1, explanation: '它决定当前应跟随的分支。' },
       { id: '4-3', type: 'single', prompt: 'Slashing 目的是什么？', options: ['奖励作弊', '惩罚有害行为', '提高 block gas limit', '替代提款'], answerIndex: 1, explanation: '通过经济惩罚维护诚实行为。' },
       { id: '4-4', type: 'single', prompt: 'Slot 与 Epoch 的关系更接近？', options: ['Epoch 由多个 Slot 构成', 'Slot 由多个 Epoch 构成', '二者无关', '都表示 gas'], answerIndex: 0, explanation: 'Epoch 是 slot 的集合。' }

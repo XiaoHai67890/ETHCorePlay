@@ -1,71 +1,104 @@
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Map, BookOpen, BookMarked, BarChart3, Leaf, Search } from 'lucide-react';
-import { type ReactNode } from 'react';
-import { HomePage } from './pages/HomePage';
-import { LevelPage } from './pages/LevelPage';
-import { MapPage } from './pages/MapPage';
-import { ProgressPage } from './pages/ProgressPage';
-import { GlossaryPage } from './pages/GlossaryPage';
-import { CurriculumPage } from './pages/CurriculumPage';
-import { ZonePage } from './pages/ZonePage';
-import { PlotPage } from './pages/PlotPage';
-import { SearchPage } from './pages/SearchPage';
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { CommandK } from './components/CommandK';
+import { getLang, setLang, type Lang } from './services/i18n';
 
-function PageShell({ children }: { children: ReactNode }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-      {children}
-    </motion.div>
-  );
-}
+const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
+const LevelPage = lazy(() => import('./pages/LevelPage').then((m) => ({ default: m.LevelPage })));
+const MapPage = lazy(() => import('./pages/MapPage').then((m) => ({ default: m.MapPage })));
+const ProgressPage = lazy(() => import('./pages/ProgressPage').then((m) => ({ default: m.ProgressPage })));
+const GlossaryPage = lazy(() => import('./pages/GlossaryPage').then((m) => ({ default: m.GlossaryPage })));
+const CurriculumPage = lazy(() => import('./pages/CurriculumPage').then((m) => ({ default: m.CurriculumPage })));
+const ZonePage = lazy(() => import('./pages/ZonePage').then((m) => ({ default: m.ZonePage })));
+const PlotPage = lazy(() => import('./pages/PlotPage').then((m) => ({ default: m.PlotPage })));
+const SearchPage = lazy(() => import('./pages/SearchPage').then((m) => ({ default: m.SearchPage })));
 
 export function App() {
   const location = useLocation();
-  const isPath = (prefix: string) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`);
+  const [themeMode] = useState<'system' | 'light' | 'dark'>(() => (localStorage.getItem('epq_theme_mode') as 'system' | 'light' | 'dark') || 'system');
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const [lang, setLangState] = useState<Lang>(() => getLang());
+  const isMapArea = /^\/(map|zone|plot)(\/|$)/.test(location.pathname);
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const fn = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+    mq.addEventListener?.('change', fn);
+    return () => mq.removeEventListener?.('change', fn);
+  }, []);
+
+  useEffect(() => {
+    const effectiveDark = themeMode === 'system' ? systemDark : themeMode === 'dark';
+    const mode = effectiveDark ? 'dark' : 'light';
+    document.body.dataset.theme = mode;
+    document.documentElement.dataset.theme = mode;
+    localStorage.setItem('epq_theme_mode', themeMode);
+  }, [themeMode, systemDark]);
 
   return (
     <>
-      <header className="topbar">
+      <div className="mesh-bg" aria-hidden />
+      <a className="skip-link" href="#main-content">
+        跳到主内容
+      </a>
+      <header className="topbar" role="banner">
         <div className="topbar-inner">
           <Link to="/" className="brand">
-            <Leaf size={24} color="#4a8f61" />
-            ETHCorePlay
+            🌿 Ethereum Infinite Garden Quest
           </Link>
-          <nav>
-            <Link to="/map" className={isPath('/map') || isPath('/zone') || isPath('/plot') ? 'active' : ''}>
-              <Map size={18} /> 地图
-            </Link>
-            <Link to="/progress" className={isPath('/progress') ? 'active' : ''}>
-              <BarChart3 size={18} /> 总览
-            </Link>
-            <Link to="/curriculum" className={isPath('/curriculum') ? 'active' : ''}>
-              <BookOpen size={18} /> 课程
-            </Link>
-            <Link to="/glossary" className={isPath('/glossary') ? 'active' : ''}>
-              <BookMarked size={18} /> 术语
-            </Link>
-            <Link to="/search" className={isPath('/search') ? 'active' : ''}>
-              <Search size={18} /> 搜索
-            </Link>
+          <nav aria-label="主导航">
+            <NavLink to="/map" className={isMapArea ? 'active' : ''}>
+              {lang === 'zh' ? '地图' : 'Map'}
+            </NavLink>
+            <NavLink to="/progress" className={({ isActive }) => (isActive ? 'active' : '')}>
+              {lang === 'zh' ? '总览' : 'Progress'}
+            </NavLink>
+            <NavLink to="/curriculum" className={({ isActive }) => (isActive ? 'active' : '')}>
+              {lang === 'zh' ? '课程' : 'Curriculum'}
+            </NavLink>
+            <NavLink to="/glossary" className={({ isActive }) => (isActive ? 'active' : '')}>
+              {lang === 'zh' ? '术语' : 'Glossary'}
+            </NavLink>
+            <NavLink to="/search" className={({ isActive }) => (isActive ? 'active' : '')}>
+              {lang === 'zh' ? '搜索' : 'Search'}
+            </NavLink>
+            <button
+              className="lang-switch"
+              onClick={() => {
+                const nextLang = lang === 'zh' ? 'en' : 'zh';
+                setLangState(nextLang);
+                setLang(nextLang);
+              }}
+            >
+              {lang === 'zh' ? 'EN' : '中'}
+            </button>
           </nav>
         </div>
       </header>
-      
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageShell><HomePage /></PageShell>} />
-          <Route path="/map" element={<PageShell><MapPage /></PageShell>} />
-          <Route path="/level/:id" element={<PageShell><LevelPage /></PageShell>} />
-          <Route path="/progress" element={<PageShell><ProgressPage /></PageShell>} />
-          <Route path="/curriculum" element={<PageShell><CurriculumPage /></PageShell>} />
-          <Route path="/glossary" element={<PageShell><GlossaryPage /></PageShell>} />
-          <Route path="/zone/:zoneKey" element={<PageShell><ZonePage /></PageShell>} />
-          <Route path="/plot/:id" element={<PageShell><PlotPage /></PageShell>} />
-          <Route path="/search" element={<PageShell><SearchPage /></PageShell>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AnimatePresence>
+      <CommandK />
+      <main id="main-content" role="main" tabIndex={-1}>
+        <Suspense
+          fallback={
+            <div className="container">
+              <div className="card">加载中...</div>
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/level/:id" element={<LevelPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/curriculum" element={<CurriculumPage />} />
+            <Route path="/glossary" element={<GlossaryPage />} />
+            <Route path="/zone/:zoneKey" element={<ZonePage />} />
+            <Route path="/plot/:id" element={<PlotPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </main>
     </>
   );
 }

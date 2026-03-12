@@ -26,7 +26,7 @@ export const chapterAssessments: ChapterAssessment[] = [
     chapterId: 'cl-core',
     passThreshold: 0.7,
     questions: [
-      { id: 'cl-a1', prompt: 'Finality 表示？', options: ['刚打包', '几乎不可逆', '钱包已签名', '节点已同步'], answerIndex: 1, explanation: 'Finality 是强不可逆保障。' },
+      { id: 'cl-a1', prompt: 'Finality 表示？', options: ['刚打包', '几乎不可逆', '钱包已签名', '节点已同步'], answerIndex: 1, explanation: 'Finality 是经济上强不可逆保障。' },
       { id: 'cl-a2', prompt: 'Fork choice 解决什么问题？', options: ['手续费计算', '链头选择', '密钥管理', 'RPC 限流'], answerIndex: 1, explanation: '核心是链头选择。' },
       { id: 'cl-a3', prompt: 'Slashing 用于？', options: ['奖励恶意行为', '惩罚有害行为', '增加区块容量', '替代共识'], answerIndex: 1, explanation: '经济惩罚维护安全。' }
     ]
@@ -45,7 +45,7 @@ export const chapterAssessments: ChapterAssessment[] = [
     passThreshold: 0.7,
     questions: [
       { id: 'tx-a1', prompt: '交易广播后通常先进入？', options: ['mempool', 'IPFS', '冷钱包', 'DNS'], answerIndex: 0, explanation: '先入 mempool。' },
-      { id: 'tx-a2', prompt: '“已打包”是否等于最终不可逆？', options: ['是', '否'], answerIndex: 1, explanation: '需最终性确认。' },
+      { id: 'tx-a2', prompt: '“已打包”是否等于经济上最终不可逆？', options: ['是', '否'], answerIndex: 1, explanation: '需最终性确认。' },
       { id: 'tx-a3', prompt: '同 nonce 替换交易通常需？', options: ['更高费率', '更低费率', '更短 data', '不同 chain'], answerIndex: 0, explanation: '更高费率常用于替换。' }
     ]
   },
@@ -98,9 +98,216 @@ export const chapterAssessments: ChapterAssessment[] = [
     chapterId: 'l2-da-core',
     passThreshold: 0.7,
     questions: [
-      { id: 'l2-a1', prompt: 'Rollup 的核心是？', options: ['L2 执行 + L1 结算', '完全脱离 L1', '只改前端', '只改钱包'], answerIndex: 0, explanation: '主流 rollup 模式。' },
+      { id: 'l2-a1', prompt: 'Rollup 的核心是？', options: ['L2 执行 + L1 结算', '完全脱离 L1', '只改前端', '只改钱包'], answerIndex: 0, explanation: '常见 rollup 模式（不同方案安全模型有差异）。' },
       { id: 'l2-a2', prompt: 'DA 的重要性在于？', options: ['提高头像清晰度', '保障状态可验证性', '替代签名', '减少节点数量'], answerIndex: 1, explanation: '无 DA 难以独立验证。' },
       { id: 'l2-a3', prompt: '跨域消息通常具备？', options: ['同步即时', '异步与延迟', '免费无限', '无需验证'], answerIndex: 1, explanation: '跨域多数是异步流程。' }
+    ]
+  }
+  ,{
+    chapterId: 'p2p-gossip-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'p2p-a1', prompt: 'Gossip 传播延迟主要与什么相关？', options: ['节点拓扑与链路质量', '钱包 UI 配色', '私钥长度', 'Logo 设计'], answerIndex: 0, explanation: '传播是网络拓扑与节点性能问题。' },
+      { id: 'p2p-a2', prompt: 'Peer Score 的核心目标是？', options: ['增加 gas', '识别并抑制低质量 peer 行为', '替代共识', '减少区块时间'], answerIndex: 1, explanation: 'Peer Score 用于抗垃圾与连接质量治理。' },
+      { id: 'p2p-a3', prompt: '消息风暴治理更合理的做法是？', options: ['完全放开限流', '分层限流+背压+监控告警', '关闭日志', '禁用 gossip'], answerIndex: 1, explanation: '工程上需要限流和可观测性配套。' }
+    ]
+  },
+  {
+    chapterId: 'mev-builder-relay-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'mev-a1', prompt: 'Builder/Relay/Proposer 分工中，Relay 常见职责是？', options: ['持久化私钥', '作为中介传递候选并做链路协调', '生成最终性证明', '替代 EL 执行'], answerIndex: 1, explanation: 'Relay 承担候选传递与链路协调角色。' },
+      { id: 'mev-a2', prompt: '单 relay 依赖的主要风险是？', options: ['手续费降低', '系统性可用性风险', '自动提升最终性', '减少监控需求'], answerIndex: 1, explanation: '单点依赖会放大中断风险。' },
+      { id: 'mev-a3', prompt: '构建链路工程治理应优先关注？', options: ['主题颜色统一', '提案成功率/超时率/回退命中率', 'Markdown 风格', '页面加载动画'], answerIndex: 1, explanation: '这些指标直接反映链路健康度。' }
+    ]
+  }
+  ,{
+    chapterId: 'verkle-stateless-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'verkle-a1', prompt: 'Verkle/Stateless 的核心目标之一是？', options: ['增大发行量', '降低状态证明与验证负担', '替代签名机制', '移除共识层'], answerIndex: 1, explanation: '核心是优化状态承诺与验证路径。' },
+      { id: 'verkle-a2', prompt: 'Stateless Ethereum 强调什么？', options: ['节点必须保存完整状态', '执行所需 witness 可随交易/区块提供', '完全不需要网络传播', '只优化前端'], answerIndex: 1, explanation: 'witness 是无状态执行关键。' },
+      { id: 'verkle-a3', prompt: '迁移风险管理更合理的是？', options: ['一次性切换无回退', '设置过渡窗口与回退策略', '忽略测试向量', '只看理论分析'], answerIndex: 1, explanation: '工程迁移必须有回退与验证。' }
+    ]
+  },
+  {
+    chapterId: 'eip4844-da-economics-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: '4844-a1', prompt: 'EIP-4844 引入 Blob 的关键价值是？', options: ['提高头像清晰度', '为 DA 提供更高性价比数据承载', '替代所有 calldata', '替代共识投票'], answerIndex: 1, explanation: 'Blob 主要服务 DA 成本优化。' },
+      { id: '4844-a2', prompt: 'Blob 成本治理应关注？', options: ['仅单次费用', '双费用市场波动与批次策略', '只看 UI 速度', '忽略失败重试'], answerIndex: 1, explanation: '要结合波动与批处理策略。' },
+      { id: '4844-a3', prompt: '运营最佳实践之一是？', options: ['固定批次参数永不调整', '建立高波动时自适应降频/扩批策略', '关闭监控', '取消回测'], answerIndex: 1, explanation: '需要策略弹性应对费用变化。' }
+    ]
+  },
+  {
+    chapterId: 'pbs-inclusion-censorship-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'pbs-a1', prompt: 'PBS 的一个核心意图是？', options: ['增加中心化依赖', '优化提议-构建分工并改善系统效率', '替代 EVM', '取消中继'], answerIndex: 1, explanation: 'PBS 核心是角色分离与效率/安全平衡。' },
+      { id: 'pbs-a2', prompt: 'Inclusion list 的治理价值更接近？', options: ['保证最低可包含性', '完全消除网络延迟', '降低存储成本', '替代审计'], answerIndex: 0, explanation: '其目标是提升交易可包含保障。' },
+      { id: 'pbs-a3', prompt: '抗审查工程实践应优先具备？', options: ['单 relay 固定路径', '多路径 fallback 与事件复盘闭环', '无监控运行', '仅靠人工经验'], answerIndex: 1, explanation: '抗审查能力需要可用性与治理闭环。' }
+    ]
+  }
+  ,{
+    chapterId: 'account-abstraction-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'aa-a1', prompt: 'ERC-4337 典型交易入口是？', options: ['UserOperation + Bundler', 'EOA 直发必须', '只靠 RPC 转发', '只在 L2 可用'], answerIndex: 0, explanation: 'AA 典型链路是 UserOperation 经 Bundler 聚合。' },
+      { id: 'aa-a2', prompt: 'Paymaster 的核心风险是？', options: ['提升 UX', '被滥用导致代付成本失控', '减少签名复杂度', '加快同步'], answerIndex: 1, explanation: '代付必须配套风控策略。' },
+      { id: 'aa-a3', prompt: 'AA 工程实践中推荐保留？', options: ['紧急回退方案', '禁用监控', '无 nonce 策略', '无失败告警'], answerIndex: 0, explanation: '回退与监控是可运营前提。' }
+    ]
+  }
+  ,{
+    chapterId: 'eof-pectra-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'eof-a1', prompt: 'EOF 的核心价值更接近？', options: ['提高字节码结构化与可验证性', '替代共识层', '移除 gas', '降低签名需求'], answerIndex: 0, explanation: 'EOF 的重点是执行格式演进与可分析性。' },
+      { id: 'eof-a2', prompt: 'Pectra 升级准备应优先包含？', options: ['只更新前端', '版本矩阵+回归测试+回滚方案', '禁用监控', '忽略测试网'], answerIndex: 1, explanation: '协议升级必须有全链路准备。' },
+      { id: 'eof-a3', prompt: '应用侧最容易忽略的是？', options: ['工具链兼容性检查', 'Logo 设计', '社区名字', '页面配色'], answerIndex: 0, explanation: '工具链不兼容是常见故障源。' }
+    ]
+  },
+  {
+    chapterId: 'lst-lrt-risk-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'lst-a1', prompt: 'LST/LRT 风险评估应先做什么？', options: ['只看 APY', '拆解收益来源与风险来源', '只看 TVL', '只看 UI'], answerIndex: 1, explanation: '收益与风险必须同时分层。' },
+      { id: 'lst-a2', prompt: '再质押常见系统性风险是？', options: ['相关性风险放大', '自动降低波动', '完全无流动性问题', '无需风控'], answerIndex: 0, explanation: '相关性会放大连锁风险。' },
+      { id: 'lst-a3', prompt: '产品风控较优实践是？', options: ['无上限敞口', '敞口限额+熔断+风险披露', '隐藏风险信息', '固定策略不调整'], answerIndex: 1, explanation: '可运营风险管理需要限额与披露。' }
+    ]
+  }
+  ,{
+    chapterId: 'client-labs-minimal-runs',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'lab-a1', prompt: '最小可跑实验的关键目标是？', options: ['仅启动成功', '可复现+可观测+可恢复', '只看前端页面', '只看 TPS'], answerIndex: 1, explanation: '工程实验应形成闭环能力。' },
+      { id: 'lab-a2', prompt: '客户端矩阵记录主要用于？', options: ['社媒展示', '复现问题与兼容排查', '替代测试', '减少日志'], answerIndex: 1, explanation: '版本矩阵是排错关键。' },
+      { id: 'lab-a3', prompt: 'runbook 价值在于？', options: ['替代监控', '标准化故障恢复流程', '增加复杂度', '减少测试'], answerIndex: 1, explanation: 'runbook 提升故障处理一致性。' }
+    ]
+  },
+  {
+    chapterId: 'chaos-lite-ops-lab',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'chaos-a1', prompt: 'Chaos-lite 演练先做什么？', options: ['先注入再说', '定义观测指标与退出条件', '关闭告警', '直接上线生产'], answerIndex: 1, explanation: '演练必须先定义边界和观测。' },
+      { id: 'chaos-a2', prompt: 'relay 不可用时关键能力是？', options: ['忽略故障', 'fallback 降级路径', '重启所有机器', '停止所有服务'], answerIndex: 1, explanation: '降级路径决定可用性。' },
+      { id: 'chaos-a3', prompt: '演练复盘应包含？', options: ['仅截图', '时间线+处理动作+改进项', '只写结论', '不记录'], answerIndex: 1, explanation: '复盘要形成可执行改进。' }
+    ]
+  },
+  {
+    chapterId: 'eip-reading-workbench',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'eipw-a1', prompt: 'EIP 阅读工作台核心价值是？', options: ['读得更快', '结构化输出可复用分析', '减少文档', '替代实现'], answerIndex: 1, explanation: '目标是方法论可复用。' },
+      { id: 'eipw-a2', prompt: '规范拆解应优先提取？', options: ['修辞', 'MUST/SHOULD 条款', '作者故事', '社媒讨论'], answerIndex: 1, explanation: '实现要基于规范条款。' },
+      { id: 'eipw-a3', prompt: '安全维度输出应连接到？', options: ['美术设计', '测试向量与回归策略', '产品文案', '活动海报'], answerIndex: 1, explanation: '安全分析必须落地测试。' }
+    ]
+  }
+  ,{
+    chapterId: 'zk-proving-verification-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'zk-a1', prompt: 'ZK 系统中常见的成本瓶颈更可能是？', options: ['验证端', '证明生成端', 'UI 渲染', 'DNS 查询'], answerIndex: 1, explanation: '通常 prover 侧更重。' },
+      { id: 'zk-a2', prompt: '可信设置风险管理应包含？', options: ['忽略参数管理', '参数审计与更新流程', '仅看 TPS', '仅看页面速度'], answerIndex: 1, explanation: '参数治理是关键风险点。' },
+      { id: 'zk-a3', prompt: '容量规划更合理方式是？', options: ['凭经验估算', '基于基准测试的数据化评估', '只看社区讨论', '一次性固定配置'], answerIndex: 1, explanation: '应做系统基准评估。' }
+    ]
+  },
+  {
+    chapterId: 'cross-rollup-interoperability-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'xroll-a1', prompt: '跨 Rollup 消息处理更接近？', options: ['同步调用', '异步多阶段流程', '本地函数调用', '单步确认'], answerIndex: 1, explanation: '跨域是异步多阶段。' },
+      { id: 'xroll-a2', prompt: '幂等设计在跨域中的价值是？', options: ['增加复杂度', '避免重复执行风险', '降低安全性', '替代监控'], answerIndex: 1, explanation: '幂等是跨域稳定核心。' },
+      { id: 'xroll-a3', prompt: '失败补偿策略主要用于？', options: ['美化日志', '恢复异常状态并降低用户损失', '提升动画效果', '替代验证'], answerIndex: 1, explanation: '补偿机制保障异常恢复。' }
+    ]
+  },
+  {
+    chapterId: 'validator-economics-governance-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'val-a1', prompt: '验证者行为主要由什么驱动？', options: ['随机因素', '激励与惩罚结构', '界面配色', '社媒热度'], answerIndex: 1, explanation: '经济结构塑造行为。' },
+      { id: 'val-a2', prompt: '治理提案评估应避免？', options: ['角色影响分析', '敏感性测试', '只看理论最优不看运营成本', '场景化回测'], answerIndex: 2, explanation: '需结合运营现实。' },
+      { id: 'val-a3', prompt: '治理闭环应包括？', options: ['提案后不跟踪', '执行后观测与反馈调整', '仅一次投票', '只写总结不行动'], answerIndex: 1, explanation: '闭环是长期稳定关键。' }
+    ]
+  }
+  ,{
+    chapterId: 'wallet-security-signing-domain-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'wallet-a1', prompt: '签名域隔离的核心作用是？', options: ['提升 UI 美观', '避免跨域/跨链重放与误用', '提高区块容量', '替代 nonce'], answerIndex: 1, explanation: '域隔离用于边界约束与防重放。' },
+      { id: 'wallet-a2', prompt: 'Permit 安全实践更推荐？', options: ['无限授权长期有效', '最小额度+短有效期', '不展示签名字段', '忽略 chainId'], answerIndex: 1, explanation: '授权最小化是关键。' },
+      { id: 'wallet-a3', prompt: '前端签名安全应至少展示？', options: ['主题颜色', 'spender/amount/deadline 等关键字段', '头像 URL', '社媒链接'], answerIndex: 1, explanation: '可解释签名可降低钓鱼风险。' }
+    ]
+  },
+  {
+    chapterId: 'oracle-data-integrity-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'oracle-a1', prompt: '预言机完整性风险中最常被忽略的是？', options: ['图标样式', '数据新鲜度(staleness)', '页面加载速度', '钱包品牌'], answerIndex: 1, explanation: 'staleness 直接影响决策正确性。' },
+      { id: 'oracle-a2', prompt: '异常期更稳妥策略是？', options: ['继续全量交易', '启用降级模式并限流', '关闭日志', '暂停监控'], answerIndex: 1, explanation: '异常时需要可控降级。' },
+      { id: 'oracle-a3', prompt: '降低价格操纵风险常用做法是？', options: ['单点数据源', 'TWAP/多源聚合', '固定价格', '不做校验'], answerIndex: 1, explanation: '多源与时间窗口是常见缓解手段。' }
+    ]
+  },
+  {
+    chapterId: 'upgrade-oncall-playbook-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'oncall-a1', prompt: '升级值班手册最关键要素之一是？', options: ['回滚触发条件', 'Logo 更新计划', '节日海报', '社媒排期'], answerIndex: 0, explanation: '回滚阈值决定故障处置时效。' },
+      { id: 'oncall-a2', prompt: '告警联动最佳实践是？', options: ['只看节点指标', '链上+节点+业务三层联动', '只看用户反馈', '只看 CPU'], answerIndex: 1, explanation: '跨层联动更能快速定位问题。' },
+      { id: 'oncall-a3', prompt: '升级后复盘应产出？', options: ['只写一句总结', '时间线+动作+改进项闭环', '不记录', '只保留截图'], answerIndex: 1, explanation: '复盘要支撑后续改进执行。' }
+    ]
+  }
+  ,{
+    chapterId: 'ens-name-resolution-security-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'ens-a1', prompt: 'ENS 安全实践中最重要之一是？', options: ['只展示域名不展示地址', '关键操作前做地址二次校验', '关闭缓存', '不显示解析来源'], answerIndex: 1, explanation: '高价值操作需要地址级校验。' },
+      { id: 'ens-a2', prompt: '同形字符攻击主要利用？', options: ['字符视觉混淆', '网络带宽', 'Gas 费波动', '合约大小'], answerIndex: 0, explanation: 'homograph 是视觉混淆风险。' },
+      { id: 'ens-a3', prompt: '缓存策略更合理的是？', options: ['永久缓存', '带 TTL 与高风险实时校验', '完全禁用解析', '只看前端状态'], answerIndex: 1, explanation: '缓存要有失效与校验机制。' }
+    ]
+  },
+  {
+    chapterId: 'mempool-private-orderflow-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'memp-a1', prompt: '公开 mempool 最大风险之一是？', options: ['无节点可见', '交易意图暴露导致 MEV 风险', '无法打包', '不支持费用调整'], answerIndex: 1, explanation: '公开可见会增加抢跑与夹子风险。' },
+      { id: 'memp-a2', prompt: '私有路由策略应同时考虑？', options: ['可用性与回退路径', '页面主题色', '社媒热度', '文案长度'], answerIndex: 0, explanation: '可用性与回退决定真实可运营性。' },
+      { id: 'memp-a3', prompt: '执行质量评估应关注？', options: ['仅成交数量', '滑点/失败率/时延/重试成本', '仅手续费', '仅区块高度'], answerIndex: 1, explanation: '需要综合执行质量指标。' }
+    ]
+  }
+  ,{
+    chapterId: 'eip4337-production-hardening-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'aa-prod-a1', prompt: 'AA 生产化稳定性的首要保障之一是？', options: ['单一 bundler', '多路由与失败回退', '关闭监控', '固定重试无限制'], answerIndex: 1, explanation: '多路由与回退是可用性基础。' },
+      { id: 'aa-prod-a2', prompt: 'Paymaster 风控重点在于？', options: ['只看 UI', '额度/频率/信誉分层控制', '忽略失败成本', '不做告警'], answerIndex: 1, explanation: '风控需防滥用与成本失控。' },
+      { id: 'aa-prod-a3', prompt: '用户体验兜底最佳实践是？', options: ['只报失败码', '提供可解释失败原因与重试/回退路径', '隐藏错误', '强制刷新'], answerIndex: 1, explanation: '可解释与可操作是生产必需。' }
+    ]
+  }
+  ,{
+    chapterId: 'bridge-security-incidents-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'bridge-a1', prompt: '评估桥接风险时最先看什么？', options: ['页面设计', '信任模型与验证路径', '社媒热度', 'Logo'], answerIndex: 1, explanation: '信任模型决定根本攻击面。' },
+      { id: 'bridge-a2', prompt: '事故先行信号常见包括？', options: ['字体变化', '出入金异常与对账差异', '域名长度', '页面颜色'], answerIndex: 1, explanation: '链路数据异常是重要信号。' },
+      { id: 'bridge-a3', prompt: '恢复前应优先完成？', options: ['直接解冻', '资产快照与验证回放', '关闭监控', '只发公告'], answerIndex: 1, explanation: '恢复前需验证一致性。' }
+    ]
+  },
+  {
+    chapterId: 'evm-gas-optimization-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'gas-a1', prompt: 'gas 优化中最稳妥起点是？', options: ['随意改代码', '基于真实热点路径剖析', '只改注释', '删除测试'], answerIndex: 1, explanation: '应从热点与基线数据出发。' },
+      { id: 'gas-a2', prompt: '优化完成后应做什么？', options: ['直接上线', '同向量回归与安全复核', '关闭告警', '忽略边界'], answerIndex: 1, explanation: '优化需验证收益与安全。' },
+      { id: 'gas-a3', prompt: '过度优化风险是？', options: ['更易审计', '可读性下降与潜在安全回归', '自动增益', '无风险'], answerIndex: 1, explanation: '需平衡性能与可维护性。' }
+    ]
+  }
+  ,{
+    chapterId: 'state-expiry-history-expiry-deep',
+    passThreshold: 0.7,
+    questions: [
+      { id: 'expiry-a1', prompt: 'State/History Expiry 主要解决什么问题？', options: ['界面性能', '节点存储可持续性', '钱包签名速度', '社媒传播'], answerIndex: 1, explanation: '核心是节点长期成本与可持续性。' },
+      { id: 'expiry-a2', prompt: '对应用查询层更推荐？', options: ['只用单一路径', '热冷数据分层与兼容改造', '禁用缓存', '不做迁移'], answerIndex: 1, explanation: '查询层应做分层适配。' },
+      { id: 'expiry-a3', prompt: '迁移阶段关键动作是？', options: ['忽略回归', '接口兼容检查与数据一致性校验', '仅改文档', '只做UI升级'], answerIndex: 1, explanation: '迁移需要兼容与一致性保障。' }
     ]
   }
 ];
