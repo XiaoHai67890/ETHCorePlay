@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>退出驱动演化模型（G-I-R-E）可视分析台</title>
+  <style>
+    :root { --bg:#0f1220; --panel:#171b2e; --text:#eef2ff; --sub:#aab3d1; --ok:#4fd18b; --warn:#f4bf5f; --bad:#ff6b7a; --pri:#7a83ff; }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:radial-gradient(circle at 20% 0,#1a2040,#0f1220 45%);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+    .card{background:linear-gradient(180deg,#1a1f36,#171b2e);border:1px solid #2b3357;border-radius:14px;padding:14px}
+    h1{margin:.2rem 0 1rem;font-size:1.45rem} h2{font-size:1rem;margin:.2rem 0 .8rem}
+    .sub{color:var(--sub);font-size:.92rem;line-height:1.55}
+    .row{display:grid;grid-template-columns:130px 1fr 62px;gap:8px;align-items:center;margin:8px 0}
+    input[type=range]{width:100%}
+    .pill{display:inline-block;border:1px solid #3b4678;padding:2px 10px;border-radius:999px;color:#c8d0ee;font-size:12px}
+    .bars{display:grid;gap:7px;margin-top:8px}
+    .bar{height:9px;border-radius:999px;background:#2a3154;overflow:hidden}.bar>i{display:block;height:100%}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi .item{background:#11162a;border:1px solid #2b3357;border-radius:10px;padding:10px}
+    .big{font-size:1.3rem;font-weight:700}
+    .tag{font-weight:700;padding:4px 10px;border-radius:999px;display:inline-block}
+    .ok{background:rgba(79,209,139,.18);color:#8af0bd}.warn{background:rgba(244,191,95,.18);color:#ffd88f}.bad{background:rgba(255,107,122,.18);color:#ff9ca8}
+    .out{line-height:1.7}
+    .quote{border-left:3px solid #626dff;padding-left:10px;color:#d4dcff;font-style:italic}
+    .footer{margin-top:10px;color:#8f9ac2;font-size:12px}
+    button{background:#2a3158;border:1px solid #3c4886;color:#e8edff;border-radius:10px;padding:8px 10px;cursor:pointer}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>退出驱动演化模型 · 本地可视分析台</h1>
+    <p class="sub">先共情再分析：在不确定时代，焦虑是正常反应。这个工具不是为了“证明你错”，而是帮你看清系统是否还在呼吸——<b>有没有退出权，决定有没有未来</b>。</p>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1) G-I-R-E 输入</h2>
+        <div class="row"><label>G 治理</label><input id="g" type="range" min="0" max="1" step="0.01" value="0.62"><span id="gv">0.62</span></div>
+        <div class="row"><label>I 创新</label><input id="i" type="range" min="0" max="1" step="0.01" value="0.54"><span id="iv">0.54</span></div>
+        <div class="row"><label>R 冗余</label><input id="r" type="range" min="0" max="1" step="0.01" value="0.58"><span id="rv">0.58</span></div>
+
+        <h2>2) EI 五维（乘积逻辑）</h2>
+        <div class="row"><label>Eₛ 结构允许</label><input id="es" type="range" min="0" max="1" step="0.01" value="0.6"><span id="esv">0.60</span></div>
+        <div class="row"><label>E_c 成本摩擦</label><input id="ec" type="range" min="0" max="1" step="0.01" value="0.55"><span id="ecv">0.55</span></div>
+        <div class="row"><label>E_p 路径可行</label><input id="ep" type="range" min="0" max="1" step="0.01" value="0.52"><span id="epv">0.52</span></div>
+        <div class="row"><label>E_o 失败隔离</label><input id="eo" type="range" min="0" max="1" step="0.01" value="0.64"><span id="eov">0.64</span></div>
+        <div class="row"><label>E_i 信息感知</label><input id="ei" type="range" min="0" max="1" step="0.01" value="0.68"><span id="eiv">0.68</span></div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button data-preset="team">团队常见态</button>
+          <button data-preset="startup">创业高压态</button>
+          <button data-preset="corp">大组织内卷态</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3) 结果诊断</h2>
+        <div class="kpi">
+          <div class="item"><div class="sub">G×I</div><div class="big" id="gi">0.33</div></div>
+          <div class="item"><div class="sub">R</div><div class="big" id="rr">0.58</div></div>
+          <div class="item"><div class="sub">EI</div><div class="big" id="eix">0.07</div></div>
+        </div>
+
+        <div style="margin:10px 0 6px" id="statusTag" class="tag warn">临界态</div>
+
+        <div class="bars">
+          <div class="sub">生存不等式：G×I ≤ R</div>
+          <div class="bar"><i id="gibar" style="width:33%;background:var(--warn)"></i></div>
+          <div class="sub">退出指数 EI（任一维归零→整体归零）</div>
+          <div class="bar"><i id="eibar" style="width:7%;background:var(--bad)"></i></div>
+        </div>
+
+        <h2 style="margin-top:12px">4) 结论与干预</h2>
+        <div id="analysis" class="out"></div>
+        <p class="quote" id="quote"></p>
+        <p class="footer">模型提醒：演化系统里，效率不是终点，<b>可退出性</b>才是生命体征。</p>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const ids = ['g','i','r','es','ec','ep','eo','ei'];
+    const q = (id)=>document.getElementById(id);
+    const val = (id)=>Number(q(id).value);
+
+    const quotes = [
+      '“演化没有颁奖台，只有尚未退出的玩家。”',
+      '“效率是通往死亡的高速公路，冗余是唯一的备胎。”',
+      '“真正的自由，是不再参与的权利。”',
+      '“任何阻断退出的系统，最终都会阻断自己的未来。”'
+    ];
+
+    function classify(g,i,r,ei){
+      const gi=g*i;
+      if (ei < 0.04) return ['活尸态','bad'];
+      if (i > r*1.2) return ['猝死型风险','bad'];
+      if (i < 0.15) return ['僵尸型风险','warn'];
+      if (g < 0.2) return ['耗散型风险','warn'];
+      if (gi <= r) return ['动态平衡（可生存）','ok'];
+      return ['临界态','warn'];
+    }
+
+    function weakestEI(es,ec,ep,eo,ei){
+      const arr=[['结构允许度 Eₛ',es],['成本摩擦 E_c',ec],['路径可行 E_p',ep],['失败隔离 E_o',eo],['信息感知 E_i',ei]];
+      arr.sort((a,b)=>a[1]-b[1]);
+      return arr[0][0];
+    }
+
+    function advice(g,i,r,ei,weak){
+      const gi=(g*i).toFixed(2);
+      const lines=[];
+      lines.push(`先共情：你现在面对的不是“做得不够多”，而是系统边界在收缩。像穿着防弹衣上高速，快是快，但摔一次就见底。`);
+      lines.push(`诊断：当前 G×I=${gi}，与 R 比较后属于 <b>${q('statusTag').textContent}</b>。`);
+      lines.push(`短板：EI 的最薄弱环节是 <b>${weak}</b>。乘积逻辑下，它会拖垮整体退出能力。`);
+      lines.push(`干预（Exit First）：先修“可离场通道”，再谈效率优化。最小动作是：`);
+      lines.push(`<ul>
+        <li>给退出建“救生艇”：明确可离开流程与时间窗口（降低 Eₛ 阻力）。</li>
+        <li>给失败做“防火隔离”：退出不连坐、不牵连（提升 E_o）。</li>
+        <li>给转移路径做“路标”：列出 2-3 条可去选项（提升 E_p、E_i）。</li>
+        <li>给系统补“脂肪”：预算/人力/时间留 15%-25% 冗余（提升 R）。</li>
+      </ul>`);
+      return lines.join('');
+    }
+
+    function render(){
+      q('gv').textContent=val('g').toFixed(2); q('iv').textContent=val('i').toFixed(2); q('rv').textContent=val('r').toFixed(2);
+      q('esv').textContent=val('es').toFixed(2); q('ecv').textContent=val('ec').toFixed(2); q('epv').textContent=val('ep').toFixed(2); q('eov').textContent=val('eo').toFixed(2); q('eiv').textContent=val('ei').toFixed(2);
+
+      const g=val('g'),i=val('i'),r=val('r');
+      const es=val('es'),ec=val('ec'),ep=val('ep'),eo=val('eo'),ei=val('ei');
+      const gi=g*i; const eix=es*ec*ep*eo*ei;
+
+      q('gi').textContent=gi.toFixed(2); q('rr').textContent=r.toFixed(2); q('eix').textContent=eix.toFixed(2);
+      q('gibar').style.width=Math.min(100,gi*100)+'%';
+      q('gibar').style.background = gi<=r? 'var(--ok)' : 'var(--bad)';
+      q('eibar').style.width=Math.min(100,eix*100)+'%';
+      q('eibar').style.background = eix<0.1 ? 'var(--bad)' : eix<0.3 ? 'var(--warn)' : 'var(--ok)';
+
+      const [status,cls]=classify(g,i,r,eix);
+      q('statusTag').textContent=status; q('statusTag').className='tag '+cls;
+
+      const weak=weakestEI(es,ec,ep,eo,ei);
+      q('analysis').innerHTML=advice(g,i,r,eix,weak);
+      q('quote').textContent=quotes[Math.floor((g+i+r+eix)*10)%quotes.length];
+    }
+
+    document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',render));
+    document.querySelectorAll('button[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{
+      const p=btn.getAttribute('data-preset');
+      const set=(a)=>Object.entries(a).forEach(([k,v])=>q(k).value=v);
+      if(p==='team') set({g:.62,i:.54,r:.58,es:.60,ec:.55,ep:.52,eo:.64,ei:.68});
+      if(p==='startup') set({g:.40,i:.86,r:.36,es:.55,ec:.30,ep:.48,eo:.35,ei:.62});
+      if(p==='corp') set({g:.82,i:.12,r:.44,es:.24,ec:.22,ep:.18,eo:.61,ei:.29});
+      render();
+    }));
+
+    render();
+  </script>
+</body>
+</html>
