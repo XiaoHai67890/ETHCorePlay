@@ -1,6 +1,0 @@
-{
-  "name": "@eur/api",
-  "private": true,
-  "scripts": {"start:dev": "node src/main.js", "build": "echo build api"},
-  "dependencies": {"express": "^4.19.2"}
-}

@@ -1,6 +1,0 @@
-{
-  "name": "@eur/worker",
-  "private": true,
-  "scripts": {"dev": "node src/index.js"},
-  "dependencies": {"bullmq": "^5.8.1", "ioredis": "^5.4.1"}
-}

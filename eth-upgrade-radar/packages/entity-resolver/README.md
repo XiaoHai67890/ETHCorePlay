@@ -1,2 +1,0 @@
-# entity-resolver
-placeholder
