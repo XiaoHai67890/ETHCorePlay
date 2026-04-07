@@ -49,6 +49,9 @@ export function App() {
             <span className="brand-text">Ethereum Infinite Garden Quest</span>
           </Link>
           <nav className="topbar-nav" aria-label="主导航">
+            <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')} end>
+              {lang === 'zh' ? '首页' : 'Home'}
+            </NavLink>
             <NavLink to="/map" className={isMapArea ? 'active' : ''}>
               {lang === 'zh' ? '地图' : 'Map'}
             </NavLink>
