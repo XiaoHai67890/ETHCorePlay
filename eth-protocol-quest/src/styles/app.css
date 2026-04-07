@@ -682,6 +682,36 @@ li { margin-bottom: 8px; }
   border-color: var(--primary-light);
 }
 
+/* Keep quiz controls as actual radio/checkbox icons instead of stretched inputs. */
+.quiz-item .option input[type="radio"],
+.quiz-item .option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+}
+
+.quiz-item .option input[type="radio"] {
+  appearance: auto;
+  -webkit-appearance: radio;
+  display: block;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  accent-color: var(--primary);
+}
+
+.quiz-item .option input[type="radio"]::before {
+  content: none;
+}
+
+.quiz-item .option input[type="checkbox"] {
+  border-radius: 6px;
+}
+
 input[type="radio"], input[type="checkbox"] {
   accent-color: var(--primary);
   width: 16px;
