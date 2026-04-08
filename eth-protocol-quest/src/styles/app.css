@@ -682,10 +682,86 @@ li { margin-bottom: 8px; }
   border-color: var(--primary-light);
 }
 
+/* Keep option controls as actual radio/checkbox icons instead of stretched inputs. */
+.option input[type="radio"],
+.option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+}
+
+.option input[type="radio"] {
+  appearance: auto;
+  -webkit-appearance: radio;
+  display: block;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  accent-color: var(--primary);
+}
+
+.option input[type="radio"]::before {
+  content: none;
+}
+
+.option input[type="checkbox"] {
+  border-radius: 6px;
+}
+
 input[type="radio"], input[type="checkbox"] {
   accent-color: var(--primary);
   width: 16px;
   height: 16px;
+}
+
+.checklist-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.35;
+  cursor: default;
+}
+
+.checklist-box {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  flex: 0 0 20px;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  position: static;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+  cursor: default;
+  accent-color: var(--primary);
+  transform: scale(1.25);
+  transform-origin: left center;
+  transition: none;
+}
+
+.checklist-box::before {
+  content: none !important;
+}
+
+.checklist-box:checked {
+  background: transparent !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+.checklist-box:checked::before {
+  content: none !important;
 }
 
 input[type="text"] {
