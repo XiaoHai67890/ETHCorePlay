@@ -2,11 +2,11 @@
 id: feature-zai-ci-you-hua-6918
 title: 再次优化 UI
 type: feature
-status: in-progress
+status: done
 priority: high
 tags: [frontend, ui]
 created_at: '2026-03-11T22:51:08.694Z'
-updated_at: '2026-03-11T22:51:15.895Z'
+updated_at: '2026-03-11T23:00:22Z'
 ---
 
 4 个核心问题
@@ -567,3 +567,19 @@ soft, credible, modular, exploratory, protocol-native, living-system
 你下一步最重要的，不是再加模块，而是：
 
 删掉一部分边框，拉开层级，给页面更多空气，让“协议花园”真的开始生长。
+
+## Implementation Summary
+
+- [x] 重构首页 Hero 与 Garden Nodes：主入口强化、右侧节点地图预览增强、主次按钮统一。
+- [x] 升级 Learning Trails：补充难度/时长/进度/前置知识，突出推荐路径并统一 CTA。
+- [x] 优化模块层级：Timeline 改为轨道式里程碑、Topics Islands 浮岛化、Cross-pollination 连接器化。
+- [x] 弱化辅助区：今日建议改为 Today’s Growth，Badge 墙改为 Growth Milestones 语义。
+- [x] 顶部导航风格更新：引入激活态导航胶囊与弱化语言切换胶囊。
+- [x] 首页视觉调色与边框降噪：采用雾紫/雾蓝/薄荷体系、轻阴影、分层卡片权重。
+- [x] 修复评审风险项：将 UI 强覆盖样式限定到 `HomePage` 作用域，避免影响全站 `card/container/btn/topbar`。
+- [x] 补齐暗色主题等价 token：为 `--eth-*` 增加 `body[data-theme='dark']` 变量覆盖，提升深色模式对比与一致性。
+- [x] 新增页面级样式隔离：在 `App` 中按路由设置 `body[data-page]`，仅在首页启用导航视觉增强。
+
+验证命令：
+
+- `npm run build`

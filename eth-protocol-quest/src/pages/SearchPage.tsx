@@ -1,156 +1,116 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { glossary } from '../data/glossary';
-import { foundationChapters } from '../data/curriculum/foundations';
-import { deepDiveChapters } from '../data/curriculum/deepdives';
-import { plots, searchAliases } from '../data/plotCatalog';
+import { Link, useSearchParams } from 'react-router-dom';
+import type { ContentSearchResult } from '../contracts/content';
+import { metricSearchMiss } from '../services/telemetry';
+import { searchContent } from '../services/contentService';
 
-type SearchType = '术语' | '课程' | '地块';
-
-type SearchRow = {
-  type: SearchType;
-  title: string;
-  desc: string;
-  href: string;
+const searchAliases: Record<string, string[]> = {
+  pbs: ['proposer builder separation'],
+  blob: ['kzg commitment', 'data availability'],
+  witness: ['stateless witness'],
+  bls: ['bls signature'],
+  lean: ['leanspec'],
+  zkevm: ['zk evm']
 };
 
+function groupedLabel(entityType: ContentSearchResult['entityType']) {
+  if (entityType === 'track') return 'Tracks';
+  if (entityType === 'module') return 'Modules';
+  if (entityType === 'node') return 'Knowledge Nodes';
+  return 'Glossary';
+}
+
 export function SearchPage() {
-  const [q, setQ] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | SearchType>('all');
-  const [activeKey, setActiveKey] = useState<string | null>(null);
-
-  const rows = useMemo<SearchRow[]>(() => {
-    const chapterRows: SearchRow[] = [...foundationChapters, ...deepDiveChapters].map((chapter) => ({
-      type: '课程',
-      title: chapter.title,
-      desc: chapter.objective,
-      href: `/curriculum#${chapter.id}`
-    }));
-    const glossaryRows: SearchRow[] = glossary.map((item) => ({
-      type: '术语',
-      title: item.term,
-      desc: item.desc,
-      href: '/glossary'
-    }));
-    const plotRows: SearchRow[] = plots.map((plot) => ({
-      type: '地块',
-      title: plot.title,
-      desc: plot.summary,
-      href: `/plot/${plot.id}`
-    }));
-
-    const all = [...plotRows, ...chapterRows, ...glossaryRows];
-    const key = q.trim().toLowerCase();
-    let result = all;
-    if (key) {
-      const aliasBlob = (searchAliases[key] || []).join(' ');
-      const search = `${key} ${aliasBlob}`.trim();
-      result = all.filter((row) => `${row.title} ${row.desc}`.toLowerCase().includes(search));
-    }
-    if (typeFilter !== 'all') result = result.filter((row) => row.type === typeFilter);
-    return result.slice(0, 100);
-  }, [q, typeFilter]);
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  const [query, setQuery] = useState(initialQuery);
+  const [results, setResults] = useState<ContentSearchResult[]>([]);
 
   useEffect(() => {
-    if (!rows.length) {
-      setActiveKey(null);
-      return;
-    }
-    const exists = rows.some((row, idx) => `${row.type}-${row.title}-${idx}` === activeKey);
-    if (!exists) setActiveKey(`${rows[0].type}-${rows[0].title}-0`);
-  }, [rows, activeKey]);
+    const expandedQuery = query.trim()
+      ? `${query.trim()} ${(searchAliases[query.trim().toLowerCase()] || []).join(' ')}`.trim()
+      : '';
 
-  const groupedCount = useMemo(() => {
-    return rows.reduce<Record<SearchType, number>>(
-      (acc, row) => {
-        acc[row.type] += 1;
-        return acc;
-      },
-      { 地块: 0, 课程: 0, 术语: 0 }
-    );
-  }, [rows]);
+    searchContent(expandedQuery).then((response) => setResults(response.items));
+  }, [query]);
 
-  const activeRow = useMemo(() => {
-    if (!activeKey) return null;
-    return rows.find((row, idx) => `${row.type}-${row.title}-${idx}` === activeKey) || null;
-  }, [rows, activeKey]);
+  const grouped = useMemo(() => {
+    const buckets = new Map<string, ContentSearchResult[]>();
+    results.forEach((result) => {
+      const label = groupedLabel(result.entityType);
+      if (!buckets.has(label)) buckets.set(label, []);
+      buckets.get(label)?.push(result);
+    });
+    return Array.from(buckets.entries());
+  }, [results]);
+
+  const onBlurSearch = () => {
+    if (query.trim() && results.length === 0) metricSearchMiss(query);
+  };
 
   return (
-    <main className="container container-wide">
-      <div className="page-head">
-        <nav className="breadcrumb" aria-label="breadcrumb">
-          <Link to="/">首页</Link> / <span>搜索</span>
-        </nav>
-        <h2>搜索</h2>
-      </div>
+    <main className="container registry-shell">
+      <section className="card page-hero">
+        <p className="eyebrow">Unified Search</p>
+        <h1>统一搜索</h1>
+        <p className="page-lead">
+          搜索结果不只返回“某一页”，而要回答它是什么、属于哪个 Track、前置模块是什么、上游入口在哪、推荐下一步是什么。
+        </p>
+      </section>
 
-      <section className="tri-layout search-layout">
-        <aside className="card tri-left">
-          <h3>筛选</h3>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="输入关键词"
-            aria-label="搜索"
-          />
-          <div className="search-type-stack">
-            <button className={`search-type-btn ${typeFilter === 'all' ? 'active' : ''}`} onClick={() => setTypeFilter('all')}>
-              全部 <span>{rows.length}</span>
-            </button>
-            <button className={`search-type-btn ${typeFilter === '地块' ? 'active' : ''}`} onClick={() => setTypeFilter('地块')}>
-              地块 <span>{groupedCount['地块']}</span>
-            </button>
-            <button className={`search-type-btn ${typeFilter === '课程' ? 'active' : ''}`} onClick={() => setTypeFilter('课程')}>
-              课程 <span>{groupedCount['课程']}</span>
-            </button>
-            <button className={`search-type-btn ${typeFilter === '术语' ? 'active' : ''}`} onClick={() => setTypeFilter('术语')}>
-              术语 <span>{groupedCount['术语']}</span>
-            </button>
-          </div>
-        </aside>
+      <section className="card">
+        <div className="section-heading">
+          <h2>Search Registry</h2>
+          <p className="subtle">当前页面已经从旧静态搜索改为 content service contract-backed 搜索。</p>
+        </div>
+        <input
+          value={query}
+          onBlur={onBlurSearch}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="搜索 Track / Module / Node / Glossary（支持别名：pbs / blob / witness / bls / lean / zkevm）"
+          className="field-input"
+        />
+        <small className="subtle">结果：{results.length}</small>
+      </section>
 
-        <section className="card tri-main">
-          <h3>结果</h3>
-          {rows.length === 0 ? (
-            <p className="subtle">无结果。</p>
-          ) : (
-            <ul className="search-list">
-              {rows.map((row, idx) => {
-                const key = `${row.type}-${row.title}-${idx}`;
-                return (
-                  <li key={key}>
-                    <button
-                      className={`search-item ${activeKey === key ? 'active' : ''}`}
-                      onClick={() => setActiveKey(key)}
-                    >
-                      <div className="search-item-head">
-                        <strong>{row.title}</strong>
-                        <span className="meta-pill">{row.type}</span>
-                      </div>
-                      <small className="subtle">{row.desc}</small>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+      <section className="section-stack">
+        {grouped.map(([group, list]) => (
+          <article key={group} className="card">
+            <div className="section-heading">
+              <h2>{group}</h2>
+              <p className="subtle">按 contract 统一返回，页面不再直接拼散落数据。</p>
+            </div>
+            <div className="stack-list">
+              {list.map((result) => (
+                <Link key={`${result.entityType}-${result.slug}`} className="task-row" to={result.href}>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="chip-row" style={{ marginBottom: 6 }}>
+                      <span className="meta-pill">{result.entityType}</span>
+                      {result.trackTitleZh ? <span className="chip chip-soft">{result.trackTitleZh}</span> : null}
+                    </div>
+                    <strong>{result.titleZh}</strong>
+                    <p className="subtle" style={{ margin: '6px 0 0' }}>{result.summaryZh}</p>
+                    <div className="chip-row" style={{ marginTop: 8 }}>
+                      {result.prerequisiteLabelsZh.map((label) => (
+                        <span key={label} className="chip chip-soft">前置：{label}</span>
+                      ))}
+                      {result.nextRecommendedLabelZh ? <span className="chip">下一步：{result.nextRecommendedLabelZh}</span> : null}
+                      {result.sourceLabels.map((label) => <span key={label} className="chip chip-soft">来源：{label}</span>)}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </article>
+        ))}
 
-        <aside className="card tri-right">
-          <h3>详情</h3>
-          {!activeRow ? (
-            <p className="subtle">未选择结果。</p>
-          ) : (
-            <>
-              <span className="meta-pill">{activeRow.type}</span>
-              <h4 style={{ margin: '8px 0' }}>{activeRow.title}</h4>
-              <p>{activeRow.desc}</p>
-              <Link className="btn" to={activeRow.href}>打开</Link>
-            </>
-          )}
-        </aside>
+        {!grouped.length ? (
+          <article className="card">
+            <h2>没有命中结果</h2>
+            <p className="subtle">当前 registry 没有匹配项。请尝试英文原词、模块名或 Track 名称。</p>
+          </article>
+        ) : null}
       </section>
     </main>
   );
 }
-

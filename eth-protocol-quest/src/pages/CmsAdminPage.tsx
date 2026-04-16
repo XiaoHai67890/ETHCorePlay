@@ -1,14 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { CustomSelect } from '../components/CustomSelect';
 import { cloudEnabled } from '../services/cloudSync';
 import { cmsRemoteGet, cmsRemoteSet } from '../services/cmsRemote';
-
-const cmsKeyOptions = [
-  { value: 'glossary', label: 'glossary', hint: '术语数据集' },
-  { value: 'chapters', label: 'chapters', hint: '课程章节内容' },
-  { value: 'assessments', label: 'assessments', hint: '章节测评题库' }
-];
 
 export function CmsAdminPage() {
   const [keyName, setKeyName] = useState<'glossary' | 'chapters' | 'assessments'>('glossary');
@@ -38,12 +31,11 @@ export function CmsAdminPage() {
       <section className="card card-hover">
         <p className="subtle">用于在线维护课程/术语/测评 JSON。{!cloudEnabled && '（当前未配置 Supabase）'}</p>
         <div className="filter-row">
-          <CustomSelect
-            value={keyName}
-            onChange={(next) => setKeyName(next as any)}
-            options={cmsKeyOptions}
-            ariaLabel="CMS 数据键"
-          />
+          <select value={keyName} onChange={(e) => setKeyName(e.target.value as any)}>
+            <option value="glossary">glossary</option>
+            <option value="chapters">chapters</option>
+            <option value="assessments">assessments</option>
+          </select>
           <button className="btn btn-ghost" onClick={load}>读取远端</button>
           <button className="btn" onClick={save}>保存远端</button>
         </div>

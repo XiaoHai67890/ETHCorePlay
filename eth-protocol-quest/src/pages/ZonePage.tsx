@@ -1,149 +1,110 @@
 import { Link, useParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { CustomSelect } from '../components/CustomSelect';
-import { plots, zoneMap, ZoneKey } from '../data/plotCatalog';
-import { levels } from '../data/levels';
+import { PlotCard } from '../components/ui/PlotCard';
+import { GardenLinksPanel } from '../components/ui/GardenLinksPanel';
 
-const validZoneKeys = new Set<ZoneKey>(['execution', 'consensus', 'tooling', 'security', 'scaling']);
-const zoneDifficultyOptions = [
-  { value: 'all', label: '全部难度', hint: '显示当前园区所有地块' },
-  { value: '1-2', label: '低难度 (1-2)', hint: '先清基础块' },
-  { value: '3-5', label: '中高难度 (3-5)', hint: '直接看进阶块' }
-];
-const zoneSortOptions = [
-  { value: 'recommended', label: '推荐排序', hint: '按默认学习顺序' },
-  { value: 'difficulty', label: '按难度排序', hint: '从轻到重展开' },
-  { value: 'time', label: '按时长排序', hint: '优先短时任务' }
+const STATE_KEY = 'epq_zone_toolbar_v1';
+
+const sample = [
+  { id: 'el-core', title: 'EL 执行层核心', summary: '状态转移与 gas 机制', zone: 'Execution' as const, difficulty: 2 as const, timeMins: 35, tags: ['EVM', 'Gas'], status: 'learning' as const, progress: 0.5 },
+  { id: 'cl-core', title: 'CL 共识层核心', summary: 'fork choice 与最终性', zone: 'Consensus' as const, difficulty: 2 as const, timeMins: 40, tags: ['Finality', 'Validator'], status: 'new' as const, progress: 0.2 },
+  { id: 'security-core', title: '安全专题', summary: '重组与审查阻力', zone: 'Security' as const, difficulty: 4 as const, timeMins: 45, tags: ['Reorg', 'Monitoring'], status: 'bloomed' as const, progress: 1 },
+  { id: 'engine-api-core', title: 'Engine API', summary: 'EL/CL 协同接口', zone: 'Tooling' as const, difficulty: 3 as const, timeMins: 38, tags: ['Client'], status: 'learning' as const, progress: 0.6 }
 ];
 
 export function ZonePage() {
   const { zoneKey } = useParams();
-  const resolvedZone = validZoneKeys.has(zoneKey as ZoneKey) ? (zoneKey as ZoneKey) : null;
-  const zone = resolvedZone ? zoneMap[resolvedZone] : null;
-
-  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState<'all' | '1-2' | '3-5'>('all');
-  const [sortBy, setSortBy] = useState<'recommended' | 'difficulty' | 'time'>('recommended');
-  const [activePlotId, setActivePlotId] = useState<string | null>(null);
-
-  const zonePlots = useMemo(() => {
-    if (!resolvedZone) return [];
-    let list = plots.filter((item) => item.zone === resolvedZone);
-    if (query.trim()) {
-      const q = query.trim().toLowerCase();
-      list = list.filter((item) => `${item.title} ${item.summary} ${item.tags.join(' ')}`.toLowerCase().includes(q));
-    }
-    if (difficulty === '1-2') list = list.filter((item) => item.difficulty <= 2);
-    if (difficulty === '3-5') list = list.filter((item) => item.difficulty >= 3);
-    if (sortBy === 'difficulty') list = [...list].sort((a, b) => a.difficulty - b.difficulty);
-    if (sortBy === 'time') list = [...list].sort((a, b) => a.timeMins - b.timeMins);
-    return list;
-  }, [resolvedZone, query, difficulty, sortBy]);
+  const [hasLab, setHasLab] = useState(false);
+  const [sort, setSort] = useState<'recommended' | 'difficulty' | 'time'>('recommended');
+  const [view, setView] = useState<'grid' | 'map-lite'>('grid');
 
   useEffect(() => {
-    if (!zonePlots.length) {
-      setActivePlotId(null);
-      return;
-    }
-    if (!activePlotId || !zonePlots.some((item) => item.id === activePlotId)) {
-      setActivePlotId(zonePlots[0].id);
-    }
-  }, [zonePlots, activePlotId]);
+    try {
+      const raw = localStorage.getItem(STATE_KEY);
+      if (!raw) return;
+      const v = JSON.parse(raw);
+      setSearch(v.search || '');
+      setDifficulty(v.difficulty || 'all');
+      setHasLab(!!v.hasLab);
+      setSort(v.sort || 'recommended');
+      setView(v.view || 'grid');
+    } catch {}
+  }, []);
 
-  const activePlot = useMemo(() => zonePlots.find((item) => item.id === activePlotId) || null, [zonePlots, activePlotId]);
-  const activeLevel = useMemo(() => {
-    if (!activePlot) return null;
-    return levels.find((item) => item.id === activePlot.levelId) || null;
-  }, [activePlot]);
+  useEffect(() => {
+    localStorage.setItem(STATE_KEY, JSON.stringify({ search, difficulty, hasLab, sort, view }));
+  }, [search, difficulty, hasLab, sort, view]);
 
-  if (!zone) {
-    return (
-      <main className="container">
-        <p>找不到对应园区。</p>
-        <Link className="btn" to="/map">返回地图</Link>
-      </main>
-    );
-  }
+  const list = useMemo(() => {
+    let r = [...sample];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      r = r.filter((x) => `${x.title} ${x.summary} ${x.tags.join(' ')}`.toLowerCase().includes(q));
+    }
+    if (difficulty === '1-2') r = r.filter((x) => x.difficulty <= 2);
+    if (difficulty === '3-5') r = r.filter((x) => x.difficulty >= 3);
+    if (hasLab) r = r.filter((x) => x.tags.includes('Client') || x.tags.includes('Monitoring'));
+    if (sort === 'difficulty') r.sort((a, b) => a.difficulty - b.difficulty);
+    if (sort === 'time') r.sort((a, b) => (a.timeMins || 0) - (b.timeMins || 0));
+    return r;
+  }, [search, difficulty, hasLab, sort]);
 
   return (
-    <main className="container container-wide">
-      <div className="page-head">
-        <nav className="breadcrumb" aria-label="breadcrumb">
-          <Link to="/">首页</Link> / <Link to="/map">地图</Link> / <span>{zone.title}</span>
-        </nav>
-        <h2>{zone.title}</h2>
-      </div>
+    <main className="container">
+      <Link to="/">← 首页</Link>
+      <section className="card card-hover">
+        <h2>{zoneKey || 'Zone'} 园区</h2>
+        <p className="subtle">园区概览：地块数量 {sample.length} · 预计总时长 120+ 分钟</p>
+        <div className="quick-links">
+          <Link className="btn" to="/curriculum">Start path</Link>
+          <Link className="btn btn-ghost" to="/map">Explore</Link>
+        </div>
+      </section>
 
-      <section className="tri-layout zone-layout">
-        <aside className="card tri-left">
-          <h3>筛选</h3>
-          <div className="layout-filters">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="搜索 plot"
-              aria-label="搜索 plot"
-            />
-            <CustomSelect
-              value={difficulty}
-              onChange={(next) => setDifficulty(next as any)}
-              options={zoneDifficultyOptions}
-              ariaLabel="筛选难度"
-              fullWidth
-            />
-            <CustomSelect
-              value={sortBy}
-              onChange={(next) => setSortBy(next as any)}
-              options={zoneSortOptions}
-              ariaLabel="排序方式"
-              fullWidth
-            />
-          </div>
-          <small className="subtle">结果 {zonePlots.length}</small>
-        </aside>
+      <section className="card card-hover" style={{ position: 'sticky', top: 72, zIndex: 20 }}>
+        <h3>Zone Toolbar</h3>
+        <div className="filter-row">
+          <label htmlFor="zone-search" className="subtle">搜索地块</label>
+          <input id="zone-search" aria-label="搜索地块" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search plots" style={{ padding: 8, borderRadius: 10, border: '1px solid var(--border-default)' }} />
+          <label htmlFor="zone-difficulty" className="subtle">难度筛选</label>
+          <select id="zone-difficulty" aria-label="难度筛选" value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)}>
+            <option value="all">Difficulty: All</option>
+            <option value="1-2">Difficulty: 1-2</option>
+            <option value="3-5">Difficulty: 3-5</option>
+          </select>
+          <label><input type="checkbox" checked={hasLab} onChange={(e) => setHasLab(e.target.checked)} /> Has Lab</label>
+          <label htmlFor="zone-sort" className="subtle">排序</label>
+          <select id="zone-sort" aria-label="排序" value={sort} onChange={(e) => setSort(e.target.value as any)}>
+            <option value="recommended">Sort: Recommended</option>
+            <option value="difficulty">Sort: Difficulty</option>
+            <option value="time">Sort: Time</option>
+          </select>
+          <label htmlFor="zone-view" className="subtle">视图切换</label>
+          <select id="zone-view" aria-label="视图切换" value={view} onChange={(e) => setView(e.target.value as any)}>
+            <option value="grid">View: Grid</option>
+            <option value="map-lite">View: Map-lite</option>
+          </select>
+        </div>
+      </section>
 
-        <section className="card tri-main">
-          <h3>地块列表</h3>
-          <ul className="plot-list">
-            {zonePlots.map((item) => (
-              <li key={item.id}>
-                <button
-                  className={`plot-list-item ${activePlotId === item.id ? 'active' : ''}`}
-                  onClick={() => setActivePlotId(item.id)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <strong>Lv{item.levelId} · {item.title}</strong>
-                    <span className="meta-pill">难度 {item.difficulty}</span>
-                  </div>
-                  <small className="subtle">{item.summary}</small>
-                </button>
-              </li>
-            ))}
-          </ul>
+      {view === 'grid' ? (
+        <section className="grid">
+          {list.map((p) => <PlotCard key={p.id} {...p} />)}
         </section>
+      ) : (
+        <section className="card">
+          <h3>Map-lite View</h3>
+          <p className="subtle">当前命中 {list.length} 个地块。可切回 Grid 查看详情卡片。</p>
+          <div className="chips">{list.map((x) => <span className="chip" key={x.id}>{x.title}</span>)}</div>
+        </section>
+      )}
 
-        <aside className="card tri-right">
-          <h3>详情</h3>
-          {!activePlot ? (
-            <p className="subtle">无地块。</p>
-          ) : (
-            <>
-              <strong>{activePlot.title}</strong>
-              <p>{activePlot.summary}</p>
-              <div className="chips">
-                <span className="chip">时长 {activePlot.timeMins}m</span>
-                {activePlot.tags.map((tag) => <span key={`${activePlot.id}-${tag}`} className="chip">{tag}</span>)}
-              </div>
-              {activeLevel ? <small className="subtle">目标：{activeLevel.goal}</small> : null}
-              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <Link className="btn" to={`/plot/${activePlot.id}`}>查看地块</Link>
-                <Link className="btn btn-ghost" to={`/level/${activePlot.levelId}`}>进入关卡</Link>
-              </div>
-            </>
-          )}
-        </aside>
+      <section className="grid" style={{ gridTemplateColumns: '1fr 320px', alignItems: 'start' }}>
+        <div />
+        <GardenLinksPanel />
       </section>
     </main>
   );
 }
-

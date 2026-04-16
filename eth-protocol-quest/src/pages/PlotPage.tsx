@@ -1,116 +1,84 @@
 import { Link, useParams } from 'react-router-dom';
-import { useMemo } from 'react';
-import { plots } from '../data/plotCatalog';
-import { levels } from '../data/levels';
+import { GardenLinksPanel } from '../components/ui/GardenLinksPanel';
+import { useMemo, useState } from 'react';
+import { plotContentMap } from '../data/plotContent';
 
 export function PlotPage() {
   const { id } = useParams();
-  const plot = useMemo(() => plots.find((item) => item.id === id), [id]);
-  const level = useMemo(() => {
-    if (!plot) return null;
-    return levels.find((item) => item.id === plot.levelId) || null;
-  }, [plot]);
+  const data = useMemo(() => (id ? plotContentMap[id] : undefined), [id]);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
 
-  const related = useMemo(() => {
-    if (!plot) return [];
-    return plots.filter((item) => item.zone === plot.zone && item.id !== plot.id).slice(0, 4);
-  }, [plot]);
-
-  if (!plot || !level) {
-    return (
-      <main className="container">
-        <p>找不到对应地块。</p>
-        <Link className="btn" to="/map">返回地图</Link>
-      </main>
-    );
-  }
+  const quiz = data?.sections.quiz || [
+    { q: '该知识点最核心的工程收益是？', opts: ['更可观测', '更花哨', '更复杂'], ans: 0 }
+  ];
+  const score = quiz.reduce((a, x, i) => a + (answers[i] === x.ans ? 1 : 0), 0);
 
   return (
-    <main className="container container-wide">
-      <div className="page-head">
-        <nav className="breadcrumb" aria-label="breadcrumb">
-          <Link to="/">首页</Link> / <Link to="/map">地图</Link> / <Link to={`/zone/${plot.zone}`}>园区</Link> / <span>{plot.title}</span>
-        </nav>
-      </div>
+    <main className="container">
+      <Link to="/curriculum">← 返回课程</Link>
+      <section className="card card-hover">
+        <div className="card-title-row">
+          <h2 style={{ margin: 0 }}>Plot: {data?.title || id}</h2>
+          <span className="meta-pill">Spec / EIP / Client</span>
+        </div>
+        <p className="subtle">{data?.subtitle || '固定模板：Intuition → Definition → Mechanism → Failure Modes → MiniLab → QuickQuiz'}</p>
+      </section>
 
-      <section className="tri-layout plot-page-layout">
-        <aside className="card tri-left plot-toc">
-          <h3>目录</h3>
+      <section className="grid" style={{ gridTemplateColumns: '220px 1fr 300px', alignItems: 'start' }}>
+        <aside className="card card-hover" style={{ position: 'sticky', top: 76 }}>
+          <h3>TOC</h3>
           <ul>
-            <li><a href="#goal">学习目标</a></li>
-            <li><a href="#knowledge">关键知识点</a></li>
-            <li><a href="#challenge">Boss 挑战</a></li>
-            <li><a href="#quiz">自测题预览</a></li>
+            <li><a href="#intuition">Intuition</a></li>
+            <li><a href="#definition">Definition</a></li>
+            <li><a href="#mechanism">Mechanism</a></li>
+            <li><a href="#failure">Failure Modes</a></li>
+            <li><a href="#lab">MiniLab</a></li>
+            <li><a href="#quiz">QuickQuiz</a></li>
           </ul>
         </aside>
 
-        <article className="tri-main">
-          <section className="card">
-            <div className="card-title-row">
-              <h2 style={{ margin: 0 }}>{plot.title}</h2>
-              <span className="meta-pill">难度 {plot.difficulty}</span>
-            </div>
-            <p>{plot.summary}</p>
-            <div className="chips">
-              <span className="chip">预计时长 {plot.timeMins} 分钟</span>
-              {plot.tags.map((tag) => <span key={`${plot.id}-${tag}`} className="chip">{tag}</span>)}
-            </div>
-          </section>
+        <article>
+          <section id="intuition" className="card"><h3>Intuition Story</h3><p className="subtle">{data?.sections.intuition || '用直觉类比解释该机制为什么存在。'}</p></section>
+          <section id="definition" className="card"><h3>Precise Definition</h3><p className="subtle">{data?.sections.definition || '给出规范化定义与边界。'}</p></section>
+          <section id="mechanism" className="card"><h3>Mechanism Breakdown</h3><p className="subtle">{data?.sections.mechanism || '列状态机/流程图和关键输入输出。'}</p></section>
+          <section id="failure" className="card"><h3>Failure Modes & Security</h3><p className="subtle">{data?.sections.failure || '列常见故障/攻击面与缓解策略。'}</p></section>
 
-          <section id="goal" className="card">
-            <h3>学习目标</h3>
-            <p>{level.goal}</p>
-            <p className="subtle">{level.story}</p>
-          </section>
-
-          <section id="knowledge" className="card">
-            <h3>关键知识点</h3>
-            <ul>
-              {level.knowledgeCards.map((card) => <li key={card}>{card}</li>)}
-            </ul>
-          </section>
-
-          <section id="challenge" className="card">
-            <h3>Boss 挑战</h3>
-            <p>{level.bossChallenge}</p>
+          <section id="lab" className="card">
+            <h3>MiniLab</h3>
+            <ol>
+              {(data?.sections.miniLab || ['执行最小可跑步骤', '记录预期输出', '异常分支复盘']).map((x) => <li key={x}>{x}</li>)}
+            </ol>
+            <button className="btn">Copy Lab Steps</button>
           </section>
 
           <section id="quiz" className="card">
-            <h3>自测题预览</h3>
-            <ol>
-              {level.quiz.slice(0, 3).map((q) => (
-                <li key={q.id}>
-                  <strong>{q.prompt}</strong>
-                  <div className="subtle">选项数：{q.options.length}</div>
-                </li>
-              ))}
-            </ol>
+            <h3>QuickQuiz</h3>
+            {quiz.map((it, i) => (
+              <div key={i} style={{ marginBottom: 10 }}>
+                <strong>{i + 1}. {it.q}</strong>
+                {it.opts.map((o, oi) => (
+                  <label key={o} style={{ display: 'block' }}>
+                    <input type="radio" name={`q-${i}`} checked={answers[i] === oi} onChange={() => setAnswers((s) => ({ ...s, [i]: oi }))} /> {o}
+                  </label>
+                ))}
+              </div>
+            ))}
+            <p>得分：{score}/{quiz.length}</p>
           </section>
         </article>
 
-        <aside className="card tri-right">
-          <h3>操作</h3>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Link className="btn" to={`/level/${plot.levelId}`}>开始关卡训练</Link>
-            <Link className="btn btn-ghost" to="/curriculum">查看课程路径</Link>
-            <Link className="btn btn-ghost" to={`/zone/${plot.zone}`}>返回园区</Link>
-          </div>
-
-          {related.length > 0 ? (
-            <section style={{ marginTop: 14 }}>
-              <h4>同园区地块</h4>
-              <ul>
-                {related.map((item) => (
-                  <li key={item.id}>
-                    <Link to={`/plot/${item.id}`}>{item.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
+        <aside style={{ position: 'sticky', top: 76, display: 'grid', gap: 10 }}>
+          <section className="card card-hover">
+            <h3>Prereqs</h3>
+            <ul>{(data?.prereqs || ['el-core']).map((x) => <li key={x}>{x}</li>)}</ul>
+          </section>
+          <GardenLinksPanel />
+          <section className="card card-hover">
+            <h3>Notes</h3>
+            <p className="subtle">记录你自己的实现坑点与例子。</p>
+          </section>
         </aside>
       </section>
     </main>
   );
 }
-

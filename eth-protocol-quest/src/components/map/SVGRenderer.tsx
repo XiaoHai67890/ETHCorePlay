@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useProgressStore } from '../../game/store';
-import { CustomSelect } from '../CustomSelect';
 
 type LOD = 'zone' | 'plot' | 'edge';
 type Node = { id: string; name: string; zone: string; x: number; y: number };
@@ -9,30 +8,17 @@ type EdgeType = 'depends' | 'related' | 'research';
 
 const nodes: Node[] = [
   { id: 'el-core', name: 'Execution', zone: 'Execution', x: 80, y: 140 },
-  { id: 'cl-core', name: 'Consensus', zone: 'Consensus', x: 210, y: 80 },
-  { id: 'evm-core', name: 'EVM', zone: 'Execution', x: 180, y: 180 },
-  { id: 'engine-api-core', name: 'Engine API', zone: 'Tooling', x: 350, y: 150 },
-  { id: 'tx-lifecycle-core', name: 'Networking', zone: 'P2P', x: 340, y: 70 },
-  { id: 'l2-da-core', name: 'Scaling', zone: 'Scaling', x: 510, y: 95 },
-  { id: 'security-core', name: 'Security', zone: 'Security', x: 650, y: 155 },
-  { id: 'verkle-stateless-deep', name: 'Verkle', zone: 'Research', x: 620, y: 70 }
+  { id: 'cl-core', name: 'Consensus', zone: 'Consensus', x: 220, y: 80 },
+  { id: 'engine-api-core', name: 'Engine API', zone: 'Tooling', x: 380, y: 150 },
+  { id: 'l2-da-core', name: 'Scaling', zone: 'Scaling', x: 520, y: 90 },
+  { id: 'security-core', name: 'Security', zone: 'Security', x: 660, y: 160 }
 ];
 
 const edgeDefs: Array<{ a: number; b: number; type: EdgeType }> = [
   { a: 0, b: 1, type: 'depends' },
-  { a: 0, b: 2, type: 'depends' },
-  { a: 1, b: 3, type: 'related' },
-  { a: 2, b: 3, type: 'related' },
-  { a: 3, b: 4, type: 'depends' },
-  { a: 3, b: 5, type: 'depends' },
-  { a: 5, b: 6, type: 'related' },
-  { a: 5, b: 7, type: 'research' },
-  { a: 1, b: 7, type: 'research' }
-];
-const pathModeOptions = [
-  { value: 'newbie', label: '新手路径', hint: '基础节点优先' },
-  { value: 'builder', label: '开发者路径', hint: '偏工程实现' },
-  { value: 'core', label: '核心贡献路径', hint: '高阶链路与治理' }
+  { a: 1, b: 2, type: 'related' },
+  { a: 2, b: 3, type: 'depends' },
+  { a: 2, b: 4, type: 'research' }
 ];
 
 export function SVGRenderer() {
@@ -105,12 +91,11 @@ export function SVGRenderer() {
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索节点：execution / engine / security" style={{ padding: 8, borderRadius: 10, border: '1px solid var(--border-default)' }} />
         <button className="btn btn-ghost" onClick={locateNode}>定位节点</button>
         <button className="btn btn-ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>重置视图</button>
-        <CustomSelect
-          value={pathMode}
-          onChange={(next) => setPathMode(next as any)}
-          options={pathModeOptions}
-          ariaLabel="学习路径"
-        />
+        <select value={pathMode} onChange={(e) => setPathMode(e.target.value as any)} aria-label="学习路径">
+          <option value="newbie">新手路径</option>
+          <option value="builder">开发者路径</option>
+          <option value="core">核心贡献路径</option>
+        </select>
       </div>
 
       <div className="chips" style={{ marginBottom: 8 }}>
@@ -122,7 +107,7 @@ export function SVGRenderer() {
 
       <svg
         ref={svgRef}
-        viewBox="0 0 760 250"
+        viewBox="0 0 760 230"
         style={{ width: '100%', height: 'auto', borderRadius: 12, background: 'var(--bg-elevated)', cursor: dragging.current.on ? 'grabbing' : 'grab' }}
         onWheel={onWheel}
         onMouseDown={(e) => { dragging.current = { on: true, x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }; }}
@@ -169,19 +154,6 @@ export function SVGRenderer() {
         <div><strong>Next recommended：</strong>{nextNode ? `${nextNode.name}` : '已完成当前路径节点'} · <span className="subtle">Why this: 与当前路径依赖最短</span></div>
         <div><strong>完成后解锁：</strong>{pathMode === 'newbie' ? '开发者路径章节' : pathMode === 'builder' ? '核心贡献路径章节' : '高级实战节点'}</div>
       </div>
-      <section className="card" style={{ marginTop: 10 }}>
-        <div className="card-title-row"><strong>地图学习快照</strong><span className="meta-pill">Map Insights</span></div>
-        <div className="chips" style={{ marginTop: 8 }}>
-          <span className="chip">节点：{nodes.length}</span>
-          <span className="chip">关系：{edges.length}</span>
-          <span className="chip">当前路径：{pathMode}</span>
-        </div>
-        <div className="quick-links" style={{ marginTop: 8 }}>
-          <Link className="btn btn-ghost" to="/curriculum#el-core">执行层入口</Link>
-          <Link className="btn btn-ghost" to="/curriculum#cl-core">共识层入口</Link>
-          <Link className="btn btn-ghost" to="/curriculum#verkle-stateless-deep">研究入口</Link>
-        </div>
-      </section>
       {hover && <p className="subtle">{hover.name} · {hover.zone} · <Link to={`/plot/${hover.id}`}>开始学习</Link></p>}
     </div>
   );

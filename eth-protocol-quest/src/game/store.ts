@@ -11,6 +11,7 @@ type WrongQuestion = {
 };
 
 type ChapterResult = { score: number; total: number; passed: boolean; threshold?: number; wrongIds?: string[]; history?: number[] };
+type ModuleExecution = { sourceRead: boolean; checkpointDone: boolean; outputSubmitted: boolean; outputLink?: string };
 
 type ProgressState = {
   xp: number;
@@ -31,6 +32,7 @@ type ProgressState = {
   curriculumChecklist: Record<string, Record<number, boolean>>;
   curriculumExpanded: Record<string, boolean>;
   onboardingTasks: Record<string, boolean>;
+  moduleProgress: Record<string, ModuleExecution>;
 
   completeLevel: (id: number, gainedXp: number) => void;
   addWrongQuestion: (q: WrongQuestion) => void;
@@ -48,6 +50,9 @@ type ProgressState = {
   markCurriculumChecklist: (chapterId: string, idx: number, checked: boolean) => void;
   toggleCurriculumExpanded: (chapterId: string) => void;
   setOnboardingTask: (key: string, checked: boolean) => void;
+  setModuleSourceRead: (moduleSlug: string, checked: boolean) => void;
+  setModuleCheckpointDone: (moduleSlug: string, checked: boolean) => void;
+  setModuleOutput: (moduleSlug: string, checked: boolean, outputLink?: string) => void;
 };
 
 export const useProgressStore = create<ProgressState>()(
@@ -69,6 +74,7 @@ export const useProgressStore = create<ProgressState>()(
       curriculumChecklist: {},
       curriculumExpanded: {},
       onboardingTasks: { read: false, quiz: false, replay: false, report: false },
+      moduleProgress: {},
       completeLevel: (id, gainedXp) =>
         set((s) => ({
           xp: s.xp + gainedXp,
@@ -155,11 +161,47 @@ export const useProgressStore = create<ProgressState>()(
       toggleCurriculumExpanded: (chapterId) =>
         set((s) => ({ curriculumExpanded: { ...s.curriculumExpanded, [chapterId]: !s.curriculumExpanded[chapterId] } })),
       setOnboardingTask: (key, checked) =>
-        set((s) => ({ onboardingTasks: { ...s.onboardingTasks, [key]: checked } }))
+        set((s) => ({ onboardingTasks: { ...s.onboardingTasks, [key]: checked } })),
+      setModuleSourceRead: (moduleSlug, checked) =>
+        set((s) => ({
+          moduleProgress: {
+            ...s.moduleProgress,
+            [moduleSlug]: {
+              sourceRead: checked,
+              checkpointDone: s.moduleProgress[moduleSlug]?.checkpointDone || false,
+              outputSubmitted: s.moduleProgress[moduleSlug]?.outputSubmitted || false,
+              outputLink: s.moduleProgress[moduleSlug]?.outputLink || ''
+            }
+          }
+        })),
+      setModuleCheckpointDone: (moduleSlug, checked) =>
+        set((s) => ({
+          moduleProgress: {
+            ...s.moduleProgress,
+            [moduleSlug]: {
+              sourceRead: s.moduleProgress[moduleSlug]?.sourceRead || false,
+              checkpointDone: checked,
+              outputSubmitted: s.moduleProgress[moduleSlug]?.outputSubmitted || false,
+              outputLink: s.moduleProgress[moduleSlug]?.outputLink || ''
+            }
+          }
+        })),
+      setModuleOutput: (moduleSlug, checked, outputLink) =>
+        set((s) => ({
+          moduleProgress: {
+            ...s.moduleProgress,
+            [moduleSlug]: {
+              sourceRead: s.moduleProgress[moduleSlug]?.sourceRead || false,
+              checkpointDone: s.moduleProgress[moduleSlug]?.checkpointDone || false,
+              outputSubmitted: checked,
+              outputLink: outputLink ?? s.moduleProgress[moduleSlug]?.outputLink ?? ''
+            }
+          }
+        }))
     }),
     {
       name: 'epq-progress-v2',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       migrate: (persisted: any) => {
         if (!persisted || typeof persisted !== 'object') return persisted;
@@ -168,7 +210,8 @@ export const useProgressStore = create<ProgressState>()(
           curriculumDone: persisted.curriculumDone || persisted.done || {},
           curriculumChecklist: persisted.curriculumChecklist || persisted.checklistState || {},
           curriculumExpanded: persisted.curriculumExpanded || persisted.expandedChapters || {},
-          onboardingTasks: persisted.onboardingTasks || { read: false, quiz: false, replay: false, report: false }
+          onboardingTasks: persisted.onboardingTasks || { read: false, quiz: false, replay: false, report: false },
+          moduleProgress: persisted.moduleProgress || {}
         };
       }
     }
