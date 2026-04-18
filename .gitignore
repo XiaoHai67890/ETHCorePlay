@@ -1,0 +1,6 @@
+.openclaw/
+memory/
+claudecode/.env
+claudecode/.env.bak.*
+eth-upgrade-radar/apps/web/.next/
+vibeman-playground/
